@@ -1,10 +1,6 @@
-const myCrowdsale = artifacts.require('myCrowdsale');
+const myToken = artifacts.require('./myToken.sol');
 
-async function mydeployer(deployer,account) {
-  deployer.deploy(myCrowdsale);
 
-}
-
-module.exports = function (deployer, network, accounts) {
-  return mydeployer(deployer, accounts);
+module.exports = function (deployer) {
+  deployer.deploy(myToken);
 };
