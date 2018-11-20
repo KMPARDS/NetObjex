@@ -12,21 +12,21 @@
  *   },
  */
 
+const HDWalletProvider = require('truffle-hdwallet-provider');
+
+const infuraApikey = process.env.infuraId;
+const mnemonic = 'alley relief dose right proof blouse shoot nephew elbow leaf slow hammer';
+
 module.exports = {
-  // See <http://truffleframework.com/docs/advanced/configuration>
-  // to customize your Truffle configuration!
   networks: {
     development: {
-      host: '127.0.0.1',
-      port: 7545,
+      host: 'localhost',
+      port: 8545,
       network_id: '*', // Match any network id
     },
-    rinkeby: {
-      host: "localhost", // Connect to geth on the specified
-      port: 8545,
-      network_id: 4,
-      gas: 4612388 // Gas limit used for deploys
-    }
-  }
+    ropsten: {
+      provider: new HDWalletProvider(mnemonic, `https://ropsten.infura.io/${infuraApikey}`),
+      network_id: 3,
+    },
   },
 };

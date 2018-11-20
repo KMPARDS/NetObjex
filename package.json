@@ -8,7 +8,9 @@
   "license": "MIT",
   "dependencies": {
     "openzeppelin-solidity": "^2.0.0",
-    "truffle": "^4.1.14"
+    "truffle": "^4.1.14",
+    "truffle-flattener": "^1.2.9",
+    "truffle-hdwallet-provider": "0.0.6"
   },
   "devDependencies": {
     "eslint": "^5.9.0",
