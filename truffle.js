@@ -15,7 +15,7 @@
 const HDWalletProvider = require('truffle-hdwallet-provider');
 
 const infuraApikey = process.env.infuraId;
-const mnemonic = 'alley relief dose right proof blouse shoot nephew elbow leaf slow hammer';
+const mnemonic = process.env.mnemonic;
 
 module.exports = {
   networks: {
