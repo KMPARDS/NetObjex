@@ -34,6 +34,6 @@ Make sure the account has some balance to deploy the contract. Now follow these 
 
 ```sh
 $ truffle compile
-$ truffle deploy
+$ truffle deploy --network ropsten
 ```
 It will deploy the contract into your ropsten testnet in a few seconds. You can see the contract being created by your account from [ropsten](https://ropsten.etherscan.io/). You can use remix to interact with the contract by connecting metamask to your ropsten and providing the contract address into the remix browser.
