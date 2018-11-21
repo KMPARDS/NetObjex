@@ -1,6 +1,6 @@
-const myToken = artifacts.require('./myToken.sol');
+const EraswapToken = artifacts.require('./EraswapToken.sol');
 
 
 module.exports = function(deployer) {
-  deployer.deploy(myToken);
+  deployer.deploy(EraswapToken);
 };
