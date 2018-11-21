@@ -1,10 +1,10 @@
-# OpenZeppelin POC
- This is a project which is a poc for developing secure smart contracts using solidity.
+# Eraswap Smart Contracts
+ This is a project which is aimed for developing smart contract for eraswap ecosystem.
 
  **How to install**
 
 ```sh
-$ git clone git@github.com:sachushaji/openzepplin-poc.git
+$ git clone git@github.com:servntire/Ethereum_Smart_contracts.git
 $ cd openzepplin-poc
 $ npm install
 $ npm install truffle -g
