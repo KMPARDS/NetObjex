@@ -63,3 +63,4 @@ typings/
 # playaround folders
 playground/
 build/
+.vscode
