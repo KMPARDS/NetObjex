@@ -8,9 +8,19 @@ import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 * @dev This contract will be responsible for distributing the newly released tokens to the different pools.
 */
 
+// Interface for Eraswap token so as to manipulate it
+
+// contract EraswapTokenInterface{
+//     function mint(address to, uint256 value) public onlyMinter returns (bool);
+// }
+
 // The contract addresses of different pools
 contract NRT_Manager is Ownable{
     using SafeMath for uint256;
+
+    // address of EraswapToken
+
+    address public EraswapToken;
 
     // Different address to distribute to different pools
     address public Luck_pool;
@@ -46,6 +56,12 @@ contract NRT_Manager is Ownable{
     // Amount received to the NRT pool
 
     uint NRT_bal;
+
+    // constructor
+
+    constructor (address token) public{
+        EraswapToken = token;
+    }
 
     // Functions to set the different pool addresses
 
@@ -88,18 +104,18 @@ contract NRT_Manager is Ownable{
     function distribute_NRT() private onlyOwner() returns(bool){
         require(NRT_bal != 0,"There are no NRT to distribute");
         // Distibuting the newly released tokens to eachof the pools
-        New_Talents_and_Partnerships_bal.add(NRT_bal.mul(uint256(0.05)));
-        Platform_maintenance_bal.add(NRT_bal.mul(uint256(0.10)));
-        Marketing_and_RNR_bal.add(NRT_bal.mul(uint256(0.10)));
-        Kmpards_bal.add(NRT_bal.mul(uint256(0.10)));
-        Contingency_Funds_bal.add(NRT_bal.mul(uint256(0.10)));
-        ReaserchAndDevelopment_bal.add(NRT_bal.mul(uint256(0.05)));
-        curators_bal.add(NRT_bal.mul(uint256(0.05)));
-        timeTraders_bal.add(NRT_bal.mul(uint256(0.05)));
-        daySwappers_bal.add(NRT_bal.mul(uint256(0.125)));
-        buzzCafe_bal.add(NRT_bal.mul(uint256(0.025)));
-        powerToken_bal.add(NRT_bal.mul(uint256(0.10)));
-        stakers_bal.add(NRT_bal.mul(uint256(0.15)));
+        New_Talents_and_Partnerships_bal = New_Talents_and_Partnerships_bal.add(NRT_bal.mul(uint256(0.05)));
+        Platform_maintenance_bal = Platform_maintenance_bal.add(NRT_bal.mul(uint256(0.10)));
+        Marketing_and_RNR_bal = Marketing_and_RNR_bal.add(NRT_bal.mul(uint256(0.10)));
+        Kmpards_bal = Kmpards_bal.add(NRT_bal.mul(uint256(0.10)));
+        Contingency_Funds_bal = Contingency_Funds_bal.add(NRT_bal.mul(uint256(0.10)));
+        ReaserchAndDevelopment_bal = ReaserchAndDevelopment_bal.add(NRT_bal.mul(uint256(0.05)));
+        curators_bal = curators_bal.add(NRT_bal.mul(uint256(0.05)));
+        timeTraders_bal = timeTraders_bal.add(NRT_bal.mul(uint256(0.05)));
+        daySwappers_bal = daySwappers_bal.add(NRT_bal.mul(uint256(0.125)));
+        buzzCafe_bal = buzzCafe_bal.add(NRT_bal.mul(uint256(0.025)));
+        powerToken_bal = powerToken_bal.add(NRT_bal.mul(uint256(0.10)));
+        stakers_bal = stakers_bal.add(NRT_bal.mul(uint256(0.15)));
      
     }
 
