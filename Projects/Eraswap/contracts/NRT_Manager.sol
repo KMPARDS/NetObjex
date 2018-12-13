@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
 * @title  NRT Distribution Contract
@@ -8,46 +9,83 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 */
 
 // The contract addresses of different pools
-contract NRT_Manager{
+contract NRT_Manager is Ownable{
     using SafeMath for uint256;
 
     // Different address to distribute to different pools
-    address private Luck_pool;
-    address private New_Talents_and_Partnerships;
-    address private Platform_maintenance;
-    address private Marketing_and_RNR;
-    address private Kmpards;
-    address private Contingency_Funds;
-    address private TimeAlly;
-    address private ReaserchAndDevelopment_balance;
+    address public Luck_pool;
+    address public New_Talents_and_Partnerships;
+    address public Platform_maintenance;
+    address public Marketing_and_RNR;
+    address public Kmpards;
+    address public Contingency_Funds;
+    address public TimeAlly;
+    address public ReaserchAndDevelopment_bal;
 
-    // Balances present in different pools
+    // balances present in different pools
 
-    uint256 private Luck_pool_balance;
-    uint256 private New_Talents_and_Partnerships_balance;
-    uint256 private Platform_maintenance_balance;
-    uint256 private Marketing_and_RNR_balance;
-    uint256 private Kmpards_balance;
-    uint256 private Contingency_Funds_balance;
-    uint256 private TimeAlly_balance;
-    uint256 private ReaserchAndDevelopment_balance;
+    uint256 public Luck_pool_bal;
+    uint256 public New_Talents_and_Partnerships_bal;
+    uint256 public Platform_maintenance_bal;
+    uint256 public Marketing_and_RNR_bal;
+    uint256 public Kmpards_bal;
+    uint256 public Contingency_Funds_bal;
+    uint256 public TimeAlly_bal;
+    uint256 public ReaserchAndDevelopment_bal;
 
     // Amount received to the NRT pool
 
-    uint NRT_balance;
+    uint NRT_bal;
+
+    // Functions to set the different pool addresses
+
+    function set_Luck_pool(pool_addr) external onlyOwner(){
+        Luck_pool = pool_addr;
+    }
+
+    function set_New_Talents_and_Partnerships(pool_addr) external onlyOwner(){
+        New_Talents_and_Partnerships = pool_addr;
+    }
+
+    function set_Platform_maintenance(pool_addr) external onlyOwner(){
+        Platform_maintenance = pool_addr;
+    }
+
+    function set_Marketing_and_RNR(pool_addr) external onlyOwner(){
+        Marketing_and_RNR = pool_addr;
+    }
+
+    function set_Kmpards(pool_addr) external onlyOwner(){
+        Kmpards = pool_addr;
+    }
+
+    function set_Contingency_Funds(pool_addr) external onlyOwner(){
+        Contingency_Funds = pool_addr;
+    }
+
+    function set_TimeAlly(pool_addr) external onlyOwner(){
+        TimeAlly = pool_addr;
+    }
+
+    function set_ReaserchAndDevelopment(pool_addr) external onlyOwner(){
+        ReaserchAndDevelopment = pool_addr;
+    }
+
 
     // function which is called internally to distribute tokens
     function distribute_NRT() internal returns(bool){
-        require(NRT_balance != 0,"There are no NRT to distribute");
+        require(NRT_bal != 0,"There are no NRT to distribute");
         // Distibuting the newly released tokens to eachof the pools
-        New_Talents_and_Partnerships_balance.add(NRT_balance.mul(0.05));
-        Platform_maintenance_balance.add(NRT_balance.mul(0.10));
-        Marketing_and_RNR_balance.add(NRT_balance.mul(0.10));
-        Kmpards_balance.add(NRT_balance.mul(0.10));
-        Contingency_Funds_balance.add(NRT_balance.mul(0.10));
-        ReaserchAndDevelopment_balance.add(NRT_balance.mul(0.05));
-        TimeAlly_balance.add(NRT_balance.mul(0.5));
+        New_Talents_and_Partnerships_bal.add(NRT_bal.mul(0.05));
+        Platform_maintenance_bal.add(NRT_bal.mul(0.10));
+        Marketing_and_RNR_bal.add(NRT_bal.mul(0.10));
+        Kmpards_bal.add(NRT_bal.mul(0.10));
+        Contingency_Funds_bal.add(NRT_bal.mul(0.10));
+        ReaserchAndDevelopment_bal.add(NRT_bal.mul(0.05));
+        TimeAlly_bal.add(NRT_bal.mul(0.5));
     }
+
+
 
 
 }
