@@ -2,17 +2,15 @@ pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "./EraswapToken.sol";
+
 
 /**
 * @title  NRT Distribution Contract
 * @dev This contract will be responsible for distributing the newly released tokens to the different pools.
 */
 
-// Interface for Eraswap token so as to manipulate it
 
-// contract EraswapTokenInterface{
-//     function mint(address to, uint256 value) public onlyMinter returns (bool);
-// }
 
 // The contract addresses of different pools
 contract NRT_Manager is Ownable{
@@ -21,6 +19,12 @@ contract NRT_Manager is Ownable{
     // address of EraswapToken
 
     address public EraswapToken;
+
+        // constructor
+
+    constructor (address token) public{
+        EraswapToken = token;
+    }
 
     // Different address to distribute to different pools
     address public Luck_pool;
@@ -57,45 +61,59 @@ contract NRT_Manager is Ownable{
 
     uint NRT_bal;
 
-    // constructor
 
-    constructor (address token) public{
-        EraswapToken = token;
-    }
 
     // Functions to set the different pool addresses
 
     function set_Luck_pool(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");  
+        require(pool_addr == 0x0,"The token address must not have been initialized");  
         Luck_pool = pool_addr;
     }
 
     function set_New_Talents_and_Partnerships(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");  
+        require(pool_addr == 0x0,"The token address must not have been initialized");  
         New_Talents_and_Partnerships = pool_addr;
     }
 
     function set_Platform_maintenance(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");  
+        require(pool_addr == 0x0,"The token address must not have been initialized");  
         Platform_maintenance = pool_addr;
     }
 
     function set_Marketing_and_RNR(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");  
+        require(pool_addr == 0x0,"The token address must not have been initialized");  
         Marketing_and_RNR = pool_addr;
     }
 
     function set_Kmpards(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");  
+        require(pool_addr == 0x0,"The token address must not have been initialized");
         Kmpards = pool_addr;
     }
 
     function set_Contingency_Funds(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");  
+        require(pool_addr == 0x0,"The token address must not have been initialized");
         Contingency_Funds = pool_addr;
     }
 
     function set_ReaserchAndDevelopment(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");  
+        require(pool_addr == 0x0,"The token address must not have been initialized");
         ReaserchAndDevelopment = pool_addr;
     }
     function set_buzzCafe(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");  
+        require(pool_addr == 0x0,"The token address must not have been initialized");
         buzzCafe = pool_addr;
     }
     function set_powerToken(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");  
+        require(pool_addr == 0x0,"The token address must not have been initialized");
         powerToken = pool_addr;
     }
 
