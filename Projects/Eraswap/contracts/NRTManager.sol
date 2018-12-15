@@ -20,7 +20,6 @@ contract NRTManager is Ownable{
 
     EraswapToken tokenContract;  // Defining conract address so as to interact with EraswapToken
 
-    uint256 Timecheck; // variable to store date
     uint256 releaseNrtTime; // variable to check release date
 
     // Variables to keep track of tokens released
@@ -28,13 +27,33 @@ contract NRTManager is Ownable{
     uint256 AnnualReleaseNrt;
     uint256 monthCount;
 
-        // constructor
+    // Event to watch token redemption
+    event RedeemToken(
+    string pool,
+    address indexed redeemedAddress,
+    uint256 value
+    );
+
+    // Event To watch pool address change
+    event ChangingPoolAddress(
+    string pool,
+    address indexed newAddress
+    );
+
+    // Event to watch NRT distribution
+    event NRTDistributed(
+        uint256 NRTReleased
+    );
+
+    /**
+    * @dev Constructor
+    * @param token Address of eraswaptoken
+    */
 
     constructor (address token) public{
         require(token != 0,"Token address must be defined");
         eraswapToken = token;
         tokenContract = EraswapToken(eraswapToken);
-        Timecheck = now;
         releaseNrtTime = now.add(30 days);
         AnnualReleaseNrt = 81900000000000000;
         MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));
@@ -83,6 +102,7 @@ contract NRTManager is Ownable{
     function setLuckPool(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
         luckPool = pool_addr;
+        emit ChangingPoolAddress("LuckPool",luckPool);
     }
     /**
     * @dev Function to redeem luckpool balance
@@ -92,6 +112,7 @@ contract NRTManager is Ownable{
         require(luckPoolBal != 0, "There is no balance to redeem");
         require(tokenContract.balanceOf(this)>=luckPoolBal,"NRT_Manger doesn't have token balance");
         require(tokenContract.transfer(luckPool, luckPoolBal),"The transfer must not fail");
+        emit RedeemToken("LuckPool",luckPool,luckPoolBal);
         luckPoolBal = 0;
     }
 
@@ -103,6 +124,7 @@ contract NRTManager is Ownable{
     function setNewTalentsAndPartnerships(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
         newTalentsAndPartnerships = pool_addr;
+        emit ChangingPoolAddress("NewTalentsAndPartnerships",newTalentsAndPartnerships);
     }
 
      /**
@@ -113,6 +135,7 @@ contract NRTManager is Ownable{
         require(newTalentsAndPartnershipsBal != 0, "There is no balance to redeem");
         require(tokenContract.balanceOf(this)>=newTalentsAndPartnershipsBal,"NRT_Manger doesn't have token balance");
         require(tokenContract.transfer(newTalentsAndPartnerships, newTalentsAndPartnershipsBal),"The transfer must not fail");
+        emit RedeemToken("NewTalentsAndPartnerships",newTalentsAndPartnerships,newTalentsAndPartnershipsBal);
         newTalentsAndPartnershipsBal = 0;
     }
 
@@ -124,6 +147,7 @@ contract NRTManager is Ownable{
     function setPlatformMaintenance(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
         platformMaintenance = pool_addr;
+        emit ChangingPoolAddress("PlatformMaintenance",platformMaintenance);
     }
     
 
@@ -135,7 +159,9 @@ contract NRTManager is Ownable{
         require(platformMaintenanceBal != 0, "There is no balance to redeem");
         require(tokenContract.balanceOf(this)>=platformMaintenanceBal,"NRT_Manger doesn't have token balance");
         require(tokenContract.transfer(platformMaintenance, platformMaintenanceBal),"The transfer must not fail");
+        emit RedeemToken("PlatformMaintenance",platformMaintenance,platformMaintenanceBal);
         platformMaintenanceBal = 0;
+       
     }
 
     /**
@@ -146,6 +172,7 @@ contract NRTManager is Ownable{
     function setMarketingAndRNR(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
         marketingAndRNR = pool_addr;
+        emit ChangingPoolAddress("MarketingAndRNR",marketingAndRNR);
     }
 
     /**
@@ -156,6 +183,7 @@ contract NRTManager is Ownable{
         require(marketingAndRNRBal != 0, "There is no balance to redeem");
         require(tokenContract.balanceOf(this)>=marketingAndRNRBal,"NRT_Manger doesn't have token balance");
         require(tokenContract.transfer(marketingAndRNR, marketingAndRNRBal),"The transfer must not fail");
+        emit RedeemToken("MarketingAndRNR",marketingAndRNR,marketingAndRNRBal);
         marketingAndRNRBal = 0;
     }
 
@@ -167,6 +195,7 @@ contract NRTManager is Ownable{
     function setKmPards(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
         kmPards = pool_addr;
+        emit ChangingPoolAddress("kmPards",kmPards);
     }
 
     /**
@@ -177,6 +206,7 @@ contract NRTManager is Ownable{
         require(kmPardsBal != 0, "There is no balance to redeem");
         require(tokenContract.balanceOf(this)>=kmPardsBal,"NRT_Manger doesn't have token balance");
         require(tokenContract.transfer(kmPards, kmPardsBal),"The transfer must not fail");
+        emit RedeemToken("MarketingAndRNR",kmPards,kmPardsBal);
         kmPardsBal = 0;
     }
 
@@ -188,6 +218,7 @@ contract NRTManager is Ownable{
     function setContingencyFunds(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
         contingencyFunds = pool_addr;
+        emit ChangingPoolAddress("ContingencyFunds",contingencyFunds);
     }
 
     /**
@@ -198,6 +229,7 @@ contract NRTManager is Ownable{
         require(contingencyFundsBal != 0, "There is no balance to redeem");
         require(tokenContract.balanceOf(this)>=contingencyFundsBal,"NRT_Manger doesn't have token balance");
         require(tokenContract.transfer(contingencyFunds, contingencyFundsBal),"The transfer must not fail");
+        emit RedeemToken("contingencyFunds",contingencyFunds,contingencyFundsBal);
         contingencyFundsBal = 0;
     }
     /**
@@ -208,6 +240,7 @@ contract NRTManager is Ownable{
     function setResearchAndDevelopment(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
         researchAndDevelopment = pool_addr;
+        emit ChangingPoolAddress("ResearchAndDevelopment",researchAndDevelopment);
     }
 
     /**
@@ -218,6 +251,7 @@ contract NRTManager is Ownable{
         require(researchAndDevelopmentBal != 0, "There is no balance to redeem");
         require(tokenContract.balanceOf(this)>=researchAndDevelopmentBal,"NRT_Manger doesn't have token balance");
         require(tokenContract.transfer(researchAndDevelopment, researchAndDevelopmentBal),"The transfer must not fail");
+        emit RedeemToken("ResearchAndDevelopment",researchAndDevelopment,researchAndDevelopmentBal);
         researchAndDevelopmentBal = 0;
     }
 
@@ -229,6 +263,7 @@ contract NRTManager is Ownable{
     function setBuzzCafe(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
         buzzCafe = pool_addr;
+        emit ChangingPoolAddress("BuzzCafe",buzzCafe);
     }
 
     /**
@@ -239,6 +274,7 @@ contract NRTManager is Ownable{
         require(buzzCafeBal != 0, "There is no balance to redeem");
         require(tokenContract.balanceOf(this)>=buzzCafeBal,"NRT_Manger doesn't have token balance");
         require(tokenContract.transfer(buzzCafe, buzzCafeBal),"The transfer must not fail");
+        emit RedeemToken("BuzzCafe",buzzCafe,buzzCafeBal);
         buzzCafeBal = 0;
     }
 
@@ -250,6 +286,7 @@ contract NRTManager is Ownable{
     function setPowerToken(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
         powerToken = pool_addr;
+        emit ChangingPoolAddress("PowerToken",powerToken);
     }
 
     /**
@@ -260,6 +297,7 @@ contract NRTManager is Ownable{
         require(powerTokenBal != 0, "There is no balance to redeem");
         require(tokenContract.balanceOf(this)>=powerTokenBal,"NRT_Manger doesn't have token balance");
         require(tokenContract.transfer(powerToken, powerTokenBal),"The transfer must not fail");
+        emit RedeemToken("PowerToken",powerToken,powerTokenBal);
         powerTokenBal = 0;
     }
 
@@ -304,7 +342,9 @@ contract NRTManager is Ownable{
         powerTokenBal = (powerTokenBal.add(NRTBal.mul(10))).div(100);
         stakersBal = (stakersBal.add(NRTBal.mul(15))).div(100);
         // Reseting NRT
+        emit NRTDistributed(NRTBal);
         NRTBal = 0;
+        releaseNrtTime = releaseNrtTime.add(30 days);
 
     }
 }
