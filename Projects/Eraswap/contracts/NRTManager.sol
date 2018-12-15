@@ -32,7 +32,6 @@ contract NRTManager is Ownable{
 
     constructor (address token) public{
         require(token != 0,"Token address must be defined");
-        require(token == 0x0,"The token address must not have been initialized");
         eraswapToken = token;
         tokenContract = EraswapToken(eraswapToken);
         Timecheck = now;
@@ -83,7 +82,6 @@ contract NRTManager is Ownable{
 
     function setLuckPool(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
-        require(pool_addr == 0x0,"The token address must not have been initialized");
         luckPool = pool_addr;
     }
     /**
@@ -104,7 +102,6 @@ contract NRTManager is Ownable{
 
     function setNewTalentsAndPartnerships(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
-        require(pool_addr == 0x0,"The token address must not have been initialized");
         newTalentsAndPartnerships = pool_addr;
     }
 
@@ -126,7 +123,6 @@ contract NRTManager is Ownable{
 
     function setPlatformMaintenance(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
-        require(pool_addr == 0x0,"The token address must not have been initialized");
         platformMaintenance = pool_addr;
     }
     
@@ -149,7 +145,6 @@ contract NRTManager is Ownable{
 
     function setMarketingAndRNR(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
-        require(pool_addr == 0x0,"The token address must not have been initialized");
         marketingAndRNR = pool_addr;
     }
 
@@ -171,7 +166,6 @@ contract NRTManager is Ownable{
 
     function setKmPards(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
-        require(pool_addr == 0x0,"The token address must not have been initialized");
         kmPards = pool_addr;
     }
 
@@ -193,7 +187,6 @@ contract NRTManager is Ownable{
 
     function setContingencyFunds(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
-        require(pool_addr == 0x0,"The token address must not have been initialized");
         contingencyFunds = pool_addr;
     }
 
@@ -214,7 +207,6 @@ contract NRTManager is Ownable{
 
     function setResearchAndDevelopment(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
-        require(pool_addr == 0x0,"The token address must not have been initialized");
         researchAndDevelopment = pool_addr;
     }
 
@@ -236,7 +228,6 @@ contract NRTManager is Ownable{
 
     function setBuzzCafe(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
-        require(pool_addr == 0x0,"The token address must not have been initialized");
         buzzCafe = pool_addr;
     }
 
@@ -258,7 +249,6 @@ contract NRTManager is Ownable{
 
     function setPowerToken(address pool_addr) external onlyOwner(){
         require(pool_addr != 0,"Token address must be defined");
-        require(pool_addr == 0x0,"The token address must not have been initialized");
         powerToken = pool_addr;
     }
 
