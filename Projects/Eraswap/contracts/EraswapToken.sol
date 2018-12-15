@@ -11,7 +11,7 @@ contract EraswapToken is ERC20Detailed , ERC20Mintable , ERC20Burnable  , Ownabl
     string private _symbol;
     uint8 private _decimals;
 
-    constructor (string  name, string  symbol, uint8  decimals,uint8 totalsupply) public ERC20Detailed(_name ,_symbol ,_decimals){
+    constructor (string  name, string  symbol, uint8  decimals,uint8 totalsupply) public ERC20Detailed(name ,symbol ,decimals){
         _mint(msg.sender, totalsupply);
     }
 
