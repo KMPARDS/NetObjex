@@ -1,5 +1,71 @@
 pragma solidity ^0.4.24;
 
+// File: openzeppelin-solidity/contracts/math/SafeMath.sol
+
+/**
+ * @title SafeMath
+ * @dev Math operations with safety checks that revert on error
+ */
+library SafeMath {
+
+  /**
+  * @dev Multiplies two numbers, reverts on overflow.
+  */
+  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+    // benefit is lost if 'b' is also tested.
+    // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
+    if (a == 0) {
+      return 0;
+    }
+
+    uint256 c = a * b;
+    require(c / a == b);
+
+    return c;
+  }
+
+  /**
+  * @dev Integer division of two numbers truncating the quotient, reverts on division by zero.
+  */
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    require(b > 0); // Solidity only automatically asserts when dividing by 0
+    uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+    return c;
+  }
+
+  /**
+  * @dev Subtracts two numbers, reverts on overflow (i.e. if subtrahend is greater than minuend).
+  */
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    require(b <= a);
+    uint256 c = a - b;
+
+    return c;
+  }
+
+  /**
+  * @dev Adds two numbers, reverts on overflow.
+  */
+  function add(uint256 a, uint256 b) internal pure returns (uint256) {
+    uint256 c = a + b;
+    require(c >= a);
+
+    return c;
+  }
+
+  /**
+  * @dev Divides two numbers and returns the remainder (unsigned integer modulo),
+  * reverts when dividing by zero.
+  */
+  function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+    require(b != 0);
+    return a % b;
+  }
+}
+
 // File: openzeppelin-solidity/contracts/ownership/Ownable.sol
 
 /**
@@ -109,72 +175,6 @@ interface IERC20 {
     address indexed spender,
     uint256 value
   );
-}
-
-// File: openzeppelin-solidity/contracts/math/SafeMath.sol
-
-/**
- * @title SafeMath
- * @dev Math operations with safety checks that revert on error
- */
-library SafeMath {
-
-  /**
-  * @dev Multiplies two numbers, reverts on overflow.
-  */
-  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-    // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-    // benefit is lost if 'b' is also tested.
-    // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
-    if (a == 0) {
-      return 0;
-    }
-
-    uint256 c = a * b;
-    require(c / a == b);
-
-    return c;
-  }
-
-  /**
-  * @dev Integer division of two numbers truncating the quotient, reverts on division by zero.
-  */
-  function div(uint256 a, uint256 b) internal pure returns (uint256) {
-    require(b > 0); // Solidity only automatically asserts when dividing by 0
-    uint256 c = a / b;
-    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-
-    return c;
-  }
-
-  /**
-  * @dev Subtracts two numbers, reverts on overflow (i.e. if subtrahend is greater than minuend).
-  */
-  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-    require(b <= a);
-    uint256 c = a - b;
-
-    return c;
-  }
-
-  /**
-  * @dev Adds two numbers, reverts on overflow.
-  */
-  function add(uint256 a, uint256 b) internal pure returns (uint256) {
-    uint256 c = a + b;
-    require(c >= a);
-
-    return c;
-  }
-
-  /**
-  * @dev Divides two numbers and returns the remainder (unsigned integer modulo),
-  * reverts when dividing by zero.
-  */
-  function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-    require(b != 0);
-    return a % b;
-  }
 }
 
 // File: openzeppelin-solidity/contracts/token/ERC20/ERC20.sol
@@ -566,15 +566,398 @@ contract ERC20Detailed is IERC20 {
   }
 }
 
+// File: openzeppelin-solidity/contracts/access/roles/PauserRole.sol
+
+contract PauserRole {
+  using Roles for Roles.Role;
+
+  event PauserAdded(address indexed account);
+  event PauserRemoved(address indexed account);
+
+  Roles.Role private pausers;
+
+  constructor() internal {
+    _addPauser(msg.sender);
+  }
+
+  modifier onlyPauser() {
+    require(isPauser(msg.sender));
+    _;
+  }
+
+  function isPauser(address account) public view returns (bool) {
+    return pausers.has(account);
+  }
+
+  function addPauser(address account) public onlyPauser {
+    _addPauser(account);
+  }
+
+  function renouncePauser() public {
+    _removePauser(msg.sender);
+  }
+
+  function _addPauser(address account) internal {
+    pausers.add(account);
+    emit PauserAdded(account);
+  }
+
+  function _removePauser(address account) internal {
+    pausers.remove(account);
+    emit PauserRemoved(account);
+  }
+}
+
+// File: openzeppelin-solidity/contracts/lifecycle/Pausable.sol
+
+/**
+ * @title Pausable
+ * @dev Base contract which allows children to implement an emergency stop mechanism.
+ */
+contract Pausable is PauserRole {
+  event Paused(address account);
+  event Unpaused(address account);
+
+  bool private _paused;
+
+  constructor() internal {
+    _paused = false;
+  }
+
+  /**
+   * @return true if the contract is paused, false otherwise.
+   */
+  function paused() public view returns(bool) {
+    return _paused;
+  }
+
+  /**
+   * @dev Modifier to make a function callable only when the contract is not paused.
+   */
+  modifier whenNotPaused() {
+    require(!_paused);
+    _;
+  }
+
+  /**
+   * @dev Modifier to make a function callable only when the contract is paused.
+   */
+  modifier whenPaused() {
+    require(_paused);
+    _;
+  }
+
+  /**
+   * @dev called by the owner to pause, triggers stopped state
+   */
+  function pause() public onlyPauser whenNotPaused {
+    _paused = true;
+    emit Paused(msg.sender);
+  }
+
+  /**
+   * @dev called by the owner to unpause, returns to normal state
+   */
+  function unpause() public onlyPauser whenPaused {
+    _paused = false;
+    emit Unpaused(msg.sender);
+  }
+}
+
+// File: openzeppelin-solidity/contracts/token/ERC20/ERC20Pausable.sol
+
+/**
+ * @title Pausable token
+ * @dev ERC20 modified with pausable transfers.
+ **/
+contract ERC20Pausable is ERC20, Pausable {
+
+  function transfer(
+    address to,
+    uint256 value
+  )
+    public
+    whenNotPaused
+    returns (bool)
+  {
+    return super.transfer(to, value);
+  }
+
+  function transferFrom(
+    address from,
+    address to,
+    uint256 value
+  )
+    public
+    whenNotPaused
+    returns (bool)
+  {
+    return super.transferFrom(from, to, value);
+  }
+
+  function approve(
+    address spender,
+    uint256 value
+  )
+    public
+    whenNotPaused
+    returns (bool)
+  {
+    return super.approve(spender, value);
+  }
+
+  function increaseAllowance(
+    address spender,
+    uint addedValue
+  )
+    public
+    whenNotPaused
+    returns (bool success)
+  {
+    return super.increaseAllowance(spender, addedValue);
+  }
+
+  function decreaseAllowance(
+    address spender,
+    uint subtractedValue
+  )
+    public
+    whenNotPaused
+    returns (bool success)
+  {
+    return super.decreaseAllowance(spender, subtractedValue);
+  }
+}
+
 // File: contracts/EraswapToken.sol
 
-contract EraswapToken is ERC20Detailed , ERC20Mintable , ERC20Burnable  , Ownable {
+contract EraswapToken is ERC20Detailed , ERC20Mintable , ERC20Burnable  , Ownable ,ERC20Pausable {
+    string private _name;
+    string private _symbol;
+    uint8 private _decimals;
 
-    string private _name = "EraswapToken";
-    string private _symbol= "EST";
-    uint8 private _decimals= 18;
-    constructor () public ERC20Detailed(_name ,_symbol ,_decimals){
-        
+    constructor (string  name, string  symbol, uint8  decimals,uint8 totalsupply) public ERC20Detailed(_name ,_symbol ,_decimals){
+        _name = name;
+        _symbol = symbol;
+        _decimals = decimals;
+        _mint(msg.sender, totalsupply);
     }
 
+}
+
+// File: contracts/NRTManager.sol
+
+/**
+* @title  NRT Distribution Contract
+* @dev This contract will be responsible for distributing the newly released tokens to the different pools.
+*/
+
+
+
+// The contract addresses of different pools
+contract NRTManager is Ownable{
+    using SafeMath for uint256;
+
+    address public eraswapToken;  // address of EraswapToken
+
+    EraswapToken tokenContract;  // Defining conract address so as to interact with EraswapToken
+
+    uint256 Timecheck; // variable to store date
+    uint256 releaseNrtTime; // variable to check release date
+
+    // Variables to keep track of tokens released
+    uint256 MonthlyReleaseNrt;
+    uint256 AnnualReleaseNrt;
+    uint256 monthCount;
+
+        // constructor
+
+    constructor (address token) public{
+        eraswapToken = token;
+        tokenContract = EraswapToken(eraswapToken);
+        Timecheck = now;
+        releaseNrtTime = now + 30 days;
+        AnnualReleaseNrt = 81900000000000000;
+        MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));
+        monthCount = 0;
+    }
+
+    // Different address to distribute to different pools
+    address public luckPool;
+    address public newTalentsAndPartnerships;
+    address public platformMaintenance;
+    address public marketingAndRNR;
+    address public kmPards;
+    address public contingencyFunds;
+    address public researchAndDevelopment;
+    address public buzzCafe;
+    address public powerToken;
+
+    // balances present in different pools
+    uint256 public luckPoolBal;
+    uint256 public newTalentsAndPartnershipsBal;
+    uint256 public platformMaintenanceBal;
+    uint256 public marketingAndRNRBal;
+    uint256 public kmPardsBal;
+    uint256 public contingencyFundsBal;
+    uint256 public researchAndDevelopmentBal;
+    uint256 public powerTokenBal;
+
+    // balances timeAlly workpool distribute
+    uint256 public curatorsBal;
+    uint256 public timeTradersBal;
+    uint256 public daySwappersBal;
+    uint256 public buzzCafeBal;
+    uint256 public stakersBal;
+
+
+    // Amount received to the NRT pool , keeps track of the amount which is to be distributed to the NRT pool
+
+    uint NRTBal;
+
+
+    /**
+    * @dev Function to initialise  luckpool address
+    * @param pool_addr Address to be set 
+    */
+
+    function setLuckPool(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");
+        require(pool_addr == 0x0,"The token address must not have been initialized");
+        luckPool = pool_addr;
+    }
+
+    /**
+    * @dev Function to initialise NewTalentsAndPartnerships pool address
+    * @param pool_addr Address to be set 
+    */
+
+    function setNewTalentsAndPartnerships(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");
+        require(pool_addr == 0x0,"The token address must not have been initialized");
+        newTalentsAndPartnerships = pool_addr;
+    }
+
+    /**
+    * @dev Function to initialise PlatformMaintenance pool address
+    * @param pool_addr Address to be set 
+    */
+
+    function setPlatformMaintenance(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");
+        require(pool_addr == 0x0,"The token address must not have been initialized");
+        platformMaintenance = pool_addr;
+    }
+
+    /**
+    * @dev Function to initialise MarketingAndRNR pool address
+    * @param pool_addr Address to be set 
+    */
+
+    function setMarketingAndRNR(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");
+        require(pool_addr == 0x0,"The token address must not have been initialized");
+        marketingAndRNR = pool_addr;
+    }
+
+    /**
+    * @dev Function to initialise MarketingAndRNR pool address
+    * @param pool_addr Address to be set 
+    */
+
+    function setKmPards(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");
+        require(pool_addr == 0x0,"The token address must not have been initialized");
+        kmPards = pool_addr;
+    }
+
+    /**
+    * @dev Function to initialise ContingencyFunds pool address
+    * @param pool_addr Address to be set 
+    */
+
+    function setContingencyFunds(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");
+        require(pool_addr == 0x0,"The token address must not have been initialized");
+        contingencyFunds = pool_addr;
+    }
+
+    /**
+    * @dev Function to initialise ResearchAndDevelopment pool address
+    * @param pool_addr Address to be set 
+    */
+
+    function setResearchAndDevelopment(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");
+        require(pool_addr == 0x0,"The token address must not have been initialized");
+        researchAndDevelopment = pool_addr;
+    }
+
+    /**
+    * @dev Function to initialise BuzzCafe pool address
+    * @param pool_addr Address to be set 
+    */
+
+    function setBuzzCafe(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");
+        require(pool_addr == 0x0,"The token address must not have been initialized");
+        buzzCafe = pool_addr;
+    }
+
+    /**
+    * @dev Function to initialise PowerToken pool address
+    * @param pool_addr Address to be set 
+    */
+
+    function setPowerToken(address pool_addr) external onlyOwner(){
+        require(pool_addr != 0,"Token address must be defined");
+        require(pool_addr == 0x0,"The token address must not have been initialized");
+        powerToken = pool_addr;
+    }
+
+    /**
+    * @dev Function to trigger the release of montly NRT to diffreent actors in the system
+    * 
+    */
+
+    function receiveMonthlyNRT() external onlyOwner(){
+        require(NRTBal>=0, "NRTBal should be valid");
+        require(tokenContract.balanceOf(this)>0,"NRT_Manger should have token balance");
+        require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
+        NRTBal = NRTBal.add(MonthlyReleaseNrt);
+        distribute_NRT();
+        if(monthCount == 12){
+            monthCount = 0;
+            AnnualReleaseNrt = (AnnualReleaseNrt.mul(9)).div(10);
+            MonthlyReleaseNrt = AnnualReleaseNrt.div(12);
+        }
+        else{
+            monthCount = monthCount.add(1);
+        }        
+    }
+
+
+    // function which is called internally to distribute tokens
+    function distribute_NRT() private onlyOwner(){
+        require(NRTBal != 0,"There are no NRT to distribute");
+        
+        // Distibuting the newly released tokens to eachof the pools
+        
+        newTalentsAndPartnershipsBal = (newTalentsAndPartnershipsBal.add(NRTBal.mul(5))).div(100);
+        platformMaintenanceBal = (platformMaintenanceBal.add(NRTBal.mul(10))).div(100);
+        marketingAndRNRBal = (marketingAndRNRBal.add(NRTBal.mul(10))).div(100);
+        kmPardsBal = (kmPardsBal.add(NRTBal.mul(10))).div(100);
+        contingencyFundsBal = (contingencyFundsBal.add(NRTBal.mul(10))).div(100);
+        researchAndDevelopmentBal = (researchAndDevelopmentBal.add(NRTBal.mul(5))).div(100);
+        curatorsBal = (curatorsBal.add(NRTBal.mul(5))).div(100);
+        timeTradersBal = (timeTradersBal.add(NRTBal.mul(5))).div(100);
+        daySwappersBal = (daySwappersBal.add(NRTBal.mul(125))).div(1000);
+        buzzCafeBal = (buzzCafeBal.add(NRTBal.mul(25))).div(1000); 
+        powerTokenBal = (powerTokenBal.add(NRTBal.mul(10))).div(100);
+        stakersBal = (stakersBal.add(NRTBal.mul(15))).div(100);
+        
+        // Reseting NRT
+        NRTBal = 0;
+
+    }
 }

@@ -31,6 +31,8 @@ contract NRTManager is Ownable{
         // constructor
 
     constructor (address token) public{
+        require(token != 0,"Token address must be defined");
+        require(token == 0x0,"The token address must not have been initialized");
         eraswapToken = token;
         tokenContract = EraswapToken(eraswapToken);
         Timecheck = now;
@@ -84,6 +86,16 @@ contract NRTManager is Ownable{
         require(pool_addr == 0x0,"The token address must not have been initialized");
         luckPool = pool_addr;
     }
+    /**
+    * @dev Function to redeem luckpool balance
+    */
+    function redeemLuckPool() external {
+        require(msg.sender == luckPool,"Can be redeemed only by luckpool address ");
+        require(luckPoolBal != 0, "There is no balance to redeem");
+        require(tokenContract.balanceOf(this)>=luckPoolBal,"NRT_Manger doesn't have token balance");
+        require(tokenContract.transfer(luckPool, luckPoolBal),"The transfer must not fail");
+        luckPoolBal = 0;
+    }
 
     /**
     * @dev Function to initialise NewTalentsAndPartnerships pool address
@@ -96,6 +108,17 @@ contract NRTManager is Ownable{
         newTalentsAndPartnerships = pool_addr;
     }
 
+     /**
+    * @dev Function to redeem NewTalentsAndPartnerships balance
+    */
+    function redeemNewTalentsAndPartnerships() external {
+        require(msg.sender == newTalentsAndPartnerships,"Can be redeemed only by newTalentsAndPartnerships address ");
+        require(newTalentsAndPartnershipsBal != 0, "There is no balance to redeem");
+        require(tokenContract.balanceOf(this)>=newTalentsAndPartnershipsBal,"NRT_Manger doesn't have token balance");
+        require(tokenContract.transfer(newTalentsAndPartnerships, newTalentsAndPartnershipsBal),"The transfer must not fail");
+        newTalentsAndPartnershipsBal = 0;
+    }
+
     /**
     * @dev Function to initialise PlatformMaintenance pool address
     * @param pool_addr Address to be set 
@@ -105,6 +128,18 @@ contract NRTManager is Ownable{
         require(pool_addr != 0,"Token address must be defined");
         require(pool_addr == 0x0,"The token address must not have been initialized");
         platformMaintenance = pool_addr;
+    }
+    
+
+     /**
+    * @dev Function to redeem platformMaintenance balance
+    */
+    function redeemPlatformMaintenance() external {
+        require(msg.sender == platformMaintenance,"Can be redeemed only by platformMaintenance address ");
+        require(platformMaintenanceBal != 0, "There is no balance to redeem");
+        require(tokenContract.balanceOf(this)>=platformMaintenanceBal,"NRT_Manger doesn't have token balance");
+        require(tokenContract.transfer(platformMaintenance, platformMaintenanceBal),"The transfer must not fail");
+        platformMaintenanceBal = 0;
     }
 
     /**
@@ -119,7 +154,18 @@ contract NRTManager is Ownable{
     }
 
     /**
-    * @dev Function to initialise MarketingAndRNR pool address
+    * @dev Function to redeem marketingAndRNR balance
+    */
+    function redeemMarketingAndRNR() external {
+        require(msg.sender == marketingAndRNR,"Can be redeemed only by marketingAndRNR address ");
+        require(marketingAndRNRBal != 0, "There is no balance to redeem");
+        require(tokenContract.balanceOf(this)>=marketingAndRNRBal,"NRT_Manger doesn't have token balance");
+        require(tokenContract.transfer(marketingAndRNR, marketingAndRNRBal),"The transfer must not fail");
+        marketingAndRNRBal = 0;
+    }
+
+    /**
+    * @dev Function to initialise setKmPards pool address
     * @param pool_addr Address to be set 
     */
 
@@ -127,6 +173,17 @@ contract NRTManager is Ownable{
         require(pool_addr != 0,"Token address must be defined");
         require(pool_addr == 0x0,"The token address must not have been initialized");
         kmPards = pool_addr;
+    }
+
+    /**
+    * @dev Function to redeem KmPards balance
+    */
+    function redeemKmPardsBal() external {
+        require(msg.sender == kmPards,"Can be redeemed only by kmPards address ");
+        require(kmPardsBal != 0, "There is no balance to redeem");
+        require(tokenContract.balanceOf(this)>=kmPardsBal,"NRT_Manger doesn't have token balance");
+        require(tokenContract.transfer(kmPards, kmPardsBal),"The transfer must not fail");
+        kmPardsBal = 0;
     }
 
     /**
@@ -141,6 +198,16 @@ contract NRTManager is Ownable{
     }
 
     /**
+    * @dev Function to redeem contingencyFunds balance
+    */
+    function redeemContingencyFundsBal() external {
+        require(msg.sender == contingencyFunds,"Can be redeemed only by contingencyFunds address ");
+        require(contingencyFundsBal != 0, "There is no balance to redeem");
+        require(tokenContract.balanceOf(this)>=contingencyFundsBal,"NRT_Manger doesn't have token balance");
+        require(tokenContract.transfer(contingencyFunds, contingencyFundsBal),"The transfer must not fail");
+        contingencyFundsBal = 0;
+    }
+    /**
     * @dev Function to initialise ResearchAndDevelopment pool address
     * @param pool_addr Address to be set 
     */
@@ -149,6 +216,17 @@ contract NRTManager is Ownable{
         require(pool_addr != 0,"Token address must be defined");
         require(pool_addr == 0x0,"The token address must not have been initialized");
         researchAndDevelopment = pool_addr;
+    }
+
+    /**
+    * @dev Function to redeem researchAndDevelopment balance
+    */
+    function redeemResearchAndDevelopmentBal() external {
+        require(msg.sender == researchAndDevelopment,"Can be redeemed only by researchAndDevelopment address ");
+        require(researchAndDevelopmentBal != 0, "There is no balance to redeem");
+        require(tokenContract.balanceOf(this)>=researchAndDevelopmentBal,"NRT_Manger doesn't have token balance");
+        require(tokenContract.transfer(researchAndDevelopment, researchAndDevelopmentBal),"The transfer must not fail");
+        researchAndDevelopmentBal = 0;
     }
 
     /**
@@ -163,6 +241,17 @@ contract NRTManager is Ownable{
     }
 
     /**
+    * @dev Function to redeem buzzCafe balance
+    */
+    function redeemBuzzCafeBal() external {
+        require(msg.sender == buzzCafe,"Can be redeemed only by buzzCafe address ");
+        require(buzzCafeBal != 0, "There is no balance to redeem");
+        require(tokenContract.balanceOf(this)>=buzzCafeBal,"NRT_Manger doesn't have token balance");
+        require(tokenContract.transfer(buzzCafe, buzzCafeBal),"The transfer must not fail");
+        buzzCafeBal = 0;
+    }
+
+    /**
     * @dev Function to initialise PowerToken pool address
     * @param pool_addr Address to be set 
     */
@@ -171,6 +260,17 @@ contract NRTManager is Ownable{
         require(pool_addr != 0,"Token address must be defined");
         require(pool_addr == 0x0,"The token address must not have been initialized");
         powerToken = pool_addr;
+    }
+
+    /**
+    * @dev Function to redeem powerToken balance
+    */
+    function redeemPowerTokenBal() external {
+        require(msg.sender == powerToken,"Can be redeemed only by powerTokenBal address ");
+        require(powerTokenBal != 0, "There is no balance to redeem");
+        require(tokenContract.balanceOf(this)>=powerTokenBal,"NRT_Manger doesn't have token balance");
+        require(tokenContract.transfer(powerToken, powerTokenBal),"The transfer must not fail");
+        powerTokenBal = 0;
     }
 
     /**
@@ -213,6 +313,8 @@ contract NRTManager is Ownable{
         buzzCafeBal = (buzzCafeBal.add(NRTBal.mul(25))).div(1000); 
         powerTokenBal = (powerTokenBal.add(NRTBal.mul(10))).div(100);
         stakersBal = (stakersBal.add(NRTBal.mul(15))).div(100);
+
+
         
         // Reseting NRT
         NRTBal = 0;
