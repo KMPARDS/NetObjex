@@ -737,9 +737,6 @@ contract EraswapToken is ERC20Detailed , ERC20Mintable , ERC20Burnable  , Ownabl
     uint8 private _decimals;
 
     constructor (string  name, string  symbol, uint8  decimals,uint8 totalsupply) public ERC20Detailed(_name ,_symbol ,_decimals){
-        _name = name;
-        _symbol = symbol;
-        _decimals = decimals;
         _mint(msg.sender, totalsupply);
     }
 
@@ -777,7 +774,7 @@ contract NRTManager is Ownable{
         eraswapToken = token;
         tokenContract = EraswapToken(eraswapToken);
         Timecheck = now;
-        releaseNrtTime = now + 30 days;
+        releaseNrtTime = now.add(30 days);
         AnnualReleaseNrt = 81900000000000000;
         MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));
         monthCount = 0;
@@ -1045,9 +1042,6 @@ contract NRTManager is Ownable{
         buzzCafeBal = (buzzCafeBal.add(NRTBal.mul(25))).div(1000); 
         powerTokenBal = (powerTokenBal.add(NRTBal.mul(10))).div(100);
         stakersBal = (stakersBal.add(NRTBal.mul(15))).div(100);
-
-
-        
         // Reseting NRT
         NRTBal = 0;
 
