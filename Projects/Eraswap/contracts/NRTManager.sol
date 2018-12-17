@@ -107,10 +107,12 @@ contract NRTManager is Ownable{
      /**
     * @dev Function to send NewTalentsAndPartnerships balance
     */
-    function sendNewTalentsAndPartnerships() internal isValidAddress(newTalentsAndPartnerships) isNotZero(newTalentsAndPartnershipsBal) {
+    function sendNewTalentsAndPartnerships() internal isValidAddress(newTalentsAndPartnerships) isNotZero(newTalentsAndPartnershipsBal) 
+    returns(bool) {
         require(tokenContract.transfer(newTalentsAndPartnerships, newTalentsAndPartnershipsBal),"The transfer must not fail");
         emit sendToken("NewTalentsAndPartnerships",newTalentsAndPartnerships,newTalentsAndPartnershipsBal);
         newTalentsAndPartnershipsBal = 0;
+        return true;
     }
 
     /**
@@ -127,11 +129,12 @@ contract NRTManager is Ownable{
      /**
     * @dev Function to send platformMaintenance balance
     */
-    function sendPlatformMaintenance() internal isValidAddress(platformMaintenance) isNotZero(platformMaintenanceBal){
+    function sendPlatformMaintenance() internal isValidAddress(platformMaintenance) isNotZero(platformMaintenanceBal)
+    returns(bool){
         require(tokenContract.transfer(platformMaintenance, platformMaintenanceBal),"The transfer must not fail");
         emit sendToken("PlatformMaintenance",platformMaintenance,platformMaintenanceBal);
         platformMaintenanceBal = 0;
-       
+        return true;    
     }
 
     /**
@@ -147,10 +150,12 @@ contract NRTManager is Ownable{
     /**
     * @dev Function to send marketingAndRNR balance
     */
-    function sendMarketingAndRNR() internal isValidAddress(marketingAndRNR) isNotZero(marketingAndRNRBal){
+    function sendMarketingAndRNR() internal isValidAddress(marketingAndRNR) isNotZero(marketingAndRNRBal)
+    returns(bool){
         require(tokenContract.transfer(marketingAndRNR, marketingAndRNRBal),"The transfer must not fail");
         emit sendToken("MarketingAndRNR",marketingAndRNR,marketingAndRNRBal);
         marketingAndRNRBal = 0;
+        return true;
     }
 
     /**
@@ -166,10 +171,12 @@ contract NRTManager is Ownable{
     /**
     * @dev Function to send KmPards balance
     */
-    function sendKmPards() internal isValidAddress(kmPards) isNotZero(kmPardsBal){
+    function sendKmPards() internal isValidAddress(kmPards) isNotZero(kmPardsBal)
+    returns(bool){
         require(tokenContract.transfer(kmPards, kmPardsBal),"The transfer must not fail");
         emit sendToken("MarketingAndRNR",kmPards,kmPardsBal);
         kmPardsBal = 0;
+        return true;
     }
 
     /**
@@ -185,10 +192,12 @@ contract NRTManager is Ownable{
     /**
     * @dev Function to send contingencyFunds balance
     */
-    function sendContingencyFunds() internal  isValidAddress(contingencyFunds) isNotZero(contingencyFundsBal){
+    function sendContingencyFunds() internal  isValidAddress(contingencyFunds) isNotZero(contingencyFundsBal)
+    returns(bool){
         require(tokenContract.transfer(contingencyFunds, contingencyFundsBal),"The transfer must not fail");
         emit sendToken("contingencyFunds",contingencyFunds,contingencyFundsBal);
         contingencyFundsBal = 0;
+        return true;
     }
     /**
     * @dev Function to initialise ResearchAndDevelopment pool address
@@ -203,10 +212,12 @@ contract NRTManager is Ownable{
     /**
     * @dev Function to send researchAndDevelopment balance
     */
-    function sendResearchAndDevelopment() internal isValidAddress(researchAndDevelopment) isNotZero(researchAndDevelopmentBal){
+    function sendResearchAndDevelopment() internal isValidAddress(researchAndDevelopment) isNotZero(researchAndDevelopmentBal)
+    returns(bool){
         require(tokenContract.transfer(researchAndDevelopment, researchAndDevelopmentBal),"The transfer must not fail");
         emit sendToken("ResearchAndDevelopment",researchAndDevelopment,researchAndDevelopmentBal);
         researchAndDevelopmentBal = 0;
+        return true;
     }
 
     /**
@@ -222,10 +233,12 @@ contract NRTManager is Ownable{
     /**
     * @dev Function to send buzzCafe balance
     */
-    function sendBuzzCafe() internal isValidAddress(buzzCafe) isNotZero(buzzCafeBal){
+    function sendBuzzCafe() internal isValidAddress(buzzCafe) isNotZero(buzzCafeBal)
+    returns(bool){
         require(tokenContract.transfer(buzzCafe, buzzCafeBal),"The transfer must not fail");
         emit sendToken("BuzzCafe",buzzCafe,buzzCafeBal);
         buzzCafeBal = 0;
+        return true;
     }
 
     /**
@@ -241,10 +254,12 @@ contract NRTManager is Ownable{
     /**
     * @dev Function to send powerToken balance
     */
-    function sendPowerToken() internal  isValidAddress(powerToken) isNotZero(powerTokenBal){
+    function sendPowerToken() internal  isValidAddress(powerToken) isNotZero(powerTokenBal)
+    returns(bool){
         require(tokenContract.transfer(powerToken, powerTokenBal),"The transfer must not fail");
         emit sendToken("PowerToken",powerToken,powerTokenBal);
         powerTokenBal = 0;
+        return true;
     }
 
     /**
@@ -309,7 +324,7 @@ contract NRTManager is Ownable{
     /**
     * @dev Constructor
     * @param token Address of eraswaptoken
-    * @param pool[] Array of different pools
+    * @param pool Array of different pools
     * NewTalentsAndPartnerships(pool[0]);
     * PlatformMaintenance(pool[1]);
     * MarketingAndRNR(pool[2]);
