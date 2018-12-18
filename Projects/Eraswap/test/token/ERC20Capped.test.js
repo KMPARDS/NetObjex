@@ -1,7 +1,7 @@
 const shouldFail = require('../helpers/shouldFail');
 const { ether } = require('../helpers/ether');
 const { shouldBehaveLikeERC20Mintable } = require('./behaviors/ERC20Mintable.behavior');
-const { shouldBehaveLikeERC20Capped } = require('./behaviors/EraswapToken.behavior');
+const { shouldBehaveLikeERC20Capped } = require('./behaviors/ERC20Capped.behavior');
 
 const EraswapToken = artifacts.require('EraswapToken');
 
