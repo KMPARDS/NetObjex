@@ -3,7 +3,7 @@ const { sha3, soliditySha3 } = require('web3-utils');
 const REAL_SIGNATURE_SIZE = 2 * 65; // 65 bytes in hexadecimal string legnth
 const PADDED_SIGNATURE_SIZE = 2 * 96; // 96 bytes in hexadecimal string length
 
-const DUMMY_SIGNATURE = `0x${web3.utils.padLeft('', REAL_SIGNATURE_SIZE)}`;
+const DUMMY_SIGNATURE = `0x${web3.padLeft('', REAL_SIGNATURE_SIZE)}`;
 
 // messageHex = '0xdeadbeef'
 function toEthSignedMessageHash (messageHex) {
@@ -39,7 +39,7 @@ const transformToFullName = function (json) {
  * @param methodName string
  * @param methodArgs any[]
  */
-const getBouncerSigner = (contract, signer) => (redeemer, methodName, methodArgs = []) => {
+const getSignFor = (contract, signer) => (redeemer, methodName, methodArgs = []) => {
   const parts = [
     contract.address,
     redeemer,
@@ -70,5 +70,5 @@ const getBouncerSigner = (contract, signer) => (redeemer, methodName, methodArgs
 module.exports = {
   signMessage,
   toEthSignedMessageHash,
-  getBouncerSigner,
+  getSignFor,
 };

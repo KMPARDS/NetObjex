@@ -13,6 +13,10 @@
     "truffle-flattener": "^1.2.10",
     "truffle-hdwallet-provider": "0.0.6"
   },
+  "scripts": {
+    "start": "npm run test",
+    "test": "scripts/test.sh"
+  },
   "devDependencies": {
     "bignumber.js": "^7.2.1",
     "chai": "^4.1.2",
@@ -21,13 +25,20 @@
     "del": "^3.0.0",
     "eslint": "^5.10.0",
     "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-mocha-no-only": "^1.1.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "ethereumjs-util": "^6.0.0",
     "ethereumjs-wallet": "^0.6.2",
     "ethjs-abi": "^0.2.1",
     "ganache-cli": "6.1.0",
     "gulp": "^3.9.1",
     "gulp-sequence": "^1.0.0",
     "moment-timezone": "^0.5.23",
+    "pify": "^4.0.1",
     "solidity-coverage": "^0.5.4",
     "solium": "^1.1.8",
     "truffle-wallet-provider": "0.0.5",
