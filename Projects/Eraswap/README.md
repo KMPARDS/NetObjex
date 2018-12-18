@@ -4,10 +4,10 @@
  **How to install**
 
 ```sh
-$ git clone git@github.com:servntire/Ethereum_Smart_contracts.git
-$ cd openzepplin-poc
+$ cd Projects/Eraswap
 $ npm install
 $ npm install truffle -g
+$ npm start or npm run test
 ```
 The deployment to the ethereum test network ropsten is preconfigured to ropsten testnet and you can also use ganache in your local system to deploy the contract.
 
