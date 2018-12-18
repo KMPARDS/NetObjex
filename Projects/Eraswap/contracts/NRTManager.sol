@@ -126,9 +126,10 @@ contract NRTManager is Ownable{
     */
     function sendNewTalentsAndPartnerships() internal isValidAddress(newTalentsAndPartnerships) isNotZero(newTalentsAndPartnershipsBal) 
     returns(bool) {
-        require(tokenContract.transfer(newTalentsAndPartnerships, newTalentsAndPartnershipsBal),"The transfer must not fail");
+        uint256 memory temp = newTalentsAndPartnershipsBal;
         emit sendToken("NewTalentsAndPartnerships",newTalentsAndPartnerships,newTalentsAndPartnershipsBal);
         newTalentsAndPartnershipsBal = 0;
+        require(tokenContract.transfer(newTalentsAndPartnerships, temp),"The transfer must not fail");
         return true;
     }
 
@@ -148,9 +149,10 @@ contract NRTManager is Ownable{
     */
     function sendPlatformMaintenance() internal isValidAddress(platformMaintenance) isNotZero(platformMaintenanceBal)
     returns(bool){
-        require(tokenContract.transfer(platformMaintenance, platformMaintenanceBal),"The transfer must not fail");
+        uint256 memory temp = platformMaintenanceBal;
         emit sendToken("PlatformMaintenance",platformMaintenance,platformMaintenanceBal);
         platformMaintenanceBal = 0;
+        require(tokenContract.transfer(platformMaintenance, temp),"The transfer must not fail");
         return true;    
     }
 
@@ -169,9 +171,10 @@ contract NRTManager is Ownable{
     */
     function sendMarketingAndRNR() internal isValidAddress(marketingAndRNR) isNotZero(marketingAndRNRBal)
     returns(bool){
-        require(tokenContract.transfer(marketingAndRNR, marketingAndRNRBal),"The transfer must not fail");
+        uint256 memory temp = marketingAndRNRBal;
         emit sendToken("MarketingAndRNR",marketingAndRNR,marketingAndRNRBal);
         marketingAndRNRBal = 0;
+        require(tokenContract.transfer(marketingAndRNR, temp),"The transfer must not fail");
         return true;
     }
 
@@ -190,9 +193,10 @@ contract NRTManager is Ownable{
     */
     function sendKmPards() internal isValidAddress(kmPards) isNotZero(kmPardsBal)
     returns(bool){
-        require(tokenContract.transfer(kmPards, kmPardsBal),"The transfer must not fail");
+        uint256 memory temp = kmPardsBal;
         emit sendToken("MarketingAndRNR",kmPards,kmPardsBal);
         kmPardsBal = 0;
+        require(tokenContract.transfer(kmPards, temp),"The transfer must not fail");
         return true;
     }
 
@@ -211,9 +215,10 @@ contract NRTManager is Ownable{
     */
     function sendContingencyFunds() internal  isValidAddress(contingencyFunds) isNotZero(contingencyFundsBal)
     returns(bool){
-        require(tokenContract.transfer(contingencyFunds, contingencyFundsBal),"The transfer must not fail");
+        uint256 memory temp = contingencyFundsBal;
         emit sendToken("contingencyFunds",contingencyFunds,contingencyFundsBal);
         contingencyFundsBal = 0;
+        require(tokenContract.transfer(contingencyFunds, temp),"The transfer must not fail");
         return true;
     }
     /**
@@ -231,9 +236,10 @@ contract NRTManager is Ownable{
     */
     function sendResearchAndDevelopment() internal isValidAddress(researchAndDevelopment) isNotZero(researchAndDevelopmentBal)
     returns(bool){
-        require(tokenContract.transfer(researchAndDevelopment, researchAndDevelopmentBal),"The transfer must not fail");
+        uint256 memory temp = researchAndDevelopmentBal;
         emit sendToken("ResearchAndDevelopment",researchAndDevelopment,researchAndDevelopmentBal);
         researchAndDevelopmentBal = 0;
+        require(tokenContract.transfer(researchAndDevelopment, temp),"The transfer must not fail");
         return true;
     }
 
@@ -252,9 +258,10 @@ contract NRTManager is Ownable{
     */
     function sendBuzzCafe() internal isValidAddress(buzzCafe) isNotZero(buzzCafeBal)
     returns(bool){
-        require(tokenContract.transfer(buzzCafe, buzzCafeBal),"The transfer must not fail");
+        uint256 memory temp = buzzCafeBal;
         emit sendToken("BuzzCafe",buzzCafe,buzzCafeBal);
         buzzCafeBal = 0;
+        require(tokenContract.transfer(buzzCafe, temp),"The transfer must not fail");
         return true;
     }
 
@@ -273,9 +280,10 @@ contract NRTManager is Ownable{
     */
     function sendPowerToken() internal  isValidAddress(powerToken) isNotZero(powerTokenBal)
     returns(bool){
-        require(tokenContract.transfer(powerToken, powerTokenBal),"The transfer must not fail");
+        uint256 memory temp = powerTokenBal;
         emit sendToken("PowerToken",powerToken,powerTokenBal);
         powerTokenBal = 0;
+        require(tokenContract.transfer(powerToken, temp),"The transfer must not fail");
         return true;
     }
 
@@ -329,6 +337,14 @@ contract NRTManager is Ownable{
 
         
 
+        // Reseting NRT
+
+        emit NRTDistributed(NRTBal);
+        NRTBal = 0;
+        luckPoolBal = 0;
+        releaseNrtTime = releaseNrtTime.add(30 days + 6 hours); // resetting release date again
+
+
         // sending tokens to respective wallets
         require(sendNewTalentsAndPartnerships(),"Tokens should be succesfully send");
         require(sendPlatformMaintenance(),"Tokens should be succesfully send");
@@ -338,12 +354,6 @@ contract NRTManager is Ownable{
         require(sendResearchAndDevelopment(),"Tokens should be succesfully send");
         require(sendBuzzCafe(),"Tokens should be succesfully send");
         require(sendPowerToken(),"Tokens should be succesfully send");
-        // Reseting NRT
-
-        emit NRTDistributed(NRTBal);
-        NRTBal = 0;
-        luckPoolBal = 0;
-        releaseNrtTime = releaseNrtTime.add(30 days); // resetting release date again
 
     }
 
@@ -374,7 +384,7 @@ contract NRTManager is Ownable{
         setPowerToken(pool[7]);
         eraswapToken = token;
         tokenContract = EraswapToken(eraswapToken);
-        releaseNrtTime = now.add(30 days);
+        releaseNrtTime = now.add(30 days + 6 hours);
         AnnualReleaseNrt = 81900000000000000;
         MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));
         monthCount = 0;
