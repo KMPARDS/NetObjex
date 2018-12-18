@@ -8,9 +8,9 @@
   "license": "MIT",
   "dependencies": {
     "openzeppelin-solidity": "^2.0.0",
+    "solc": "^0.5.1",
     "truffle": "^4.1.14",
-    "truffle-flattener": "^1.2.9",
-    "solc": "^0.4.25",
+    "truffle-flattener": "^1.2.10",
     "truffle-hdwallet-provider": "0.0.6"
   },
   "devDependencies": {
@@ -19,7 +19,7 @@
     "chai-bignumber": "^2.0.2",
     "coveralls": "^3.0.1",
     "del": "^3.0.0",
-    "eslint": "^5.9.0",
+    "eslint": "^5.10.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.14.0",
     "ethereumjs-wallet": "^0.6.2",
