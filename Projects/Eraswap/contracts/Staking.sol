@@ -43,18 +43,18 @@ contract Staking{
         require(msg.sender == owner);
         _;
     }
-  function withDrawInterest() onlyOwner() isNoLoanTaken(){
+//   function withDrawInterest() onlyOwner() isNoLoanTaken() public{
 
-  }
+//   }
 
-  function takeLoan() onlyOwner() isNoLoanTaken(){
+  function takeLoan() onlyOwner() isNoLoanTaken() external{
       require(tokenContract.transfer(owner, stakedAmount.div(2)),"The contract should transfer loan amount");
       isLoan =true;
   }
 
-  function windUpContract(){
+//   function windUpContract() external{
 
-  }
+//   }
 
      /**
    * @dev Intialises the contract
@@ -69,7 +69,7 @@ contract Staking{
         owner = initiater;
         isLoan = false;
         cumilativeWithdrawable[0] = Amount;
-        tokenContract = EraswapToken(eraswapToken);
+        tokenContract = EraswapToken(token);
 
     }
 }

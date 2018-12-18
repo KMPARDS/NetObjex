@@ -2,7 +2,9 @@ pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
-import "./EraswapToken.sol";
+import "./Staking.sol";
+
+
 /**
 * @title  NRT Distribution Contract
 * @dev This contract will be responsible for distributing the newly released tokens to the different pools.
@@ -86,19 +88,27 @@ contract NRTManager is Ownable{
     uint256 public OneYearStakersBal;
     uint256 public TwoYearStakersBal;
 
-    struct OneYearStaker{
+    struct OneYearStaker {
         uint256 stakedAmount;
         uint256 stakedtime;
-
     }
-    
+
+    struct TwoYearStaker {
+        uint256 stakedAmount;
+        uint256 stakedtime;
+    }
+
+    mapping (address => OneYearStaker) OneYearContract;
+    mapping (address => TwoYearStaker) TwoYearContract;
+    address[] OneYearContractList;
+    address[] TwoYearContractList;
 
 
    /**
    * @dev Throws if not a valid address
    */
     modifier isValidAddress(address addr) {
-        require(addr != 0,"It should be a valid address");
+        require(addr != address(0),"It should be a valid address");
         _;
     }
 
@@ -126,7 +136,7 @@ contract NRTManager is Ownable{
     */
     function sendNewTalentsAndPartnerships() internal isValidAddress(newTalentsAndPartnerships) isNotZero(newTalentsAndPartnershipsBal) 
     returns(bool) {
-        uint256 memory temp = newTalentsAndPartnershipsBal;
+        uint256 temp = newTalentsAndPartnershipsBal;
         emit sendToken("NewTalentsAndPartnerships",newTalentsAndPartnerships,newTalentsAndPartnershipsBal);
         newTalentsAndPartnershipsBal = 0;
         require(tokenContract.transfer(newTalentsAndPartnerships, temp),"The transfer must not fail");
@@ -149,7 +159,7 @@ contract NRTManager is Ownable{
     */
     function sendPlatformMaintenance() internal isValidAddress(platformMaintenance) isNotZero(platformMaintenanceBal)
     returns(bool){
-        uint256 memory temp = platformMaintenanceBal;
+        uint256 temp = platformMaintenanceBal;
         emit sendToken("PlatformMaintenance",platformMaintenance,platformMaintenanceBal);
         platformMaintenanceBal = 0;
         require(tokenContract.transfer(platformMaintenance, temp),"The transfer must not fail");
@@ -171,7 +181,7 @@ contract NRTManager is Ownable{
     */
     function sendMarketingAndRNR() internal isValidAddress(marketingAndRNR) isNotZero(marketingAndRNRBal)
     returns(bool){
-        uint256 memory temp = marketingAndRNRBal;
+        uint256 temp = marketingAndRNRBal;
         emit sendToken("MarketingAndRNR",marketingAndRNR,marketingAndRNRBal);
         marketingAndRNRBal = 0;
         require(tokenContract.transfer(marketingAndRNR, temp),"The transfer must not fail");
@@ -193,7 +203,7 @@ contract NRTManager is Ownable{
     */
     function sendKmPards() internal isValidAddress(kmPards) isNotZero(kmPardsBal)
     returns(bool){
-        uint256 memory temp = kmPardsBal;
+        uint256 temp = kmPardsBal;
         emit sendToken("MarketingAndRNR",kmPards,kmPardsBal);
         kmPardsBal = 0;
         require(tokenContract.transfer(kmPards, temp),"The transfer must not fail");
@@ -215,7 +225,7 @@ contract NRTManager is Ownable{
     */
     function sendContingencyFunds() internal  isValidAddress(contingencyFunds) isNotZero(contingencyFundsBal)
     returns(bool){
-        uint256 memory temp = contingencyFundsBal;
+        uint256 temp = contingencyFundsBal;
         emit sendToken("contingencyFunds",contingencyFunds,contingencyFundsBal);
         contingencyFundsBal = 0;
         require(tokenContract.transfer(contingencyFunds, temp),"The transfer must not fail");
@@ -236,7 +246,7 @@ contract NRTManager is Ownable{
     */
     function sendResearchAndDevelopment() internal isValidAddress(researchAndDevelopment) isNotZero(researchAndDevelopmentBal)
     returns(bool){
-        uint256 memory temp = researchAndDevelopmentBal;
+        uint256 temp = researchAndDevelopmentBal;
         emit sendToken("ResearchAndDevelopment",researchAndDevelopment,researchAndDevelopmentBal);
         researchAndDevelopmentBal = 0;
         require(tokenContract.transfer(researchAndDevelopment, temp),"The transfer must not fail");
@@ -258,7 +268,7 @@ contract NRTManager is Ownable{
     */
     function sendBuzzCafe() internal isValidAddress(buzzCafe) isNotZero(buzzCafeBal)
     returns(bool){
-        uint256 memory temp = buzzCafeBal;
+        uint256 temp = buzzCafeBal;
         emit sendToken("BuzzCafe",buzzCafe,buzzCafeBal);
         buzzCafeBal = 0;
         require(tokenContract.transfer(buzzCafe, temp),"The transfer must not fail");
@@ -280,7 +290,7 @@ contract NRTManager is Ownable{
     */
     function sendPowerToken() internal  isValidAddress(powerToken) isNotZero(powerTokenBal)
     returns(bool){
-        uint256 memory temp = powerTokenBal;
+        uint256 temp = powerTokenBal;
         emit sendToken("PowerToken",powerToken,powerTokenBal);
         powerTokenBal = 0;
         require(tokenContract.transfer(powerToken, temp),"The transfer must not fail");
@@ -332,7 +342,7 @@ contract NRTManager is Ownable{
         TotalStakerCount = OneYearStakerCount.add(TwoYearStakerCount);
         OneYearStakersBal = (stakersBal.mul(OneYearStakerCount)).div(TotalStakerCount);
         TwoYearStakersBal = (stakersBal.mul(TwoYearStakerCount)).div(TotalStakerCount);
-        luckPoolBal = OneYearStakersBal.mul(0.133333);
+        luckPoolBal = (OneYearStakersBal.mul(2)).div(15);
         OneYearStakersBal = OneYearStakersBal.sub(luckPoolBal);
 
         
@@ -355,6 +365,25 @@ contract NRTManager is Ownable{
         require(sendBuzzCafe(),"Tokens should be succesfully send");
         require(sendPowerToken(),"Tokens should be succesfully send");
 
+    }
+
+
+    // Staking Contract Functions
+
+    function createStakingContract(uint256 Amount,bool isTwoYear) external returns (address){
+        Staking newStakingContract = new Staking(Amount,isTwoYear, msg.sender, eraswapToken);
+        if(isTwoYear){
+                    TwoYearStaker memory temp1 = TwoYearStaker(Amount,now);
+                    TwoYearContractList.push(newStakingContract);
+                    TwoYearContract[newStakingContract] = temp1; 
+        }
+        else{
+                    OneYearStaker memory temp2 = OneYearStaker(Amount,now);
+                    OneYearContractList.push(newStakingContract);
+                    OneYearContract[newStakingContract] = temp2;
+        }
+        require(tokenContract.transfer(newStakingContract,Amount),"Token Contract should be created");
+        return newStakingContract;
     }
 
     /**
