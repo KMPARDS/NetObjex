@@ -1,5 +1,5 @@
-const EraswapToken = artifacts.require('./EraswapToken.sol');
-const NRT_Manager = artifacts.require('./NRTManager.sol');
+// const EraswapToken = artifacts.require('./EraswapToken.sol');
+// const NRT_Manager = artifacts.require('./NRTManager.sol');
 const name = 'EraswapToken';
 const symbol = 'EST';
 const decimals = web3.toBigNumber(8);
@@ -9,8 +9,8 @@ const poolAddr = ['0x5526B758117863bcf1cF558cE864CB99bdAC781c','0xfFbB9F2b2fBE60
 '0x8f28E76120e96CE72767b4eEBe7D9C445D37631A','0xDC8553bb6dea3a2856de1D1008BB367e3ECC8538'];
 
 module.exports = function (deployer) {
-  deployer.deploy(EraswapToken, name, symbol, decimals,totalsupply).then((A)=>{
-    deployer.deploy(NRT_Manager , A.address,poolAddr);
-  });
-  
+  // deployer.deploy(EraswapToken, name, symbol, decimals,totalsupply).then((A)=>{
+  //   deployer.deploy(NRT_Manager , A.address,poolAddr);
+  // });
+
 };

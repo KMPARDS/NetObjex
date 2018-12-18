@@ -79,8 +79,9 @@ function combineSolidity(path, name){
 }
 gulp.task('combine_solidity', ['clean'], function () {
     combineSolidity('./contracts_dev/Migrations.sol',"Migrations");
-    combineSolidity('./contracts_dev/EraswapToken.sol', "EraswapToken");
-    combineSolidity('./contracts_dev/NRTManager.sol', "NRTManager");
+    // combineSolidity('./contracts_dev/EraswapToken.sol', "EraswapToken");
+    // combineSolidity('./contracts_dev/NRTManager.sol', "NRTManager");
+    combineSolidity('./contracts_dev/ERC20Mock.sol', "ERC20Mock");
 });
 
 gulp.task('clean', [], function () {

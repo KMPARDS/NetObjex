@@ -11,9 +11,10 @@ contract EraswapToken is ERC20Detailed , ERC20Burnable ,ERC20Capped , Ownable ,E
     string private _symbol;
     uint8 private _decimals;
 
-    constructor (string  name, string  symbol, uint8  decimals,uint256 cap) public ERC20Detailed(name ,symbol ,decimals) 
+    constructor (string  name, string  symbol, uint8  decimals, uint256 cap) public
+    ERC20Detailed(name ,symbol ,decimals)
     ERC20Capped(cap){
-        _mint(msg.sender, cap);
+//        _mint(msg.sender, cap);
     }
 
 }
