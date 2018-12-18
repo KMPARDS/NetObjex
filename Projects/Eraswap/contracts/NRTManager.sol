@@ -75,6 +75,25 @@ contract NRTManager is Ownable{
 
     uint NRTBal;
 
+
+     // ================Staking -- TimeAlly=================
+
+     // Counts of different stakers
+    uint256 public OneYearStakerCount;
+    uint256 public TwoYearStakerCount;
+    uint256 public TotalStakerCount;
+
+    uint256 public OneYearStakersBal;
+    uint256 public TwoYearStakersBal;
+
+    struct OneYearStaker{
+        uint256 stakedAmount;
+        uint256 stakedtime;
+
+    }
+    
+
+
    /**
    * @dev Throws if not a valid address
    */
@@ -99,7 +118,7 @@ contract NRTManager is Ownable{
 
     function setNewTalentsAndPartnerships(address pool_addr) public onlyOwner() isValidAddress(pool_addr){
         newTalentsAndPartnerships = pool_addr;
-        emit ChangingPoolAddress("NewTalentsAndPartnerships",newTalentsAndPartnerships);
+        emit ChangingPoolAddress ("NewTalentsAndPartnerships",newTalentsAndPartnerships);
     }
 
      /**
@@ -261,7 +280,7 @@ contract NRTManager is Ownable{
     }
 
     /**
-    * @dev Function to trigger the release of montly NRT to diffreent actors in the system
+    * @dev Function to trigger the release of montly NRT to different actors in the system
     * 
     */
 
@@ -286,7 +305,7 @@ contract NRTManager is Ownable{
         require(tokenContract.balanceOf(this)>=NRTBal,"NRT_Manger doesn't have token balance");
         NRTBal = NRTBal.add(luckPoolBal);
         
-        // Distibuting the newly released tokens to eachof the pools
+        // Distibuting the newly released tokens to each of the pools
         
         newTalentsAndPartnershipsBal = (newTalentsAndPartnershipsBal.add(NRTBal.mul(5))).div(100);
         platformMaintenanceBal = (platformMaintenanceBal.add(NRTBal.mul(10))).div(100);
@@ -300,6 +319,15 @@ contract NRTManager is Ownable{
         buzzCafeBal = (buzzCafeBal.add(NRTBal.mul(25))).div(1000); 
         powerTokenBal = (powerTokenBal.add(NRTBal.mul(10))).div(100);
         stakersBal = (stakersBal.add(NRTBal.mul(15))).div(100);
+
+        // Updating one and 2 year balances
+        TotalStakerCount = OneYearStakerCount.add(TwoYearStakerCount);
+        OneYearStakersBal = (stakersBal.mul(OneYearStakerCount)).div(TotalStakerCount);
+        TwoYearStakersBal = (stakersBal.mul(TwoYearStakerCount)).div(TotalStakerCount);
+        luckPoolBal = OneYearStakersBal.mul(0.133333);
+        OneYearStakersBal = OneYearStakersBal.sub(luckPoolBal);
+
+        
 
         // sending tokens to respective wallets
         require(sendNewTalentsAndPartnerships(),"Tokens should be succesfully send");
@@ -351,4 +379,5 @@ contract NRTManager is Ownable{
         MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));
         monthCount = 0;
     }
+
 }
