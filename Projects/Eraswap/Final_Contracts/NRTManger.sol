@@ -24,8 +24,7 @@ library SafeMath {
 
     return c;
   }
-
-  /**
+`  /**
   * @dev Integer division of two numbers truncating the quotient, reverts on division by zero.
   */
   function div(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -766,11 +765,88 @@ contract EraswapToken is ERC20Detailed , ERC20Burnable ,ERC20Capped , Ownable ,E
     string private _symbol;
     uint8 private _decimals;
 
-    constructor (string  name, string  symbol, uint8  decimals,uint256 cap) public ERC20Detailed(name ,symbol ,decimals) 
+    constructor (string  name, string  symbol, uint8  decimals, uint256 cap) public
+    ERC20Detailed(name ,symbol ,decimals)
     ERC20Capped(cap){
         _mint(msg.sender, cap);
     }
 
+}
+
+// File: contracts/Staking.sol
+
+// contract to manage staking of one year and two year stakers
+
+
+contract Staking{
+    using SafeMath for uint256;
+
+    uint256 stakedAmount; 
+    uint256 stakedTime; 
+    bool isTwoYear;
+    bool isLoan;
+    address owner;
+    uint256[] cumilativeWithdrawable;
+
+    EraswapToken tokenContract;  // Defining conract address so as to interact with EraswapToken
+  /**
+   * @dev Throws if not times up to close a contract
+   */
+    modifier isPeriodEnd() {
+        if(isTwoYear)
+        {
+        require(now >= stakedTime + 730 days,"Contract can only be ended after 2 years");
+        }
+        else{
+            require(now >= stakedTime + 365 days,"Contract can only be ended after 1 years");
+        }
+        _;
+    }
+
+    /**
+   * @dev To check if loan is initiated
+   */
+   modifier isNoLoanTaken() {
+       require(isLoan == false,"He should not have taken loan");
+        _;
+    }
+
+     /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        require(msg.sender == owner);
+        _;
+    }
+//   function withDrawInterest() onlyOwner() isNoLoanTaken() public{
+
+//   }
+
+  function takeLoan() onlyOwner() isNoLoanTaken() external{
+      require(tokenContract.transfer(owner, stakedAmount.div(2)),"The contract should transfer loan amount");
+      isLoan =true;
+  }
+
+//   function windUpContract() external{
+
+//   }
+
+     /**
+   * @dev Intialises the contract
+   * @param Amount Amount whichis to be staked
+   * @param plan true if two year plan / false for one year plan
+   * @param initiater Address of the staker
+   */
+    constructor(uint256 Amount,bool plan, address initiater, address token) public{
+        stakedAmount = Amount;
+        stakedTime = now;
+        isTwoYear = plan;
+        owner = initiater;
+        isLoan = false;
+        cumilativeWithdrawable[0] = Amount;
+        tokenContract = EraswapToken(token);
+
+    }
 }
 
 // File: contracts/NRTManager.sol
@@ -847,11 +923,38 @@ contract NRTManager is Ownable{
 
     uint NRTBal;
 
+
+     // ================Staking -- TimeAlly=================
+
+     // Counts of different stakers
+    uint256 public OneYearStakerCount;
+    uint256 public TwoYearStakerCount;
+    uint256 public TotalStakerCount;
+
+    uint256 public OneYearStakersBal;
+    uint256 public TwoYearStakersBal;
+
+    struct OneYearStaker {
+        uint256 stakedAmount;
+        uint256 stakedtime;
+    }
+
+    struct TwoYearStaker {
+        uint256 stakedAmount;
+        uint256 stakedtime;
+    }
+
+    mapping (address => OneYearStaker) OneYearContract;
+    mapping (address => TwoYearStaker) TwoYearContract;
+    address[] OneYearContractList;
+    address[] TwoYearContractList;
+
+
    /**
    * @dev Throws if not a valid address
    */
     modifier isValidAddress(address addr) {
-        require(addr != 0,"It should be a valid address");
+        require(addr != address(0),"It should be a valid address");
         _;
     }
 
@@ -871,7 +974,7 @@ contract NRTManager is Ownable{
 
     function setNewTalentsAndPartnerships(address pool_addr) public onlyOwner() isValidAddress(pool_addr){
         newTalentsAndPartnerships = pool_addr;
-        emit ChangingPoolAddress("NewTalentsAndPartnerships",newTalentsAndPartnerships);
+        emit ChangingPoolAddress ("NewTalentsAndPartnerships",newTalentsAndPartnerships);
     }
 
      /**
@@ -879,9 +982,10 @@ contract NRTManager is Ownable{
     */
     function sendNewTalentsAndPartnerships() internal isValidAddress(newTalentsAndPartnerships) isNotZero(newTalentsAndPartnershipsBal) 
     returns(bool) {
-        require(tokenContract.transfer(newTalentsAndPartnerships, newTalentsAndPartnershipsBal),"The transfer must not fail");
+        uint256 temp = newTalentsAndPartnershipsBal;
         emit sendToken("NewTalentsAndPartnerships",newTalentsAndPartnerships,newTalentsAndPartnershipsBal);
         newTalentsAndPartnershipsBal = 0;
+        require(tokenContract.transfer(newTalentsAndPartnerships, temp),"The transfer must not fail");
         return true;
     }
 
@@ -901,9 +1005,10 @@ contract NRTManager is Ownable{
     */
     function sendPlatformMaintenance() internal isValidAddress(platformMaintenance) isNotZero(platformMaintenanceBal)
     returns(bool){
-        require(tokenContract.transfer(platformMaintenance, platformMaintenanceBal),"The transfer must not fail");
+        uint256 temp = platformMaintenanceBal;
         emit sendToken("PlatformMaintenance",platformMaintenance,platformMaintenanceBal);
         platformMaintenanceBal = 0;
+        require(tokenContract.transfer(platformMaintenance, temp),"The transfer must not fail");
         return true;    
     }
 
@@ -922,9 +1027,10 @@ contract NRTManager is Ownable{
     */
     function sendMarketingAndRNR() internal isValidAddress(marketingAndRNR) isNotZero(marketingAndRNRBal)
     returns(bool){
-        require(tokenContract.transfer(marketingAndRNR, marketingAndRNRBal),"The transfer must not fail");
+        uint256 temp = marketingAndRNRBal;
         emit sendToken("MarketingAndRNR",marketingAndRNR,marketingAndRNRBal);
         marketingAndRNRBal = 0;
+        require(tokenContract.transfer(marketingAndRNR, temp),"The transfer must not fail");
         return true;
     }
 
@@ -943,9 +1049,10 @@ contract NRTManager is Ownable{
     */
     function sendKmPards() internal isValidAddress(kmPards) isNotZero(kmPardsBal)
     returns(bool){
-        require(tokenContract.transfer(kmPards, kmPardsBal),"The transfer must not fail");
+        uint256 temp = kmPardsBal;
         emit sendToken("MarketingAndRNR",kmPards,kmPardsBal);
         kmPardsBal = 0;
+        require(tokenContract.transfer(kmPards, temp),"The transfer must not fail");
         return true;
     }
 
@@ -964,9 +1071,10 @@ contract NRTManager is Ownable{
     */
     function sendContingencyFunds() internal  isValidAddress(contingencyFunds) isNotZero(contingencyFundsBal)
     returns(bool){
-        require(tokenContract.transfer(contingencyFunds, contingencyFundsBal),"The transfer must not fail");
+        uint256 temp = contingencyFundsBal;
         emit sendToken("contingencyFunds",contingencyFunds,contingencyFundsBal);
         contingencyFundsBal = 0;
+        require(tokenContract.transfer(contingencyFunds, temp),"The transfer must not fail");
         return true;
     }
     /**
@@ -984,9 +1092,10 @@ contract NRTManager is Ownable{
     */
     function sendResearchAndDevelopment() internal isValidAddress(researchAndDevelopment) isNotZero(researchAndDevelopmentBal)
     returns(bool){
-        require(tokenContract.transfer(researchAndDevelopment, researchAndDevelopmentBal),"The transfer must not fail");
+        uint256 temp = researchAndDevelopmentBal;
         emit sendToken("ResearchAndDevelopment",researchAndDevelopment,researchAndDevelopmentBal);
         researchAndDevelopmentBal = 0;
+        require(tokenContract.transfer(researchAndDevelopment, temp),"The transfer must not fail");
         return true;
     }
 
@@ -1005,9 +1114,10 @@ contract NRTManager is Ownable{
     */
     function sendBuzzCafe() internal isValidAddress(buzzCafe) isNotZero(buzzCafeBal)
     returns(bool){
-        require(tokenContract.transfer(buzzCafe, buzzCafeBal),"The transfer must not fail");
+        uint256 temp = buzzCafeBal;
         emit sendToken("BuzzCafe",buzzCafe,buzzCafeBal);
         buzzCafeBal = 0;
+        require(tokenContract.transfer(buzzCafe, temp),"The transfer must not fail");
         return true;
     }
 
@@ -1026,14 +1136,15 @@ contract NRTManager is Ownable{
     */
     function sendPowerToken() internal  isValidAddress(powerToken) isNotZero(powerTokenBal)
     returns(bool){
-        require(tokenContract.transfer(powerToken, powerTokenBal),"The transfer must not fail");
+        uint256 temp = powerTokenBal;
         emit sendToken("PowerToken",powerToken,powerTokenBal);
         powerTokenBal = 0;
+        require(tokenContract.transfer(powerToken, temp),"The transfer must not fail");
         return true;
     }
 
     /**
-    * @dev Function to trigger the release of montly NRT to diffreent actors in the system
+    * @dev Function to trigger the release of montly NRT to different actors in the system
     * 
     */
 
@@ -1058,7 +1169,7 @@ contract NRTManager is Ownable{
         require(tokenContract.balanceOf(this)>=NRTBal,"NRT_Manger doesn't have token balance");
         NRTBal = NRTBal.add(luckPoolBal);
         
-        // Distibuting the newly released tokens to eachof the pools
+        // Distibuting the newly released tokens to each of the pools
         
         newTalentsAndPartnershipsBal = (newTalentsAndPartnershipsBal.add(NRTBal.mul(5))).div(100);
         platformMaintenanceBal = (platformMaintenanceBal.add(NRTBal.mul(10))).div(100);
@@ -1073,6 +1184,23 @@ contract NRTManager is Ownable{
         powerTokenBal = (powerTokenBal.add(NRTBal.mul(10))).div(100);
         stakersBal = (stakersBal.add(NRTBal.mul(15))).div(100);
 
+        // Updating one and 2 year balances
+        TotalStakerCount = OneYearStakerCount.add(TwoYearStakerCount);
+        OneYearStakersBal = (stakersBal.mul(OneYearStakerCount)).div(TotalStakerCount);
+        TwoYearStakersBal = (stakersBal.mul(TwoYearStakerCount)).div(TotalStakerCount);
+        luckPoolBal = (OneYearStakersBal.mul(2)).div(15);
+        OneYearStakersBal = OneYearStakersBal.sub(luckPoolBal);
+
+        
+
+        // Reseting NRT
+
+        emit NRTDistributed(NRTBal);
+        NRTBal = 0;
+        luckPoolBal = 0;
+        releaseNrtTime = releaseNrtTime.add(30 days + 6 hours); // resetting release date again
+
+
         // sending tokens to respective wallets
         require(sendNewTalentsAndPartnerships(),"Tokens should be succesfully send");
         require(sendPlatformMaintenance(),"Tokens should be succesfully send");
@@ -1082,13 +1210,26 @@ contract NRTManager is Ownable{
         require(sendResearchAndDevelopment(),"Tokens should be succesfully send");
         require(sendBuzzCafe(),"Tokens should be succesfully send");
         require(sendPowerToken(),"Tokens should be succesfully send");
-        // Reseting NRT
 
-        emit NRTDistributed(NRTBal);
-        NRTBal = 0;
-        luckPoolBal = 0;
-        releaseNrtTime = releaseNrtTime.add(30 days); // resetting release date again
+    }
 
+
+    // Staking Contract Functions
+
+    function createStakingContract(uint256 Amount,bool isTwoYear) external returns (address){
+        Staking newStakingContract = new Staking(Amount,isTwoYear, msg.sender, eraswapToken);
+        if(isTwoYear){
+                    TwoYearStaker memory temp1 = TwoYearStaker(Amount,now);
+                    TwoYearContractList.push(newStakingContract);
+                    TwoYearContract[newStakingContract] = temp1; 
+        }
+        else{
+                    OneYearStaker memory temp2 = OneYearStaker(Amount,now);
+                    OneYearContractList.push(newStakingContract);
+                    OneYearContract[newStakingContract] = temp2;
+        }
+        require(tokenContract.transfer(newStakingContract,Amount),"Token Contract should be created");
+        return newStakingContract;
     }
 
     /**
@@ -1118,9 +1259,10 @@ contract NRTManager is Ownable{
         setPowerToken(pool[7]);
         eraswapToken = token;
         tokenContract = EraswapToken(eraswapToken);
-        releaseNrtTime = now.add(30 days);
+        releaseNrtTime = now.add(30 days + 6 hours);
         AnnualReleaseNrt = 81900000000000000;
         MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));
         monthCount = 0;
     }
+
 }
