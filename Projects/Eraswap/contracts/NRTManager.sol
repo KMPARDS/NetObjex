@@ -386,7 +386,9 @@ contract NRTManager is Ownable{
         require(tokenContract.transfer(address(newStakingContract),Amount),"Token Contract should be created");
         return address(newStakingContract);
     }
-
+    // function releaseStakingNRTBalance()internal returns (bool){
+        
+    // }
     /**
     * @dev Constructor
     * @param token Address of eraswaptoken
