@@ -12,6 +12,7 @@ import "./Staking.sol";
 
 
 
+
 // The contract addresses of different pools
 contract NRTManager is Ownable{
     using SafeMath for uint256;
@@ -303,7 +304,7 @@ contract NRTManager is Ownable{
     */
 
     function receiveMonthlyNRT() external onlyOwner() {
-        require(tokenContract.balanceOf(this)>0,"NRT_Manger should have token balance");
+        require(tokenContract.balanceOf(address(this))>0,"NRT_Manger should have token balance");
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
         NRTBal = NRTBal.add(MonthlyReleaseNrt);
         distribute_NRT();
@@ -320,7 +321,7 @@ contract NRTManager is Ownable{
 
     // function which is called internally to distribute tokens
     function distribute_NRT() internal isNotZero(NRTBal){
-        require(tokenContract.balanceOf(this)>=NRTBal,"NRT_Manger doesn't have token balance");
+        require(tokenContract.balanceOf(address(this))>=NRTBal,"NRT_Manger doesn't have token balance");
         NRTBal = NRTBal.add(luckPoolBal);
         
         // Distibuting the newly released tokens to each of the pools
@@ -352,7 +353,7 @@ contract NRTManager is Ownable{
         emit NRTDistributed(NRTBal);
         NRTBal = 0;
         luckPoolBal = 0;
-        releaseNrtTime = releaseNrtTime.add(30 days + 6 hours); // resetting release date again
+        releaseNrtTime = releaseNrtTime.add(3 minutes); // resetting release date again
 
 
         // sending tokens to respective wallets
@@ -374,16 +375,16 @@ contract NRTManager is Ownable{
         Staking newStakingContract = new Staking(Amount,isTwoYear, msg.sender, eraswapToken);
         if(isTwoYear){
                     TwoYearStaker memory temp1 = TwoYearStaker(Amount,now);
-                    TwoYearContractList.push(newStakingContract);
-                    TwoYearContract[newStakingContract] = temp1; 
+                    TwoYearContractList.push(address(newStakingContract));
+                    TwoYearContract[address(newStakingContract)] = temp1; 
         }
         else{
                     OneYearStaker memory temp2 = OneYearStaker(Amount,now);
-                    OneYearContractList.push(newStakingContract);
-                    OneYearContract[newStakingContract] = temp2;
+                    OneYearContractList.push(address(newStakingContract));
+                    OneYearContract[address(newStakingContract)] = temp2;
         }
-        require(tokenContract.transfer(newStakingContract,Amount),"Token Contract should be created");
-        return newStakingContract;
+        require(tokenContract.transfer(address(newStakingContract),Amount),"Token Contract should be created");
+        return address(newStakingContract);
     }
 
     /**
@@ -400,8 +401,8 @@ contract NRTManager is Ownable{
     * PowerToken(pool[7]);
     */
 
-    constructor (address token, address[] pool) public{
-        require(token != 0,"Token address must be defined");
+    constructor (address token, address[] memory pool) public{
+        require(token != address(0),"Token address must be defined");
         // Setting up different pools
         setNewTalentsAndPartnerships(pool[0]);
         setPlatformMaintenance(pool[1]);
@@ -413,7 +414,7 @@ contract NRTManager is Ownable{
         setPowerToken(pool[7]);
         eraswapToken = token;
         tokenContract = EraswapToken(eraswapToken);
-        releaseNrtTime = now.add(30 days + 6 hours);
+        releaseNrtTime = now.add(3 minutes);
         AnnualReleaseNrt = 81900000000000000;
         MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));
         monthCount = 0;
