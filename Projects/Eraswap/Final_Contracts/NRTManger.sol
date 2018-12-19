@@ -743,10 +743,10 @@ contract EraswapToken is ERC20Detailed , ERC20Burnable ,ERC20Capped , Ownable ,E
 contract Staking{
     using SafeMath for uint256;
 
-    uint256 stakedAmount; 
-    uint256 stakedTime; 
-    bool isTwoYear;
-    bool isLoan;
+    uint256 public stakedAmount; 
+    uint256 public stakedTime; 
+    bool public isTwoYear;
+    bool public isLoan;
     address owner;
     uint256[] cumilativeWithdrawable;
 
@@ -1149,10 +1149,12 @@ contract NRTManager is Ownable{
 
         // Updating one and 2 year balances
         TotalStakerCount = OneYearStakerCount.add(TwoYearStakerCount);
+        if(TotalStakerCount != 0){
         OneYearStakersBal = (stakersBal.mul(OneYearStakerCount)).div(TotalStakerCount);
         TwoYearStakersBal = (stakersBal.mul(TwoYearStakerCount)).div(TotalStakerCount);
         luckPoolBal = (OneYearStakersBal.mul(2)).div(15);
         OneYearStakersBal = OneYearStakersBal.sub(luckPoolBal);
+        }
 
         
 
@@ -1161,7 +1163,7 @@ contract NRTManager is Ownable{
         emit NRTDistributed(NRTBal);
         NRTBal = 0;
         luckPoolBal = 0;
-        releaseNrtTime = releaseNrtTime.add(3 minutes); // resetting release date again
+        releaseNrtTime = releaseNrtTime.add(30 days + 6 hours); // resetting release date again
 
 
         // sending tokens to respective wallets
@@ -1194,9 +1196,15 @@ contract NRTManager is Ownable{
         require(tokenContract.transfer(address(newStakingContract),Amount),"Token Contract should be created");
         return address(newStakingContract);
     }
-    // function releaseStakingNRTBalance()internal returns (bool){
+    function releaseOneYearStakingNRTBalance()internal returns (bool){
+
         
-    // }
+    }
+
+    function releaseTwoYearStakingNRTBalance()internal returns (bool){
+
+        
+    }
     /**
     * @dev Constructor
     * @param token Address of eraswaptoken
@@ -1224,7 +1232,7 @@ contract NRTManager is Ownable{
         setPowerToken(pool[7]);
         eraswapToken = token;
         tokenContract = EraswapToken(eraswapToken);
-        releaseNrtTime = now.add(3 minutes);
+        releaseNrtTime = now.add(30 days + 6 hours);
         AnnualReleaseNrt = 81900000000000000;
         MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));
         monthCount = 0;

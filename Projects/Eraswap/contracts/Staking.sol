@@ -6,10 +6,10 @@ import "./EraswapToken.sol";
 contract Staking{
     using SafeMath for uint256;
 
-    uint256 stakedAmount; 
-    uint256 stakedTime; 
-    bool isTwoYear;
-    bool isLoan;
+    uint256 public stakedAmount; 
+    uint256 public stakedTime; 
+    bool public isTwoYear;
+    bool public isLoan;
     address owner;
     uint256[] cumilativeWithdrawable;
 
