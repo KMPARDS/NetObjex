@@ -192,6 +192,89 @@ contract Ownable {
     }
 }
 
+// File: openzeppelin-solidity/contracts/access/Roles.sol
+
+/**
+ * @title Roles
+ * @dev Library for managing addresses assigned to a Role.
+ */
+library Roles {
+    struct Role {
+        mapping (address => bool) bearer;
+    }
+
+    /**
+     * @dev give an account access to this role
+     */
+    function add(Role storage role, address account) internal {
+        require(account != address(0));
+        require(!has(role, account));
+
+        role.bearer[account] = true;
+    }
+
+    /**
+     * @dev remove an account's access to this role
+     */
+    function remove(Role storage role, address account) internal {
+        require(account != address(0));
+        require(has(role, account));
+
+        role.bearer[account] = false;
+    }
+
+    /**
+     * @dev check if an account has this role
+     * @return bool
+     */
+    function has(Role storage role, address account) internal view returns (bool) {
+        require(account != address(0));
+        return role.bearer[account];
+    }
+}
+
+// File: openzeppelin-solidity/contracts/access/roles/SignerRole.sol
+
+contract SignerRole {
+    using Roles for Roles.Role;
+
+    event SignerAdded(address indexed account);
+    event SignerRemoved(address indexed account);
+
+    Roles.Role private _signers;
+
+    constructor () internal {
+        _addSigner(msg.sender);
+    }
+
+    modifier onlySigner() {
+        require(isSigner(msg.sender));
+        _;
+    }
+
+    function isSigner(address account) public view returns (bool) {
+        return _signers.has(account);
+    }
+
+    function addSigner(address account) public onlySigner {
+        _addSigner(account);
+    }
+
+    function renounceSigner() public {
+        _removeSigner(msg.sender);
+    }
+
+    function _addSigner(address account) internal {
+        _signers.add(account);
+        emit SignerAdded(account);
+    }
+
+    function _removeSigner(address account) internal {
+        _signers.remove(account);
+        emit SignerRemoved(account);
+    }
+}
+
 // File: openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
 
 /**
@@ -422,47 +505,6 @@ contract ERC20Burnable is ERC20 {
      */
     function burnFrom(address from, uint256 value) public {
         _burnFrom(from, value);
-    }
-}
-
-// File: openzeppelin-solidity/contracts/access/Roles.sol
-
-/**
- * @title Roles
- * @dev Library for managing addresses assigned to a Role.
- */
-library Roles {
-    struct Role {
-        mapping (address => bool) bearer;
-    }
-
-    /**
-     * @dev give an account access to this role
-     */
-    function add(Role storage role, address account) internal {
-        require(account != address(0));
-        require(!has(role, account));
-
-        role.bearer[account] = true;
-    }
-
-    /**
-     * @dev remove an account's access to this role
-     */
-    function remove(Role storage role, address account) internal {
-        require(account != address(0));
-        require(has(role, account));
-
-        role.bearer[account] = false;
-    }
-
-    /**
-     * @dev check if an account has this role
-     * @return bool
-     */
-    function has(Role storage role, address account) internal view returns (bool) {
-        require(account != address(0));
-        return role.bearer[account];
     }
 }
 
@@ -822,7 +864,7 @@ contract Staking{
 
 
 // The contract addresses of different pools
-contract NRTManager is Ownable{
+contract NRTManager is Ownable, SignerRole{
     using SafeMath for uint256;
 
     address public eraswapToken;  // address of EraswapToken
@@ -1110,8 +1152,11 @@ contract NRTManager is Ownable{
     * @dev Function to trigger the release of montly NRT to different actors in the system
     * 
     */
+    function updateLuckpool(uint256 newValue) external onlySigner(){
+        luckPoolBal = luckPoolBal.add(newValue);
+    }
 
-    function receiveMonthlyNRT() external onlyOwner() {
+    function receiveMonthlyNRT() external onlySigner() {
         require(tokenContract.balanceOf(address(this))>0,"NRT_Manger should have token balance");
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
         NRTBal = NRTBal.add(MonthlyReleaseNrt);

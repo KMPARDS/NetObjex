@@ -2,6 +2,7 @@ pragma solidity ^0.4.24;
 
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "openzeppelin-solidity/contracts/access/roles/SignerRole.sol";
 import "./Staking.sol";
 
 
@@ -14,7 +15,7 @@ import "./Staking.sol";
 
 
 // The contract addresses of different pools
-contract NRTManager is Ownable{
+contract NRTManager is Ownable, SignerRole{
     using SafeMath for uint256;
 
     address public eraswapToken;  // address of EraswapToken
@@ -302,8 +303,11 @@ contract NRTManager is Ownable{
     * @dev Function to trigger the release of montly NRT to different actors in the system
     * 
     */
+    function updateLuckpool(uint256 newValue) external onlySigner(){
+        luckPoolBal = luckPoolBal.add(newValue);
+    }
 
-    function receiveMonthlyNRT() external onlyOwner() {
+    function receiveMonthlyNRT() external onlySigner() {
         require(tokenContract.balanceOf(address(this))>0,"NRT_Manger should have token balance");
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
         NRTBal = NRTBal.add(MonthlyReleaseNrt);
