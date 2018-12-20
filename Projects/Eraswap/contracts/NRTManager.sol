@@ -330,18 +330,18 @@ contract NRTManager is Ownable, SignerRole{
         
         // Distibuting the newly released tokens to each of the pools
         
-        newTalentsAndPartnershipsBal = (newTalentsAndPartnershipsBal.add(NRTBal.mul(5))).div(100);
-        platformMaintenanceBal = (platformMaintenanceBal.add(NRTBal.mul(10))).div(100);
-        marketingAndRNRBal = (marketingAndRNRBal.add(NRTBal.mul(10))).div(100);
-        kmPardsBal = (kmPardsBal.add(NRTBal.mul(10))).div(100);
-        contingencyFundsBal = (contingencyFundsBal.add(NRTBal.mul(10))).div(100);
-        researchAndDevelopmentBal = (researchAndDevelopmentBal.add(NRTBal.mul(5))).div(100);
-        curatorsBal = (curatorsBal.add(NRTBal.mul(5))).div(100);
-        timeTradersBal = (timeTradersBal.add(NRTBal.mul(5))).div(100);
-        daySwappersBal = (daySwappersBal.add(NRTBal.mul(125))).div(1000);
-        buzzCafeBal = (buzzCafeBal.add(NRTBal.mul(25))).div(1000); 
-        powerTokenBal = (powerTokenBal.add(NRTBal.mul(10))).div(100);
-        stakersBal = (stakersBal.add(NRTBal.mul(15))).div(100);
+        newTalentsAndPartnershipsBal = newTalentsAndPartnershipsBal.add((NRTBal.mul(5)).div(100));
+        platformMaintenanceBal = platformMaintenanceBal.add((NRTBal.mul(10)).div(100));
+        marketingAndRNRBal = marketingAndRNRBal.add((NRTBal.mul(10)).div(100));
+        kmPardsBal = kmPardsBal.add((NRTBal.mul(10)).div(100));
+        contingencyFundsBal = contingencyFundsBal.add((NRTBal.mul(10)).div(100));
+        researchAndDevelopmentBal = researchAndDevelopmentBal.add((NRTBal.mul(5)).div(100));
+        curatorsBal = curatorsBal.add((NRTBal.mul(5)).div(100));
+        timeTradersBal = timeTradersBal.add((NRTBal.mul(5)).div(100));
+        daySwappersBal = daySwappersBal.add((NRTBal.mul(125)).div(1000));
+        buzzCafeBal = buzzCafeBal.add((NRTBal.mul(25)).div(1000)); 
+        powerTokenBal = powerTokenBal.add((NRTBal.mul(10)).div(100));
+        stakersBal = stakersBal.add((NRTBal.mul(15)).div(100));
 
         // Updating one and 2 year balances
 
