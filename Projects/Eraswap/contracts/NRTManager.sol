@@ -340,12 +340,17 @@ contract NRTManager is Ownable{
         stakersBal = (stakersBal.add(NRTBal.mul(15))).div(100);
 
         // Updating one and 2 year balances
+
+        if(OneYearStakerCount>0)
+        {
         TotalStakerCount = OneYearStakerCount.add(TwoYearStakerCount);
-        if(TotalStakerCount != 0){
         OneYearStakersBal = (stakersBal.mul(OneYearStakerCount)).div(TotalStakerCount);
         TwoYearStakersBal = (stakersBal.mul(TwoYearStakerCount)).div(TotalStakerCount);
         luckPoolBal = (OneYearStakersBal.mul(2)).div(15);
         OneYearStakersBal = OneYearStakersBal.sub(luckPoolBal);
+        }
+        else{
+            TwoYearStakersBal = stakersBal;
         }
 
         
@@ -388,15 +393,15 @@ contract NRTManager is Ownable{
         require(tokenContract.transfer(address(newStakingContract),Amount),"Token Contract should be created");
         return address(newStakingContract);
     }
-    function releaseOneYearStakingNRTBalance()internal returns (bool){
+    // function releaseOneYearStakingNRTBalance()internal returns (bool){
 
         
-    }
+    // }
 
-    function releaseTwoYearStakingNRTBalance()internal returns (bool){
+    // function releaseTwoYearStakingNRTBalance()internal returns (bool){
 
         
-    }
+    // }
     /**
     * @dev Constructor
     * @param token Address of eraswaptoken
