@@ -308,7 +308,7 @@ contract NRTManager is Ownable{
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
         NRTBal = NRTBal.add(MonthlyReleaseNrt);
         distribute_NRT();
-        if(monthCount == 12){
+        if(monthCount == 11){
             monthCount = 0;
             AnnualReleaseNrt = (AnnualReleaseNrt.mul(9)).div(10);
             MonthlyReleaseNrt = AnnualReleaseNrt.div(12);
