@@ -1,6 +1,5 @@
 pragma solidity ^0.4.24;
 
-import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/access/roles/SignerRole.sol";
 import "./Staking.sol";
@@ -15,7 +14,7 @@ import "./Staking.sol";
 
 
 // The contract addresses of different pools
-contract NRTManager is Ownable, SignerRole{
+contract NRTManager is Ownable, SignerRole, Staking{
     using SafeMath for uint256;
 
     address public eraswapToken;  // address of EraswapToken
@@ -80,30 +79,6 @@ contract NRTManager is Ownable, SignerRole{
     uint NRTBal;
 
 
-     // ================Staking -- TimeAlly=================
-
-     // Counts of different stakers
-    uint256 public OneYearStakerCount;
-    uint256 public TwoYearStakerCount;
-    uint256 public TotalStakerCount;
-
-    uint256 public OneYearStakersBal;
-    uint256 public TwoYearStakersBal;
-
-    struct OneYearStaker {
-        uint256 stakedAmount;
-        uint256 stakedtime;
-    }
-
-    struct TwoYearStaker {
-        uint256 stakedAmount;
-        uint256 stakedtime;
-    }
-
-    mapping (address => OneYearStaker) OneYearContract;
-    mapping (address => TwoYearStaker) TwoYearContract;
-    address[] OneYearContractList;
-    address[] TwoYearContractList;
 
 
    /**
@@ -380,32 +355,7 @@ contract NRTManager is Ownable, SignerRole{
     }
 
 
-    // Staking Contract Functions
 
-    function createStakingContract(uint256 Amount,bool isTwoYear) external returns (address){
-        Staking newStakingContract = new Staking(Amount,isTwoYear, msg.sender, eraswapToken);
-        if(isTwoYear){
-                    TwoYearStaker memory temp1 = TwoYearStaker(Amount,now);
-                    TwoYearContractList.push(address(newStakingContract));
-                    TwoYearContract[address(newStakingContract)] = temp1; 
-        }
-        else{
-                    OneYearStaker memory temp2 = OneYearStaker(Amount,now);
-                    OneYearContractList.push(address(newStakingContract));
-                    OneYearContract[address(newStakingContract)] = temp2;
-        }
-        require(tokenContract.transfer(address(newStakingContract),Amount),"Token Contract should be created");
-        return address(newStakingContract);
-    }
-    // function releaseOneYearStakingNRTBalance()internal returns (bool){
-
-        
-    // }
-
-    // function releaseTwoYearStakingNRTBalance()internal returns (bool){
-
-        
-    // }
     /**
     * @dev Constructor
     * @param token Address of eraswaptoken
