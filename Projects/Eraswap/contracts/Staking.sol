@@ -1,13 +1,14 @@
 pragma solidity ^0.4.24;
 // contract to manage staking of one year and two year stakers
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
-import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
+import "./IERC20.sol";
 
 contract Staking{
     using SafeMath for uint256;
 
 
-    IERC20 public tokenContract;  // Defining conract address so as to interact with EraswapToken
+    IERC20  public tokenContract;  // Defining conract address so as to interact with EraswapToken
+  
    
     // Luckpool Balance
 
@@ -152,30 +153,57 @@ contract Staking{
           return true;
       }
   }
+  /**
+   * @dev To repay the leased loan
+   * @param orderId Total Est which is to be Staked
+   * @param isTwoYear to identify whther its one / two year contract
+   * @return total repayment
+   */
 
-  function rePayLoan(uint256 orderId, bool isTwoYear) onlyStakeOwner(orderId,isTwoYear) isWithinPeriod(orderId,isTwoYear) external returns (bool){
+  function calculateTotalPayment(uint256 orderId, bool isTwoYear) public view returns (uint256){
       if(isTwoYear){
-          uint256 TempLoan1 = (TwoYearStakingDetails[orderId].stakedAmount).div(2);
+          return ((TwoYearStakingDetails[orderId].stakedAmount).div(200)).mul(101);
+      }
+      else{
+          return ((OneYearStakingDetails[orderId].stakedAmount).div(200)).mul(101);
+      }
+  }
+
+  function isEligibleForRepayment(uint256 orderId, bool isTwoYear) public view returns (bool){
+      if(isTwoYear){
           require(TwoYearStakingDetails[orderId].loan == true,"User should have taken loan");
           require((TwoYearStakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
+      }
+      else{
+          require(OneYearStakingDetails[orderId].loan == true,"User should have taken loan");
+          require((OneYearStakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
+      }
+      return true;
+  }
+   /**
+   * @dev To repay the leased loan
+   * @param orderId Total Est which is to be Staked
+   * @param isTwoYear to identify whther its one / two year contract
+   * @return true if success
+   */
+  function rePayLoan(uint256 orderId, bool isTwoYear) onlyStakeOwner(orderId,isTwoYear) isWithinPeriod(orderId,isTwoYear) external returns (bool){
+      require(isEligibleForRepayment( orderId, isTwoYear),"The user should be eligible for repayment");
+      if(isTwoYear){
           TwoYearStakingDetails[orderId].loan = false;
           TwoYearStakingDetails[orderId].loanStartTime = 0;
-          luckPoolBal = luckPoolBal.add(TempLoan1.div(100));
+          luckPoolBal = luckPoolBal.add((TwoYearStakingDetails[orderId].stakedAmount).div(200));
           TwoYearStakerCount = TwoYearStakerCount.add(1);
           TwoYearStakersBal = TwoYearStakersBal.add(TwoYearStakingDetails[orderId].stakedAmount);
-          require(tokenContract.transfer(address(this),(TempLoan1.mul(101)).div(100)),"The contract should receive loan amount with interest");
+          require(tokenContract.transfer(address(this),calculateTotalPayment( orderId, isTwoYear)) ,"The contract should receive loan amount with interest");
           return true;
       }
       else{
-          uint256 TempLoan2 = (OneYearStakingDetails[orderId].stakedAmount).div(2);
-          require(OneYearStakingDetails[orderId].loan == true,"User should have taken loan");
-          require((OneYearStakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
           OneYearStakingDetails[orderId].loan = false;
           OneYearStakingDetails[orderId].loanStartTime = 0;
-          luckPoolBal = luckPoolBal.add(TempLoan2.div(100));
+          luckPoolBal = luckPoolBal.add((OneYearStakingDetails[orderId].stakedAmount).div(200));
           OneYearStakerCount = OneYearStakerCount.add(1);
           OneYearStakersBal = OneYearStakersBal.add(OneYearStakingDetails[orderId].stakedAmount);
-          require(tokenContract.transfer(address(this),(TempLoan2.mul(101)).div(100)),"The contract should receive loan amount with interest");
+          require(tokenContract.transfer(address(this),calculateTotalPayment( orderId, isTwoYear)),"The contract should receive loan amount with interest");
           return true;
       }
   }
