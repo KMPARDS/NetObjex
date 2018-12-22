@@ -9,11 +9,9 @@ contract Staking {
 
 
     IERC20  public tokenContract;  // Defining conract address so as to interact with EraswapToken
-  
-   
-    // Luckpool Balance
 
-    uint256 public luckPoolBal;
+    uint256 public luckPoolBal;    // Luckpool Balance
+
      // Counts of different stakers
     uint256 public OneYearStakerCount;
     uint256 public TwoYearStakerCount;
@@ -23,10 +21,10 @@ contract Staking {
     uint256 public OneYearStakersBal;
     uint256 public TwoYearStakersBal;
 
-    // orderID to uniquely identify the staking order
-    uint256 OrderId=100000;
+   
+    uint256 OrderId=100000;  // orderID to uniquely identify the staking order
 
-    // OneYearStakers Details
+
     struct Staker {
         bool isActive;
         bool isTwoYear;         // to check whether its one or two year
@@ -34,16 +32,16 @@ contract Staking {
         uint256 loanCount;      // to check limit of loans that can be taken
         uint256 loanStartTime;  // to keep a check in loan period
         uint256 orderID;        // unique orderid to uniquely identify the order
-        uint256 stakedamount;   // amount Staked
+        uint256 stakedAmount;   // amount Staked
         uint256 stakedTime;     // Time at which the user staked
 
     }
 
     mapping (uint256 => address) public  StakingOwnership; // orderid ==> address of user
-    mapping (uint256 => Staker) public StakingDetails;   //orderid ==> order details
+    mapping (uint256 => Staker) public StakingDetails;     //orderid ==> order details
 
 
-  /**
+   /**
    * @dev Throws if not times up to close a contract
    * @param orderID to identify the unique staking contract
    */
@@ -56,7 +54,7 @@ contract Staking {
         _;
     }
 
-    /**
+   /**
    * @dev To check if loan is initiated
    * @param orderID to identify the unique staking contract
    */
@@ -65,7 +63,7 @@ contract Staking {
         _;
     }
 
-        /**
+   /**
    * @dev To check whether its valid staker 
    * @param orderID to identify the unique staking contract
    */
@@ -98,7 +96,7 @@ contract Staking {
  
     /**
    * @dev To check if loan is initiated
-   * @param orderId Total Est which is to be Staked
+   * @param orderId to identify unique staking contract
    * @return orderId of created 
    */
   function takeLoan(uint256 orderId) onlyStakeOwner(orderId) isNoLoanTaken(orderId) isWithinPeriod(orderId) external returns (bool) {
@@ -106,27 +104,27 @@ contract Staking {
     if (StakingDetails[orderId].isTwoYear) {
           require(StakingDetails[orderId].loanCount <= 1,"only one loan per year is allowed");        
           TwoYearStakerCount = TwoYearStakerCount.sub(1);
-          TwoYearStakersBal = TwoYearStakersBal.sub(StakingDetails[orderId].stakedamount);
+          TwoYearStakersBal = TwoYearStakersBal.sub(StakingDetails[orderId].stakedAmount);
     }else {
           require(StakingDetails[orderId].loanCount == 0,"only one loan per year is allowed");        
           OneYearStakerCount = OneYearStakerCount.sub(1);
-          OneYearStakersBal = OneYearStakersBal.sub(StakingDetails[orderId].stakedamount);
+          OneYearStakersBal = OneYearStakersBal.sub(StakingDetails[orderId].stakedAmount);
     }
           StakingDetails[orderId].loan = true;
           StakingDetails[orderId].loanStartTime = now;
           StakingDetails[orderId].loanCount = (StakingDetails[orderId].loanCount).add(1);
-          require(tokenContract.transfer(msg.sender,(StakingDetails[orderId].stakedamount).div(2)),"The contract should transfer loan amount");
+          require(tokenContract.transfer(msg.sender,(StakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
           return true;
       }
       
   /**
    * @dev To repay the leased loan
-   * @param orderId Total Est which is to be Staked
+   * @param orderId to identify unique staking contract
    * @return total repayment
    */
 
   function calculateTotalPayment(uint256 orderId) public view returns (uint256){
-          return ((StakingDetails[orderId].stakedamount).div(200)).mul(101);
+          return ((StakingDetails[orderId].stakedAmount).div(200)).mul(101);
       
   }
 
@@ -137,20 +135,20 @@ contract Staking {
   }
    /**
    * @dev To repay the leased loan
-   * @param orderId Total Est which is to be Staked
+   * @param orderId to identify unique staking contract
    * @return true if success
    */
   function rePayLoan(uint256 orderId) onlyStakeOwner(orderId) isWithinPeriod(orderId) external returns (bool){
       require(isEligibleForRepayment(orderId),"The user should be eligible for repayment");
       StakingDetails[orderId].loan = false;
       StakingDetails[orderId].loanStartTime = 0;
-      luckPoolBal = luckPoolBal.add((StakingDetails[orderId].stakedamount).div(200));
+      luckPoolBal = luckPoolBal.add((StakingDetails[orderId].stakedAmount).div(200));
       if (StakingDetails[orderId].isTwoYear) {  
           TwoYearStakerCount = TwoYearStakerCount.add(1);
-          TwoYearStakersBal = TwoYearStakersBal.add(StakingDetails[orderId].stakedamount);
+          TwoYearStakersBal = TwoYearStakersBal.add(StakingDetails[orderId].stakedAmount);
       }else {  
           OneYearStakerCount = OneYearStakerCount.add(1);
-          OneYearStakersBal = OneYearStakersBal.add(StakingDetails[orderId].stakedamount);
+          OneYearStakersBal = OneYearStakersBal.add(StakingDetails[orderId].stakedAmount);
       }
           require(tokenContract.transfer(address(this),calculateTotalPayment(orderId)),"The contract should receive loan amount with interest");
           return true;
