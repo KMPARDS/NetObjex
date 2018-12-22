@@ -1,124 +1,5 @@
 pragma solidity ^0.4.24;
 
-// File: openzeppelin-solidity/contracts/math/SafeMath.sol
-
-/**
- * @title SafeMath
- * @dev Math operations with safety checks that revert on error
- */
-library SafeMath {
-    int256 constant private INT256_MIN = -2**255;
-
-    /**
-    * @dev Multiplies two unsigned integers, reverts on overflow.
-    */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
-        if (a == 0) {
-            return 0;
-        }
-
-        uint256 c = a * b;
-        require(c / a == b);
-
-        return c;
-    }
-
-    /**
-    * @dev Multiplies two signed integers, reverts on overflow.
-    */
-    function mul(int256 a, int256 b) internal pure returns (int256) {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
-        if (a == 0) {
-            return 0;
-        }
-
-        require(!(a == -1 && b == INT256_MIN)); // This is the only case of overflow not detected by the check below
-
-        int256 c = a * b;
-        require(c / a == b);
-
-        return c;
-    }
-
-    /**
-    * @dev Integer division of two unsigned integers truncating the quotient, reverts on division by zero.
-    */
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        // Solidity only automatically asserts when dividing by 0
-        require(b > 0);
-        uint256 c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
-
-        return c;
-    }
-
-    /**
-    * @dev Integer division of two signed integers truncating the quotient, reverts on division by zero.
-    */
-    function div(int256 a, int256 b) internal pure returns (int256) {
-        require(b != 0); // Solidity only automatically asserts when dividing by 0
-        require(!(b == -1 && a == INT256_MIN)); // This is the only case of overflow
-
-        int256 c = a / b;
-
-        return c;
-    }
-
-    /**
-    * @dev Subtracts two unsigned integers, reverts on overflow (i.e. if subtrahend is greater than minuend).
-    */
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b <= a);
-        uint256 c = a - b;
-
-        return c;
-    }
-
-    /**
-    * @dev Subtracts two signed integers, reverts on overflow.
-    */
-    function sub(int256 a, int256 b) internal pure returns (int256) {
-        int256 c = a - b;
-        require((b >= 0 && c <= a) || (b < 0 && c > a));
-
-        return c;
-    }
-
-    /**
-    * @dev Adds two unsigned integers, reverts on overflow.
-    */
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
-        require(c >= a);
-
-        return c;
-    }
-
-    /**
-    * @dev Adds two signed integers, reverts on overflow.
-    */
-    function add(int256 a, int256 b) internal pure returns (int256) {
-        int256 c = a + b;
-        require((b >= 0 && c >= a) || (b < 0 && c < a));
-
-        return c;
-    }
-
-    /**
-    * @dev Divides two unsigned integers and returns the remainder (unsigned integer modulo),
-    * reverts when dividing by zero.
-    */
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b != 0);
-        return a % b;
-    }
-}
-
 // File: openzeppelin-solidity/contracts/ownership/Ownable.sol
 
 /**
@@ -275,6 +156,125 @@ contract SignerRole {
     }
 }
 
+// File: openzeppelin-solidity/contracts/math/SafeMath.sol
+
+/**
+ * @title SafeMath
+ * @dev Math operations with safety checks that revert on error
+ */
+library SafeMath {
+    int256 constant private INT256_MIN = -2**255;
+
+    /**
+    * @dev Multiplies two unsigned integers, reverts on overflow.
+    */
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+        // benefit is lost if 'b' is also tested.
+        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
+        if (a == 0) {
+            return 0;
+        }
+
+        uint256 c = a * b;
+        require(c / a == b);
+
+        return c;
+    }
+
+    /**
+    * @dev Multiplies two signed integers, reverts on overflow.
+    */
+    function mul(int256 a, int256 b) internal pure returns (int256) {
+        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+        // benefit is lost if 'b' is also tested.
+        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
+        if (a == 0) {
+            return 0;
+        }
+
+        require(!(a == -1 && b == INT256_MIN)); // This is the only case of overflow not detected by the check below
+
+        int256 c = a * b;
+        require(c / a == b);
+
+        return c;
+    }
+
+    /**
+    * @dev Integer division of two unsigned integers truncating the quotient, reverts on division by zero.
+    */
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
+        // Solidity only automatically asserts when dividing by 0
+        require(b > 0);
+        uint256 c = a / b;
+        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+        return c;
+    }
+
+    /**
+    * @dev Integer division of two signed integers truncating the quotient, reverts on division by zero.
+    */
+    function div(int256 a, int256 b) internal pure returns (int256) {
+        require(b != 0); // Solidity only automatically asserts when dividing by 0
+        require(!(b == -1 && a == INT256_MIN)); // This is the only case of overflow
+
+        int256 c = a / b;
+
+        return c;
+    }
+
+    /**
+    * @dev Subtracts two unsigned integers, reverts on overflow (i.e. if subtrahend is greater than minuend).
+    */
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+        require(b <= a);
+        uint256 c = a - b;
+
+        return c;
+    }
+
+    /**
+    * @dev Subtracts two signed integers, reverts on overflow.
+    */
+    function sub(int256 a, int256 b) internal pure returns (int256) {
+        int256 c = a - b;
+        require((b >= 0 && c <= a) || (b < 0 && c > a));
+
+        return c;
+    }
+
+    /**
+    * @dev Adds two unsigned integers, reverts on overflow.
+    */
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 c = a + b;
+        require(c >= a);
+
+        return c;
+    }
+
+    /**
+    * @dev Adds two signed integers, reverts on overflow.
+    */
+    function add(int256 a, int256 b) internal pure returns (int256) {
+        int256 c = a + b;
+        require((b >= 0 && c >= a) || (b < 0 && c < a));
+
+        return c;
+    }
+
+    /**
+    * @dev Divides two unsigned integers and returns the remainder (unsigned integer modulo),
+    * reverts when dividing by zero.
+    */
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+        require(b != 0);
+        return a % b;
+    }
+}
+
 // File: openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
 
 /**
@@ -299,558 +299,196 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-// File: openzeppelin-solidity/contracts/token/ERC20/ERC20.sol
-
-/**
- * @title Standard ERC20 token
- *
- * @dev Implementation of the basic standard token.
- * https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
- * Originally based on code by FirstBlood: https://github.com/Firstbloodio/token/blob/master/smart_contract/FirstBloodToken.sol
- *
- * This implementation emits additional Approval events, allowing applications to reconstruct the allowance status for
- * all accounts just by listening to said events. Note that this isn't required by the specification, and other
- * compliant implementations may not do it.
- */
-contract ERC20 is IERC20 {
-    using SafeMath for uint256;
-
-    mapping (address => uint256) private _balances;
-
-    mapping (address => mapping (address => uint256)) private _allowed;
-
-    uint256 private _totalSupply;
-
-    /**
-    * @dev Total number of tokens in existence
-    */
-    function totalSupply() public view returns (uint256) {
-        return _totalSupply;
-    }
-
-    /**
-    * @dev Gets the balance of the specified address.
-    * @param owner The address to query the balance of.
-    * @return An uint256 representing the amount owned by the passed address.
-    */
-    function balanceOf(address owner) public view returns (uint256) {
-        return _balances[owner];
-    }
-
-    /**
-     * @dev Function to check the amount of tokens that an owner allowed to a spender.
-     * @param owner address The address which owns the funds.
-     * @param spender address The address which will spend the funds.
-     * @return A uint256 specifying the amount of tokens still available for the spender.
-     */
-    function allowance(address owner, address spender) public view returns (uint256) {
-        return _allowed[owner][spender];
-    }
-
-    /**
-    * @dev Transfer token for a specified address
-    * @param to The address to transfer to.
-    * @param value The amount to be transferred.
-    */
-    function transfer(address to, uint256 value) public returns (bool) {
-        _transfer(msg.sender, to, value);
-        return true;
-    }
-
-    /**
-     * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
-     * Beware that changing an allowance with this method brings the risk that someone may use both the old
-     * and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
-     * race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:
-     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-     * @param spender The address which will spend the funds.
-     * @param value The amount of tokens to be spent.
-     */
-    function approve(address spender, uint256 value) public returns (bool) {
-        require(spender != address(0));
-
-        _allowed[msg.sender][spender] = value;
-        emit Approval(msg.sender, spender, value);
-        return true;
-    }
-
-    /**
-     * @dev Transfer tokens from one address to another.
-     * Note that while this function emits an Approval event, this is not required as per the specification,
-     * and other compliant implementations may not emit the event.
-     * @param from address The address which you want to send tokens from
-     * @param to address The address which you want to transfer to
-     * @param value uint256 the amount of tokens to be transferred
-     */
-    function transferFrom(address from, address to, uint256 value) public returns (bool) {
-        _allowed[from][msg.sender] = _allowed[from][msg.sender].sub(value);
-        _transfer(from, to, value);
-        emit Approval(from, msg.sender, _allowed[from][msg.sender]);
-        return true;
-    }
-
-    /**
-     * @dev Increase the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed_[_spender] == 0. To increment
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * Emits an Approval event.
-     * @param spender The address which will spend the funds.
-     * @param addedValue The amount of tokens to increase the allowance by.
-     */
-    function increaseAllowance(address spender, uint256 addedValue) public returns (bool) {
-        require(spender != address(0));
-
-        _allowed[msg.sender][spender] = _allowed[msg.sender][spender].add(addedValue);
-        emit Approval(msg.sender, spender, _allowed[msg.sender][spender]);
-        return true;
-    }
-
-    /**
-     * @dev Decrease the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed_[_spender] == 0. To decrement
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * Emits an Approval event.
-     * @param spender The address which will spend the funds.
-     * @param subtractedValue The amount of tokens to decrease the allowance by.
-     */
-    function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
-        require(spender != address(0));
-
-        _allowed[msg.sender][spender] = _allowed[msg.sender][spender].sub(subtractedValue);
-        emit Approval(msg.sender, spender, _allowed[msg.sender][spender]);
-        return true;
-    }
-
-    /**
-    * @dev Transfer token for a specified addresses
-    * @param from The address to transfer from.
-    * @param to The address to transfer to.
-    * @param value The amount to be transferred.
-    */
-    function _transfer(address from, address to, uint256 value) internal {
-        require(to != address(0));
-
-        _balances[from] = _balances[from].sub(value);
-        _balances[to] = _balances[to].add(value);
-        emit Transfer(from, to, value);
-    }
-
-    /**
-     * @dev Internal function that mints an amount of the token and assigns it to
-     * an account. This encapsulates the modification of balances such that the
-     * proper events are emitted.
-     * @param account The account that will receive the created tokens.
-     * @param value The amount that will be created.
-     */
-    function _mint(address account, uint256 value) internal {
-        require(account != address(0));
-
-        _totalSupply = _totalSupply.add(value);
-        _balances[account] = _balances[account].add(value);
-        emit Transfer(address(0), account, value);
-    }
-
-    /**
-     * @dev Internal function that burns an amount of the token of a given
-     * account.
-     * @param account The account whose tokens will be burnt.
-     * @param value The amount that will be burnt.
-     */
-    function _burn(address account, uint256 value) internal {
-        require(account != address(0));
-
-        _totalSupply = _totalSupply.sub(value);
-        _balances[account] = _balances[account].sub(value);
-        emit Transfer(account, address(0), value);
-    }
-
-    /**
-     * @dev Internal function that burns an amount of the token of a given
-     * account, deducting from the sender's allowance for said account. Uses the
-     * internal burn function.
-     * Emits an Approval event (reflecting the reduced allowance).
-     * @param account The account whose tokens will be burnt.
-     * @param value The amount that will be burnt.
-     */
-    function _burnFrom(address account, uint256 value) internal {
-        _allowed[account][msg.sender] = _allowed[account][msg.sender].sub(value);
-        _burn(account, value);
-        emit Approval(account, msg.sender, _allowed[account][msg.sender]);
-    }
-}
-
-// File: openzeppelin-solidity/contracts/token/ERC20/ERC20Burnable.sol
-
-/**
- * @title Burnable Token
- * @dev Token that can be irreversibly burned (destroyed).
- */
-contract ERC20Burnable is ERC20 {
-    /**
-     * @dev Burns a specific amount of tokens.
-     * @param value The amount of token to be burned.
-     */
-    function burn(uint256 value) public {
-        _burn(msg.sender, value);
-    }
-
-    /**
-     * @dev Burns a specific amount of tokens from the target address and decrements allowance
-     * @param from address The address which you want to send tokens from
-     * @param value uint256 The amount of token to be burned
-     */
-    function burnFrom(address from, uint256 value) public {
-        _burnFrom(from, value);
-    }
-}
-
-// File: openzeppelin-solidity/contracts/access/roles/MinterRole.sol
-
-contract MinterRole {
-    using Roles for Roles.Role;
-
-    event MinterAdded(address indexed account);
-    event MinterRemoved(address indexed account);
-
-    Roles.Role private _minters;
-
-    constructor () internal {
-        _addMinter(msg.sender);
-    }
-
-    modifier onlyMinter() {
-        require(isMinter(msg.sender));
-        _;
-    }
-
-    function isMinter(address account) public view returns (bool) {
-        return _minters.has(account);
-    }
-
-    function addMinter(address account) public onlyMinter {
-        _addMinter(account);
-    }
-
-    function renounceMinter() public {
-        _removeMinter(msg.sender);
-    }
-
-    function _addMinter(address account) internal {
-        _minters.add(account);
-        emit MinterAdded(account);
-    }
-
-    function _removeMinter(address account) internal {
-        _minters.remove(account);
-        emit MinterRemoved(account);
-    }
-}
-
-// File: openzeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol
-
-/**
- * @title ERC20Mintable
- * @dev ERC20 minting logic
- */
-contract ERC20Mintable is ERC20, MinterRole {
-    /**
-     * @dev Function to mint tokens
-     * @param to The address that will receive the minted tokens.
-     * @param value The amount of tokens to mint.
-     * @return A boolean that indicates if the operation was successful.
-     */
-    function mint(address to, uint256 value) public onlyMinter returns (bool) {
-        _mint(to, value);
-        return true;
-    }
-}
-
-// File: openzeppelin-solidity/contracts/token/ERC20/ERC20Capped.sol
-
-/**
- * @title Capped token
- * @dev Mintable token with a token cap.
- */
-contract ERC20Capped is ERC20Mintable {
-    uint256 private _cap;
-
-    constructor (uint256 cap) public {
-        require(cap > 0);
-        _cap = cap;
-    }
-
-    /**
-     * @return the cap for the token minting.
-     */
-    function cap() public view returns (uint256) {
-        return _cap;
-    }
-
-    function _mint(address account, uint256 value) internal {
-        require(totalSupply().add(value) <= _cap);
-        super._mint(account, value);
-    }
-}
-
-// File: openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol
-
-/**
- * @title ERC20Detailed token
- * @dev The decimals are only for visualization purposes.
- * All the operations are done using the smallest and indivisible token unit,
- * just as on Ethereum all the operations are done in wei.
- */
-contract ERC20Detailed is IERC20 {
-    string private _name;
-    string private _symbol;
-    uint8 private _decimals;
-
-    constructor (string name, string symbol, uint8 decimals) public {
-        _name = name;
-        _symbol = symbol;
-        _decimals = decimals;
-    }
-
-    /**
-     * @return the name of the token.
-     */
-    function name() public view returns (string) {
-        return _name;
-    }
-
-    /**
-     * @return the symbol of the token.
-     */
-    function symbol() public view returns (string) {
-        return _symbol;
-    }
-
-    /**
-     * @return the number of decimals of the token.
-     */
-    function decimals() public view returns (uint8) {
-        return _decimals;
-    }
-}
-
-// File: openzeppelin-solidity/contracts/access/roles/PauserRole.sol
-
-contract PauserRole {
-    using Roles for Roles.Role;
-
-    event PauserAdded(address indexed account);
-    event PauserRemoved(address indexed account);
-
-    Roles.Role private _pausers;
-
-    constructor () internal {
-        _addPauser(msg.sender);
-    }
-
-    modifier onlyPauser() {
-        require(isPauser(msg.sender));
-        _;
-    }
-
-    function isPauser(address account) public view returns (bool) {
-        return _pausers.has(account);
-    }
-
-    function addPauser(address account) public onlyPauser {
-        _addPauser(account);
-    }
-
-    function renouncePauser() public {
-        _removePauser(msg.sender);
-    }
-
-    function _addPauser(address account) internal {
-        _pausers.add(account);
-        emit PauserAdded(account);
-    }
-
-    function _removePauser(address account) internal {
-        _pausers.remove(account);
-        emit PauserRemoved(account);
-    }
-}
-
-// File: openzeppelin-solidity/contracts/lifecycle/Pausable.sol
-
-/**
- * @title Pausable
- * @dev Base contract which allows children to implement an emergency stop mechanism.
- */
-contract Pausable is PauserRole {
-    event Paused(address account);
-    event Unpaused(address account);
-
-    bool private _paused;
-
-    constructor () internal {
-        _paused = false;
-    }
-
-    /**
-     * @return true if the contract is paused, false otherwise.
-     */
-    function paused() public view returns (bool) {
-        return _paused;
-    }
-
-    /**
-     * @dev Modifier to make a function callable only when the contract is not paused.
-     */
-    modifier whenNotPaused() {
-        require(!_paused);
-        _;
-    }
-
-    /**
-     * @dev Modifier to make a function callable only when the contract is paused.
-     */
-    modifier whenPaused() {
-        require(_paused);
-        _;
-    }
-
-    /**
-     * @dev called by the owner to pause, triggers stopped state
-     */
-    function pause() public onlyPauser whenNotPaused {
-        _paused = true;
-        emit Paused(msg.sender);
-    }
-
-    /**
-     * @dev called by the owner to unpause, returns to normal state
-     */
-    function unpause() public onlyPauser whenPaused {
-        _paused = false;
-        emit Unpaused(msg.sender);
-    }
-}
-
-// File: openzeppelin-solidity/contracts/token/ERC20/ERC20Pausable.sol
-
-/**
- * @title Pausable token
- * @dev ERC20 modified with pausable transfers.
- **/
-contract ERC20Pausable is ERC20, Pausable {
-    function transfer(address to, uint256 value) public whenNotPaused returns (bool) {
-        return super.transfer(to, value);
-    }
-
-    function transferFrom(address from,address to, uint256 value) public whenNotPaused returns (bool) {
-        return super.transferFrom(from, to, value);
-    }
-
-    function approve(address spender, uint256 value) public whenNotPaused returns (bool) {
-        return super.approve(spender, value);
-    }
-
-    function increaseAllowance(address spender, uint addedValue) public whenNotPaused returns (bool success) {
-        return super.increaseAllowance(spender, addedValue);
-    }
-
-    function decreaseAllowance(address spender, uint subtractedValue) public whenNotPaused returns (bool success) {
-        return super.decreaseAllowance(spender, subtractedValue);
-    }
-}
-
-// File: contracts/EraswapToken.sol
-
-contract EraswapToken is ERC20Detailed , ERC20Burnable ,ERC20Capped , Ownable ,ERC20Pausable {
-    string private _name;
-    string private _symbol;
-    uint8 private _decimals;
-
-    constructor (string  name, string  symbol, uint8  decimals, uint256 cap) public
-    ERC20Detailed(name ,symbol ,decimals)
-    ERC20Capped(cap){
-        _mint(msg.sender, cap);
-    }
-
-}
-
 // File: contracts/Staking.sol
 
-// contract to manage staking of one year and two year stakers
+// contract to manage staking of one year and two year stakers
 
 contract Staking{
     using SafeMath for uint256;
 
-    uint256 public stakedAmount; 
-    uint256 public stakedTime; 
-    bool public isTwoYear;
-    bool public isLoan;
-    address owner;
-    uint256[] cumilativeWithdrawable;
 
-    EraswapToken tokenContract;  // Defining conract address so as to interact with EraswapToken
+    IERC20 public tokenContract;  // Defining conract address so as to interact with EraswapToken
+   
+    // Luckpool Balance
+
+    uint256 public luckPoolBal;
+     // Counts of different stakers
+    uint256 public OneYearStakerCount;
+    uint256 public TwoYearStakerCount;
+    uint256 public TotalStakerCount;
+
+    // Total staking balances
+    uint256 public OneYearStakersBal;
+    uint256 public TwoYearStakersBal;
+
+    // orderID to uniquely identify the staking order
+    uint256 OneYearOrderId=100000;
+    uint256 TwoYearOrderId=100000;
+
+    // OneYearStakers Details
+    struct Staker {
+        bool isTwoYear;         // to check whether its one or two year
+        bool loan;              // to check whether loan is taken
+        uint256 loanCount;      // to check limit of loans that can be taken
+        uint256 loanStartTime;  // to keep a check in loan period
+        uint256 orderID;        // unique orderid to uniquely identify the order
+        uint256 stakedAmount;   // Amount Staked
+        uint256 stakedTime;     // Time at which the user staked
+
+    }
+
+    
+
+    mapping (uint256 => address) public  OneYearOwnership; // orderid ==> address of user
+    mapping (uint256 => address) public TwoYearOwnership; // orderid ==> address of user
+    
+    mapping (uint256 => Staker) public OneYearStakingDetails;   //orderid ==> order details
+    mapping (uint256 => Staker) public TwoYearStakingDetails;   //orderid ==> order details
+
+
   /**
    * @dev Throws if not times up to close a contract
+   * @param orderID to identify the unique staking contract
+   * @param isTwoYear to identify whther its one / two year contract
    */
-    modifier isPeriodEnd() {
+    modifier isWithinPeriod(uint256 orderID,bool isTwoYear) {
         if(isTwoYear)
         {
-        require(now >= stakedTime + 730 days,"Contract can only be ended after 2 years");
+        require(now <= TwoYearStakingDetails[orderID].stakedTime + 730 days,"Contract can only be ended after 2 years");
         }
         else{
-            require(now >= stakedTime + 365 days,"Contract can only be ended after 1 years");
+            require(now <= OneYearStakingDetails[orderID].stakedTime + 365 days,"Contract can only be ended after 1 years");
         }
         _;
     }
 
     /**
    * @dev To check if loan is initiated
+   * @param orderID to identify the unique staking contract
+   * @param isTwoYear to identify whther its one / two year contract
    */
-   modifier isNoLoanTaken() {
-       require(isLoan == false,"He should not have taken loan");
+   modifier isNoLoanTaken(uint256 orderID,bool isTwoYear) {
+        if(isTwoYear)
+        {
+        require(TwoYearStakingDetails[orderID].loan != true,"Loan is present");
+        }
+        else{
+            require(OneYearStakingDetails[orderID].loan != true,"Loan is present");
+        }
         _;
     }
 
-     /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyOwner() {
-        require(msg.sender == owner);
+        /**
+   * @dev To check whether its valid staker 
+   * @param orderID to identify the unique staking contract
+   * @param isTwoYear to identify whther its one / two year contract
+   */
+   modifier onlyStakeOwner(uint256 orderID,bool isTwoYear) {
+        if(isTwoYear)
+        {
+        require(TwoYearOwnership[orderID] == msg.sender,"Staking owner should be valid");
+        }
+        else{
+        require(OneYearOwnership[orderID] == msg.sender,"Staking owner should be valid");
+        }
         _;
     }
-//   function withDrawInterest() onlyOwner() isNoLoanTaken() public{
+
+   /**
+   * @dev To create staking contract
+   * @param Amount Total Est which is to be Staked
+   * @param isTwoYear to identify whther its one / two year contract
+   * @return orderId of created 
+   */
+
+    function createStakingContract(uint256 Amount,bool isTwoYear) external returns (uint256){ 
+        if(isTwoYear){
+            TwoYearOrderId = TwoYearOrderId.add(1);
+            TwoYearStakerCount = TwoYearStakerCount.add(1);
+            TwoYearStakersBal = TwoYearStakersBal.add(Amount);
+            TwoYearOwnership[TwoYearOrderId] = msg.sender;
+            TwoYearStakingDetails[TwoYearOrderId] = Staker(true,false,0,0,TwoYearOrderId,Amount, 730 days);
+            require(tokenContract.transfer(address(this), Amount), "The token transfer should be done");
+            return TwoYearOrderId;
+        }
+        else{
+            OneYearOrderId = OneYearOrderId.add(1);
+            OneYearStakerCount = OneYearStakerCount.add(1);
+            OneYearStakersBal = OneYearStakersBal.add(Amount);
+            OneYearOwnership[OneYearOrderId] = msg.sender;
+            OneYearStakingDetails[OneYearOrderId] = Staker(false,false,0,0,OneYearOrderId,Amount, 365 days);
+            require(tokenContract.transfer(address(this), Amount), "The token transfer should be done");
+            return OneYearOrderId;
+        }
+    }
+ 
+    /**
+   * @dev To check if loan is initiated
+   * @param orderId Total Est which is to be Staked
+   * @param isTwoYear to identify whther its one / two year contract
+   * @return orderId of created 
+   */
+  function takeLoan(uint256 orderId, bool isTwoYear) onlyStakeOwner(orderId,isTwoYear) isNoLoanTaken(orderId, isTwoYear) isWithinPeriod(orderId,isTwoYear) external returns (bool){
+    if(isTwoYear){
+          require(TwoYearStakingDetails[orderId].loanCount <= 1 ,"only one loan per year is allowed");
+          require((TwoYearStakingDetails[orderId].stakedTime).sub(now)>= 60 days,"Contract End is near");
+          TwoYearStakerCount = TwoYearStakerCount.sub(1);
+          TwoYearStakersBal = TwoYearStakersBal.sub(TwoYearStakingDetails[orderId].stakedAmount);
+          TwoYearStakingDetails[orderId].loan =true;
+          TwoYearStakingDetails[orderId].loanStartTime = now;
+          TwoYearStakingDetails[orderId].loanCount = (TwoYearStakingDetails[orderId].loanCount).add(1);
+          require(tokenContract.transfer(msg.sender,(TwoYearStakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
+          return true;
+      }
+      else{
+          require(OneYearStakingDetails[orderId].loanCount == 0,"only one loan per year is allowed");
+          require((OneYearStakingDetails[orderId].stakedTime).sub(now)>= 60 days,"Contract End is near");
+          OneYearStakerCount = OneYearStakerCount.sub(1);
+          OneYearStakersBal = OneYearStakersBal.sub(OneYearStakingDetails[orderId].stakedAmount);
+          OneYearStakingDetails[orderId].loan =true;
+          OneYearStakingDetails[orderId].loanStartTime = now;
+          OneYearStakingDetails[orderId].loanCount = (OneYearStakingDetails[orderId].loanCount).add(1);
+          require(tokenContract.transfer(msg.sender,(OneYearStakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
+          return true;
+      }
+  }
+
+  function rePayLoan(uint256 orderId, bool isTwoYear) onlyStakeOwner(orderId,isTwoYear) isWithinPeriod(orderId,isTwoYear) external returns (bool){
+      if(isTwoYear){
+          uint256 TempLoan1 = (TwoYearStakingDetails[orderId].stakedAmount).div(2);
+          require(TwoYearStakingDetails[orderId].loan == true,"User should have taken loan");
+          require((TwoYearStakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
+          TwoYearStakingDetails[orderId].loan = false;
+          TwoYearStakingDetails[orderId].loanStartTime = 0;
+          luckPoolBal = luckPoolBal.add(TempLoan1.div(100));
+          TwoYearStakerCount = TwoYearStakerCount.add(1);
+          TwoYearStakersBal = TwoYearStakersBal.add(TwoYearStakingDetails[orderId].stakedAmount);
+          require(tokenContract.transfer(address(this),(TempLoan1.mul(101)).div(100)),"The contract should receive loan amount with interest");
+          return true;
+      }
+      else{
+          uint256 TempLoan2 = (OneYearStakingDetails[orderId].stakedAmount).div(2);
+          require(OneYearStakingDetails[orderId].loan == true,"User should have taken loan");
+          require((OneYearStakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
+          OneYearStakingDetails[orderId].loan = false;
+          OneYearStakingDetails[orderId].loanStartTime = 0;
+          luckPoolBal = luckPoolBal.add(TempLoan2.div(100));
+          OneYearStakerCount = OneYearStakerCount.add(1);
+          OneYearStakersBal = OneYearStakersBal.add(OneYearStakingDetails[orderId].stakedAmount);
+          require(tokenContract.transfer(address(this),(TempLoan2.mul(101)).div(100)),"The contract should receive loan amount with interest");
+          return true;
+      }
+  }
+  //should burn defaulters token and update balances in stakers
+//   function updateStakers(){
 
 //   }
+   // function releaseMonthlyReturn
 
-  function takeLoan() onlyOwner() isNoLoanTaken() external{
-      require(tokenContract.transfer(owner, stakedAmount.div(2)),"The contract should transfer loan amount");
-      isLoan =true;
-  }
 
 //   function windUpContract() external{
 
 //   }
-
-     /**
-   * @dev Intialises the contract
-   * @param Amount Amount whichis to be staked
-   * @param plan true if two year plan / false for one year plan
-   * @param initiater Address of the staker
-   */
-    constructor(uint256 Amount,bool plan, address initiater, address token) public{
-        stakedAmount = Amount;
-        stakedTime = now;
-        isTwoYear = plan;
-        owner = initiater;
-        isLoan = false;
-        cumilativeWithdrawable[0] = Amount;
-        tokenContract = EraswapToken(token);
-
-    }
 }
 
 // File: contracts/NRTManager.sol
@@ -864,12 +502,12 @@ contract Staking{
 
 
 // The contract addresses of different pools
-contract NRTManager is Ownable, SignerRole{
+contract NRTManager is Ownable, SignerRole, Staking{
     using SafeMath for uint256;
 
     address public eraswapToken;  // address of EraswapToken
 
-    EraswapToken tokenContract;  // Defining conract address so as to interact with EraswapToken
+    IERC20 public tokenContract;  // Defining conract address so as to interact with EraswapToken
 
     uint256 releaseNrtTime; // variable to check release date
 
@@ -929,30 +567,6 @@ contract NRTManager is Ownable, SignerRole{
     uint NRTBal;
 
 
-     // ================Staking -- TimeAlly=================
-
-     // Counts of different stakers
-    uint256 public OneYearStakerCount;
-    uint256 public TwoYearStakerCount;
-    uint256 public TotalStakerCount;
-
-    uint256 public OneYearStakersBal;
-    uint256 public TwoYearStakersBal;
-
-    struct OneYearStaker {
-        uint256 stakedAmount;
-        uint256 stakedtime;
-    }
-
-    struct TwoYearStaker {
-        uint256 stakedAmount;
-        uint256 stakedtime;
-    }
-
-    mapping (address => OneYearStaker) OneYearContract;
-    mapping (address => TwoYearStaker) TwoYearContract;
-    address[] OneYearContractList;
-    address[] TwoYearContractList;
 
 
    /**
@@ -1229,32 +843,7 @@ contract NRTManager is Ownable, SignerRole{
     }
 
 
-    // Staking Contract Functions
 
-    function createStakingContract(uint256 Amount,bool isTwoYear) external returns (address){
-        Staking newStakingContract = new Staking(Amount,isTwoYear, msg.sender, eraswapToken);
-        if(isTwoYear){
-                    TwoYearStaker memory temp1 = TwoYearStaker(Amount,now);
-                    TwoYearContractList.push(address(newStakingContract));
-                    TwoYearContract[address(newStakingContract)] = temp1; 
-        }
-        else{
-                    OneYearStaker memory temp2 = OneYearStaker(Amount,now);
-                    OneYearContractList.push(address(newStakingContract));
-                    OneYearContract[address(newStakingContract)] = temp2;
-        }
-        require(tokenContract.transfer(address(newStakingContract),Amount),"Token Contract should be created");
-        return address(newStakingContract);
-    }
-    // function releaseOneYearStakingNRTBalance()internal returns (bool){
-
-        
-    // }
-
-    // function releaseTwoYearStakingNRTBalance()internal returns (bool){
-
-        
-    // }
     /**
     * @dev Constructor
     * @param token Address of eraswaptoken
@@ -1281,7 +870,7 @@ contract NRTManager is Ownable, SignerRole{
         setBuzzCafe(pool[6]);
         setPowerToken(pool[7]);
         eraswapToken = token;
-        tokenContract = EraswapToken(eraswapToken);
+        tokenContract = IERC20(eraswapToken);
         releaseNrtTime = now.add(30 days + 6 hours);
         AnnualReleaseNrt = 81900000000000000;
         MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));

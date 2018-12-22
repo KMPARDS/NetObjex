@@ -19,7 +19,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
 
     address public eraswapToken;  // address of EraswapToken
 
-    EraswapToken tokenContract;  // Defining conract address so as to interact with EraswapToken
+    IERC20 public tokenContract;  // Defining conract address so as to interact with EraswapToken
 
     uint256 releaseNrtTime; // variable to check release date
 
@@ -382,7 +382,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
         setBuzzCafe(pool[6]);
         setPowerToken(pool[7]);
         eraswapToken = token;
-        tokenContract = EraswapToken(eraswapToken);
+        tokenContract = IERC20(eraswapToken);
         releaseNrtTime = now.add(30 days + 6 hours);
         AnnualReleaseNrt = 81900000000000000;
         MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));
