@@ -278,8 +278,9 @@ contract NRTManager is Ownable, SignerRole, Staking{
     * @dev Function to trigger the release of montly NRT to different actors in the system
     * 
     */
-    function updateLuckpool(uint256 newValue) external onlySigner(){
-        luckPoolBal = luckPoolBal.add(newValue);
+    function updateLuckpool(uint256 amount) external onlySigner(){
+        require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
+        luckPoolBal = luckPoolBal.add(amount);
     }
 
     function receiveMonthlyNRT() external onlySigner() {

@@ -28,7 +28,7 @@ contract Staking {
 
 
     struct Staker {
-        bool isActive;          // to check whether eligible NRT or not
+        uint256 windUpTime;     // to check time of windup started
         bool isTwoYear;         // to check whether its one or two year
         bool loan;              // to check whether loan is taken
         uint256 loanCount;      // to check limit of loans that can be taken
@@ -91,15 +91,25 @@ contract Staking {
             if (isTwoYear) {
             TwoYearStakerCount = TwoYearStakerCount.add(1);
             TwoYearStakersBal = TwoYearStakersBal.add(amount);
-            StakingDetails[OrderId] = Staker(true,true,false,0,0,OrderId,amount, now,index);
+            StakingDetails[OrderId] = Staker(0,true,false,0,0,OrderId,amount, now,index);
             }else {
             OneYearStakerCount = OneYearStakerCount.add(1);
             OneYearStakersBal = OneYearStakersBal.add(amount);
-            StakingDetails[OrderId] = Staker(true,false,false,0,0,OrderId,amount, now,index);
+            StakingDetails[OrderId] = Staker(0,false,false,0,0,OrderId,amount, now,index);
             }
             require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
             return OrderId;
         }
+
+    /**
+   * @dev Function to check whether a partcicular order exists
+   * @param orderId to identify unique staking contract
+   * @return true if success
+   */
+
+  function isOrderExist(uint256 orderId) public view returns(bool) {
+      return OrderList[StakingDetails[orderId].index] == orderId;
+ }
  
     /**
    * @dev To check if loan is initiated
@@ -107,6 +117,7 @@ contract Staking {
    * @return orderId of created 
    */
   function takeLoan(uint256 orderId) onlyStakeOwner(orderId) isNoLoanTaken(orderId) isWithinPeriod(orderId) external returns (bool) {
+    require(isOrderExist(orderId),"The orderId should exist");
     require((StakingDetails[orderId].stakedTime).sub(now) >= 60 days,"Contract End is near");
     if (StakingDetails[orderId].isTwoYear) {
           require(StakingDetails[orderId].loanCount <= 1,"only one loan per year is allowed");        
@@ -130,12 +141,14 @@ contract Staking {
    * @return total repayment
    */
 
-  function calculateTotalPayment(uint256 orderId) public view returns (uint256) {
+  function calculateTotalPayment(uint256 orderId)  public view returns (uint256) {
+          require(isOrderExist(orderId),"The orderId should exist");
           return ((StakingDetails[orderId].stakedAmount).div(200)).mul(101);
       
   }
 
-  function isEligibleForRepayment(uint256 orderId) public view returns (bool){
+  function isEligibleForRepayment(uint256 orderId)  public view returns (bool){
+          require(isOrderExist(orderId),"The orderId should exist");
           require(StakingDetails[orderId].loan == true,"User should have taken loan");
           require((StakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
           return true;
@@ -161,15 +174,7 @@ contract Staking {
           return true;
   }
 
-  /**
-   * @dev Function to check whether a partcicular order exists
-   * @param orderId to identify unique staking contract
-   * @return true if success
-   */
 
-  function isOrderExist(uint256 orderId) public view returns(bool) {
-      return OrderList[StakingDetails[orderId].index] == orderId;
- }
 
  /**
    * @dev Function to delete a particular order
@@ -186,15 +191,30 @@ contract Staking {
       OrderList.length--; 
       return true;
   }
-  //should burn defaulters token and update balances in stakers
+
+   //should burn defaulters token and update balances in stakers
 //   function updateStakers(){
 
 //   }
-   // function releaseMonthlyReturn
 
+/**
+   * @dev Function to windup an active contact
+   * @param orderId to identify unique staking contract
+   * @return true if success
+   */
 
-//   function windUpContract(uint256 orderId) onlyStakeOwner(orderId)  external {
-//       require()
-    
-//   }
+  function windUpContract(uint256 orderId) onlyStakeOwner(orderId)  external returns (bool) {
+      require(isOrderExist(orderId),"The orderId should exist");
+      require(StakingDetails[orderId].loan == false,"There should be no loan currently");
+      require(StakingDetails[orderId].windUpTime == 0,"Windup Shouldn't be initiated currently");
+      StakingDetails[orderId].windUpTime = now;
+      if (StakingDetails[orderId].isTwoYear) {      
+          TwoYearStakerCount = TwoYearStakerCount.sub(1);
+          TwoYearStakersBal = TwoYearStakersBal.sub(StakingDetails[orderId].stakedAmount);
+    }else {     
+          OneYearStakerCount = OneYearStakerCount.sub(1);
+          OneYearStakersBal = OneYearStakersBal.sub(StakingDetails[orderId].stakedAmount);
+    }
+      return true;
+  }
 }
