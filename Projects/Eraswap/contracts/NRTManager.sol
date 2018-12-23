@@ -105,13 +105,13 @@ contract NRTManager is Ownable, SignerRole, Staking{
 
     function setNewTalentsAndPartnerships(address pool_addr) public onlyOwner() isValidAddress(pool_addr){
         newTalentsAndPartnerships = pool_addr;
-        emit ChangingPoolAddress ("NewTalentsAndPartnerships",newTalentsAndPartnerships);
+        emit ChangingPoolAddress("NewTalentsAndPartnerships",newTalentsAndPartnerships);
     }
 
      /**
     * @dev Function to send NewTalentsAndPartnerships balance
     */
-    function sendNewTalentsAndPartnerships() internal isValidAddress(newTalentsAndPartnerships) isNotZero(newTalentsAndPartnershipsBal) 
+    function sendNewTalentsAndPartnerships() internal isValidAddress(newTalentsAndPartnerships) 
     returns(bool) {
         uint256 temp = newTalentsAndPartnershipsBal;
         emit sendToken("NewTalentsAndPartnerships",newTalentsAndPartnerships,newTalentsAndPartnershipsBal);
@@ -134,7 +134,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
      /**
     * @dev Function to send platformMaintenance balance
     */
-    function sendPlatformMaintenance() internal isValidAddress(platformMaintenance) isNotZero(platformMaintenanceBal)
+    function sendPlatformMaintenance() internal isValidAddress(platformMaintenance) 
     returns(bool){
         uint256 temp = platformMaintenanceBal;
         emit sendToken("PlatformMaintenance",platformMaintenance,platformMaintenanceBal);
@@ -156,7 +156,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     /**
     * @dev Function to send marketingAndRNR balance
     */
-    function sendMarketingAndRNR() internal isValidAddress(marketingAndRNR) isNotZero(marketingAndRNRBal)
+    function sendMarketingAndRNR() internal isValidAddress(marketingAndRNR) 
     returns(bool){
         uint256 temp = marketingAndRNRBal;
         emit sendToken("MarketingAndRNR",marketingAndRNR,marketingAndRNRBal);
@@ -178,7 +178,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     /**
     * @dev Function to send KmPards balance
     */
-    function sendKmPards() internal isValidAddress(kmPards) isNotZero(kmPardsBal)
+    function sendKmPards() internal isValidAddress(kmPards) 
     returns(bool){
         uint256 temp = kmPardsBal;
         emit sendToken("MarketingAndRNR",kmPards,kmPardsBal);
@@ -200,7 +200,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     /**
     * @dev Function to send contingencyFunds balance
     */
-    function sendContingencyFunds() internal  isValidAddress(contingencyFunds) isNotZero(contingencyFundsBal)
+    function sendContingencyFunds() internal  isValidAddress(contingencyFunds) 
     returns(bool){
         uint256 temp = contingencyFundsBal;
         emit sendToken("contingencyFunds",contingencyFunds,contingencyFundsBal);
@@ -221,7 +221,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     /**
     * @dev Function to send researchAndDevelopment balance
     */
-    function sendResearchAndDevelopment() internal isValidAddress(researchAndDevelopment) isNotZero(researchAndDevelopmentBal)
+    function sendResearchAndDevelopment() internal isValidAddress(researchAndDevelopment) 
     returns(bool){
         uint256 temp = researchAndDevelopmentBal;
         emit sendToken("ResearchAndDevelopment",researchAndDevelopment,researchAndDevelopmentBal);
@@ -243,7 +243,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     /**
     * @dev Function to send buzzCafe balance
     */
-    function sendBuzzCafe() internal isValidAddress(buzzCafe) isNotZero(buzzCafeBal)
+    function sendBuzzCafe() internal isValidAddress(buzzCafe) 
     returns(bool){
         uint256 temp = buzzCafeBal;
         emit sendToken("BuzzCafe",buzzCafe,buzzCafeBal);
@@ -265,7 +265,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     /**
     * @dev Function to send powerToken balance
     */
-    function sendPowerToken() internal  isValidAddress(powerToken) isNotZero(powerTokenBal)
+    function sendPowerToken() internal  isValidAddress(powerToken) 
     returns(bool){
         uint256 temp = powerTokenBal;
         emit sendToken("PowerToken",powerToken,powerTokenBal);
@@ -286,6 +286,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
         require(tokenContract.balanceOf(address(this))>0,"NRT_Manger should have token balance");
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
         NRTBal = NRTBal.add(MonthlyReleaseNrt);
+        require(NRTBal > 0, "It should be Non-Zero");
         distribute_NRT();
         if(monthCount == 11){
             monthCount = 0;

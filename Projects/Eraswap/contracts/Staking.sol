@@ -4,6 +4,8 @@ pragma solidity ^0.4.24;
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "./IERC20.sol";
 
+// Database Design based on CRUD by Rob Hitchens . Refer : https://medium.com/@robhitchens/solidity-crud-part-1-824ffa69509a
+
 contract Staking {
     using SafeMath for uint256;
 
@@ -26,7 +28,7 @@ contract Staking {
 
 
     struct Staker {
-        bool isActive;
+        bool isActive;          // to check whether eligible NRT or not
         bool isTwoYear;         // to check whether its one or two year
         bool loan;              // to check whether loan is taken
         uint256 loanCount;      // to check limit of loans that can be taken
@@ -34,11 +36,15 @@ contract Staking {
         uint256 orderID;        // unique orderid to uniquely identify the order
         uint256 stakedAmount;   // amount Staked
         uint256 stakedTime;     // Time at which the user staked
+        uint256 index;          // index
 
     }
 
     mapping (uint256 => address) public  StakingOwnership; // orderid ==> address of user
     mapping (uint256 => Staker) public StakingDetails;     //orderid ==> order details
+
+    uint256[] public OrderList;  // to store all active orders in which the state need to be changed monthly
+  
 
 
    /**
@@ -81,14 +87,15 @@ contract Staking {
     function createStakingContract(uint256 amount,bool isTwoYear) external returns (uint256) { 
             OrderId = OrderId.add(1);
             StakingOwnership[OrderId] = msg.sender;
+            uint index = OrderList.push(OrderId) - 1;
             if (isTwoYear) {
             TwoYearStakerCount = TwoYearStakerCount.add(1);
             TwoYearStakersBal = TwoYearStakersBal.add(amount);
-            StakingDetails[OrderId] = Staker(true,true,false,0,0,OrderId,amount, now);
+            StakingDetails[OrderId] = Staker(true,true,false,0,0,OrderId,amount, now,index);
             }else {
             OneYearStakerCount = OneYearStakerCount.add(1);
             OneYearStakersBal = OneYearStakersBal.add(amount);
-            StakingDetails[OrderId] = Staker(true,false,false,0,0,OrderId,amount, now);
+            StakingDetails[OrderId] = Staker(true,false,false,0,0,OrderId,amount, now,index);
             }
             require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
             return OrderId;
@@ -123,7 +130,7 @@ contract Staking {
    * @return total repayment
    */
 
-  function calculateTotalPayment(uint256 orderId) public view returns (uint256){
+  function calculateTotalPayment(uint256 orderId) public view returns (uint256) {
           return ((StakingDetails[orderId].stakedAmount).div(200)).mul(101);
       
   }
@@ -153,6 +160,32 @@ contract Staking {
           require(tokenContract.transfer(address(this),calculateTotalPayment(orderId)),"The contract should receive loan amount with interest");
           return true;
   }
+
+  /**
+   * @dev Function to check whether a partcicular order exists
+   * @param orderId to identify unique staking contract
+   * @return true if success
+   */
+
+  function isOrderExist(uint256 orderId) public view returns(bool) {
+      return OrderList[StakingDetails[orderId].index] == orderId;
+ }
+
+ /**
+   * @dev Function to delete a particular order
+   * @param orderId to identify unique staking contract
+   * @return true if success
+   */
+
+  function deleteRecord(uint256 orderId) internal returns (bool) {
+      require(isOrderExist(orderId),"The orderId should exist");
+      uint256 rowToDelete = StakingDetails[orderId].index;
+      uint256 orderToMove = OrderList[OrderList.length-1];
+      OrderList[rowToDelete] = orderToMove;
+      StakingDetails[orderToMove].index = rowToDelete;
+      OrderList.length--; 
+      return true;
+  }
   //should burn defaulters token and update balances in stakers
 //   function updateStakers(){
 
@@ -161,6 +194,7 @@ contract Staking {
 
 
 //   function windUpContract(uint256 orderId) onlyStakeOwner(orderId)  external {
+//       require()
     
 //   }
 }
