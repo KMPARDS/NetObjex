@@ -23,6 +23,10 @@ contract Staking {
     uint256 public OneYearStakersBal;
     uint256 public TwoYearStakersBal;
 
+    // Burn away token count
+    uint256 public burnTokenBal;
+    uint256[] public delList;
+
    
     uint256 OrderId=100000;  // orderID to uniquely identify the staking order
 
@@ -131,6 +135,7 @@ contract Staking {
           StakingDetails[orderId].loan = true;
           StakingDetails[orderId].loanStartTime = now;
           StakingDetails[orderId].loanCount = (StakingDetails[orderId].loanCount).add(1);
+          // todo: check this transfer, it may not be doing as expected
           require(tokenContract.transfer(msg.sender,(StakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
           return true;
       }
@@ -146,8 +151,12 @@ contract Staking {
           return ((StakingDetails[orderId].stakedAmount).div(200)).mul(101);
       
   }
-
-  function isEligibleForRepayment(uint256 orderId)  public view returns (bool){
+   /**
+   * @dev To check if eligible for repayment
+   * @param orderId to identify unique staking contract
+   * @return total repayment
+   */
+  function isEligibleForRepayment(uint256 orderId)  public view returns (bool) {
           require(isOrderExist(orderId),"The orderId should exist");
           require(StakingDetails[orderId].loan == true,"User should have taken loan");
           require((StakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
@@ -158,7 +167,7 @@ contract Staking {
    * @param orderId to identify unique staking contract
    * @return true if success
    */
-  function rePayLoan(uint256 orderId) onlyStakeOwner(orderId) isWithinPeriod(orderId) external returns (bool){
+  function rePayLoan(uint256 orderId) onlyStakeOwner(orderId) isWithinPeriod(orderId) external returns (bool) {
       require(isEligibleForRepayment(orderId),"The user should be eligible for repayment");
       StakingDetails[orderId].loan = false;
       StakingDetails[orderId].loanStartTime = 0;
@@ -170,6 +179,7 @@ contract Staking {
           OneYearStakerCount = OneYearStakerCount.add(1);
           OneYearStakersBal = OneYearStakersBal.add(StakingDetails[orderId].stakedAmount);
       }
+          // todo: check this transfer, it may not be doing as expected
           require(tokenContract.transfer(address(this),calculateTotalPayment(orderId)),"The contract should receive loan amount with interest");
           return true;
   }
@@ -192,10 +202,52 @@ contract Staking {
       return true;
   }
 
-   //should burn defaulters token and update balances in stakers
-//   function updateStakers(){
+   /**
+   * @dev should send tokens to the user
+   * @param orderId to identify unique staking contract
+   * @param amount amount to be send
+   * @return true if success
+   */
 
-//   }
+  function sendTokens(uint256 orderId, uint256 amount) internal returns (bool) {
+      // todo: check this transfer, it may not be doing as expected
+      require(tokenContract.transfer(StakingOwnership[orderId], amount),"The contract should receive loan amount with interest");
+      return true;
+  }
+    // struct Staker {
+    //     uint256 windUpTime;     // to check time of windup started
+    //     bool isTwoYear;         // to check whether its one or two year
+    //     bool loan;              // to check whether loan is taken
+    //     uint256 loanCount;      // to check limit of loans that can be taken
+    //     uint256 loanStartTime;  // to keep a check in loan period
+    //     uint256 orderID;        // unique orderid to uniquely identify the order
+    //     uint256 stakedAmount;   // amount Staked
+    //     uint256 stakedTime;     // Time at which the user staked
+    //     uint256 index;          // index
+
+    // }
+/**
+   * @dev Should update all the stakers state
+   * @return true if success
+   */
+
+  function updateStakers() internal returns(bool) {
+      // todo: every order in delist should be removed first
+      for (uint i = 0;i < OrderList.length; i++) {
+          if (StakingDetails[OrderList[i]].windUpTime > 0) {
+                // should distribute 104th of staked amount
+          }else if (StakingDetails[OrderList[i]].loan && (StakingDetails[OrderList[i]].loanStartTime > 60 days) ) {
+              burnTokenBal = burnTokenBal.add((StakingDetails[OrderList[i]].stakedAmount).div(2));
+              delList.push(OrderList[i]);
+          }else if (StakingDetails[OrderList[i]].isTwoYear) {
+                // should distribute the proporsionate amount of staked value for two year
+
+          }
+          else{
+              // should distribute the proporsionate amount of staked value for one year
+          }
+      }
+  }
 
 /**
    * @dev Function to windup an active contact
