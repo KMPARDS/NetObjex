@@ -17,10 +17,6 @@ import "./Staking.sol";
 contract NRTManager is Ownable, SignerRole, Staking{
     using SafeMath for uint256;
 
-    address public eraswapToken;  // address of EraswapToken
-
-    IERC20 public tokenContract;  // Defining conract address so as to interact with EraswapToken
-
     uint256 releaseNrtTime; // variable to check release date
 
     // Variables to keep track of tokens released
@@ -57,7 +53,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     address public powerToken;
 
     // balances present in different pools
-    uint256 public luckPoolBal;
+
     uint256 public newTalentsAndPartnershipsBal;
     uint256 public platformMaintenanceBal;
     uint256 public marketingAndRNRBal;
@@ -73,13 +69,9 @@ contract NRTManager is Ownable, SignerRole, Staking{
     uint256 public buzzCafeBal;
     uint256 public stakersBal;
 
-
-    // Amount received to the NRT pool , keeps track of the amount which is to be distributed to the NRT pool
-
-    uint NRTBal;
-
-
-
+    // Total staking balances after NRT release
+    uint256 public OneYearStakersBal;
+    uint256 public TwoYearStakersBal;
 
    /**
    * @dev Throws if not a valid address
@@ -286,9 +278,9 @@ contract NRTManager is Ownable, SignerRole, Staking{
     function receiveMonthlyNRT() external onlySigner() {
         require(tokenContract.balanceOf(address(this))>0,"NRT_Manger should have token balance");
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
-        NRTBal = NRTBal.add(MonthlyReleaseNrt);
+        uint NRTBal = NRTBal.add(MonthlyReleaseNrt);
         require(NRTBal > 0, "It should be Non-Zero");
-        distribute_NRT();
+        distribute_NRT(NRTBal);
         if(monthCount == 11){
             monthCount = 0;
             AnnualReleaseNrt = (AnnualReleaseNrt.mul(9)).div(10);
@@ -301,7 +293,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
 
 
     // function which is called internally to distribute tokens
-    function distribute_NRT() internal isNotZero(NRTBal){
+    function distribute_NRT(uint256 NRTBal) internal isNotZero(NRTBal){
         require(tokenContract.balanceOf(address(this))>=NRTBal,"NRT_Manger doesn't have token balance");
         NRTBal = NRTBal.add(luckPoolBal);
         
@@ -355,6 +347,47 @@ contract NRTManager is Ownable, SignerRole, Staking{
         require(sendPowerToken(),"Tokens should be succesfully send");
 
     }
+  // struct Staker {
+    //     uint256 windUpTime;     // to check time of windup started
+    //     bool isTwoYear;         // to check whether its one or two year
+    //     bool loan;              // to check whether loan is taken
+    //     uint256 loanCount;      // to check limit of loans that can be taken
+    //     uint256 loanStartTime;  // to keep a check in loan period
+    //     uint256 orderID;        // unique orderid to uniquely identify the order
+    //     uint256 stakedAmount;   // amount Staked
+    //     uint256 stakedTime;     // Time at which the user staked
+    //     uint256 index;          // index
+
+    // }
+    /**
+   * @dev Should update all the stakers state
+   * @return true if success
+   */
+
+  function updateStakers() internal returns(bool) {
+      // todo: every order in delist should be removed first
+      uint temp;
+      for (uint i = 0;i < OrderList.length; i++) {
+          if (StakingDetails[OrderList[i]].windUpTime > 0) {
+                // should distribute 104th of staked amount
+          }else if (StakingDetails[OrderList[i]].loan && (StakingDetails[OrderList[i]].loanStartTime > 60 days) ) {
+              burnTokenBal = burnTokenBal.add((StakingDetails[OrderList[i]].stakedAmount).div(2));
+              delList.push(OrderList[i]);
+          }else if (StakingDetails[OrderList[i]].isTwoYear) {
+                // transfers half of the NRT received back to user and half is staked back to pool
+                temp = (((StakingDetails[OrderList[i]].stakedAmount).div(TwoYearStakedAmount)).mul(TwoYearStakersBal)).div(2);
+                if(cumilativeStakedDetails[OrderList[i]].length < 24){
+                cumilativeStakedDetails[OrderList[i]].push(temp);
+                sendTokens(OrderList[i],temp);
+                }
+                else{
+                    
+                }
+          }else {
+              // should distribute the proporsionate amount of staked value for one year
+          }
+      }
+  }
 
 
 

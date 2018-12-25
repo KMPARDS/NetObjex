@@ -11,17 +11,18 @@ contract Staking {
 
 
     IERC20  public tokenContract;  // Defining conract address so as to interact with EraswapToken
+    address public eraswapToken;  // address of EraswapToken
 
     uint256 public luckPoolBal;    // Luckpool Balance
 
      // Counts of different stakers
-    uint256 public OneYearStakerCount;
+    uint256 public  OneYearStakerCount;
     uint256 public TwoYearStakerCount;
     uint256 public TotalStakerCount;
 
-    // Total staking balances
-    uint256 public OneYearStakersBal;
-    uint256 public TwoYearStakersBal;
+    // Total staked amounts
+    uint256 public OneYearStakedAmount;
+    uint256 public TwoYearStakedAmount;
 
     // Burn away token count
     uint256 public burnTokenBal;
@@ -46,6 +47,8 @@ contract Staking {
 
     mapping (uint256 => address) public  StakingOwnership; // orderid ==> address of user
     mapping (uint256 => Staker) public StakingDetails;     //orderid ==> order details
+    mapping (uint256 => uint256[]) public cumilativeStakedDetails; // orderid ==> to store the cumilative amount of NRT stored per month
+    mapping (uint256 => uint256) public totalNrtMonthCount; // orderid ==> to keep tab on how many times NRT was received
 
     uint256[] public OrderList;  // to store all active orders in which the state need to be changed monthly
   
@@ -92,13 +95,14 @@ contract Staking {
             OrderId = OrderId.add(1);
             StakingOwnership[OrderId] = msg.sender;
             uint index = OrderList.push(OrderId) - 1;
+            cumilativeStakedDetails[OrderId].push(amount);
             if (isTwoYear) {
             TwoYearStakerCount = TwoYearStakerCount.add(1);
-            TwoYearStakersBal = TwoYearStakersBal.add(amount);
+            TwoYearStakedAmount = TwoYearStakedAmount.add(amount);
             StakingDetails[OrderId] = Staker(0,true,false,0,0,OrderId,amount, now,index);
             }else {
             OneYearStakerCount = OneYearStakerCount.add(1);
-            OneYearStakersBal = OneYearStakersBal.add(amount);
+            OneYearStakedAmount = OneYearStakedAmount.add(amount);
             StakingDetails[OrderId] = Staker(0,false,false,0,0,OrderId,amount, now,index);
             }
             require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
@@ -126,11 +130,11 @@ contract Staking {
     if (StakingDetails[orderId].isTwoYear) {
           require(StakingDetails[orderId].loanCount <= 1,"only one loan per year is allowed");        
           TwoYearStakerCount = TwoYearStakerCount.sub(1);
-          TwoYearStakersBal = TwoYearStakersBal.sub(StakingDetails[orderId].stakedAmount);
+          TwoYearStakedAmount = TwoYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
     }else {
           require(StakingDetails[orderId].loanCount == 0,"only one loan per year is allowed");        
           OneYearStakerCount = OneYearStakerCount.sub(1);
-          OneYearStakersBal = OneYearStakersBal.sub(StakingDetails[orderId].stakedAmount);
+          OneYearStakedAmount = OneYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
     }
           StakingDetails[orderId].loan = true;
           StakingDetails[orderId].loanStartTime = now;
@@ -174,10 +178,10 @@ contract Staking {
       luckPoolBal = luckPoolBal.add((StakingDetails[orderId].stakedAmount).div(200));
       if (StakingDetails[orderId].isTwoYear) {  
           TwoYearStakerCount = TwoYearStakerCount.add(1);
-          TwoYearStakersBal = TwoYearStakersBal.add(StakingDetails[orderId].stakedAmount);
+          TwoYearStakedAmount = TwoYearStakedAmount.add(StakingDetails[orderId].stakedAmount);
       }else {  
           OneYearStakerCount = OneYearStakerCount.add(1);
-          OneYearStakersBal = OneYearStakersBal.add(StakingDetails[orderId].stakedAmount);
+          OneYearStakedAmount = OneYearStakedAmount.add(StakingDetails[orderId].stakedAmount);
       }
           // todo: check this transfer, it may not be doing as expected
           require(tokenContract.transfer(address(this),calculateTotalPayment(orderId)),"The contract should receive loan amount with interest");
@@ -211,44 +215,10 @@ contract Staking {
 
   function sendTokens(uint256 orderId, uint256 amount) internal returns (bool) {
       // todo: check this transfer, it may not be doing as expected
-      require(tokenContract.transfer(StakingOwnership[orderId], amount),"The contract should receive loan amount with interest");
+      require(tokenContract.transfer(StakingOwnership[orderId], amount),"The contract should send from its balance to the user");
       return true;
   }
-    // struct Staker {
-    //     uint256 windUpTime;     // to check time of windup started
-    //     bool isTwoYear;         // to check whether its one or two year
-    //     bool loan;              // to check whether loan is taken
-    //     uint256 loanCount;      // to check limit of loans that can be taken
-    //     uint256 loanStartTime;  // to keep a check in loan period
-    //     uint256 orderID;        // unique orderid to uniquely identify the order
-    //     uint256 stakedAmount;   // amount Staked
-    //     uint256 stakedTime;     // Time at which the user staked
-    //     uint256 index;          // index
-
-    // }
-/**
-   * @dev Should update all the stakers state
-   * @return true if success
-   */
-
-  function updateStakers() internal returns(bool) {
-      // todo: every order in delist should be removed first
-      for (uint i = 0;i < OrderList.length; i++) {
-          if (StakingDetails[OrderList[i]].windUpTime > 0) {
-                // should distribute 104th of staked amount
-          }else if (StakingDetails[OrderList[i]].loan && (StakingDetails[OrderList[i]].loanStartTime > 60 days) ) {
-              burnTokenBal = burnTokenBal.add((StakingDetails[OrderList[i]].stakedAmount).div(2));
-              delList.push(OrderList[i]);
-          }else if (StakingDetails[OrderList[i]].isTwoYear) {
-                // should distribute the proporsionate amount of staked value for two year
-
-          }
-          else{
-              // should distribute the proporsionate amount of staked value for one year
-          }
-      }
-  }
-
+  
 /**
    * @dev Function to windup an active contact
    * @param orderId to identify unique staking contract
@@ -262,10 +232,10 @@ contract Staking {
       StakingDetails[orderId].windUpTime = now;
       if (StakingDetails[orderId].isTwoYear) {      
           TwoYearStakerCount = TwoYearStakerCount.sub(1);
-          TwoYearStakersBal = TwoYearStakersBal.sub(StakingDetails[orderId].stakedAmount);
+          TwoYearStakedAmount = TwoYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
     }else {     
           OneYearStakerCount = OneYearStakerCount.sub(1);
-          OneYearStakersBal = OneYearStakersBal.sub(StakingDetails[orderId].stakedAmount);
+          OneYearStakedAmount = OneYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
     }
       return true;
   }
