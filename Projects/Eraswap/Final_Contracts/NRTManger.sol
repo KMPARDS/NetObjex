@@ -8,69 +8,72 @@ pragma solidity ^0.4.24;
  * functions, this simplifies the implementation of "user permissions".
  */
 contract Ownable {
-    address private _owner;
+  address private _owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+  event OwnershipTransferred(
+    address indexed previousOwner,
+    address indexed newOwner
+  );
 
-    /**
-     * @dev The Ownable constructor sets the original `owner` of the contract to the sender
-     * account.
-     */
-    constructor () internal {
-        _owner = msg.sender;
-        emit OwnershipTransferred(address(0), _owner);
-    }
+  /**
+   * @dev The Ownable constructor sets the original `owner` of the contract to the sender
+   * account.
+   */
+  constructor() internal {
+    _owner = msg.sender;
+    emit OwnershipTransferred(address(0), _owner);
+  }
 
-    /**
-     * @return the address of the owner.
-     */
-    function owner() public view returns (address) {
-        return _owner;
-    }
+  /**
+   * @return the address of the owner.
+   */
+  function owner() public view returns(address) {
+    return _owner;
+  }
 
-    /**
-     * @dev Throws if called by any account other than the owner.
-     */
-    modifier onlyOwner() {
-        require(isOwner());
-        _;
-    }
+  /**
+   * @dev Throws if called by any account other than the owner.
+   */
+  modifier onlyOwner() {
+    require(isOwner());
+    _;
+  }
 
-    /**
-     * @return true if `msg.sender` is the owner of the contract.
-     */
-    function isOwner() public view returns (bool) {
-        return msg.sender == _owner;
-    }
+  /**
+   * @return true if `msg.sender` is the owner of the contract.
+   */
+  function isOwner() public view returns(bool) {
+    return msg.sender == _owner;
+  }
 
-    /**
-     * @dev Allows the current owner to relinquish control of the contract.
-     * @notice Renouncing to ownership will leave the contract without an owner.
-     * It will not be possible to call the functions with the `onlyOwner`
-     * modifier anymore.
-     */
-    function renounceOwnership() public onlyOwner {
-        emit OwnershipTransferred(_owner, address(0));
-        _owner = address(0);
-    }
+  /**
+   * @dev Allows the current owner to relinquish control of the contract.
+   * @notice Renouncing to ownership will leave the contract without an owner.
+   * It will not be possible to call the functions with the `onlyOwner`
+   * modifier anymore.
+   */
+  function renounceOwnership() public onlyOwner {
+    emit OwnershipTransferred(_owner, address(0));
+    _owner = address(0);
+  }
 
-    /**
-     * @dev Allows the current owner to transfer control of the contract to a newOwner.
-     * @param newOwner The address to transfer ownership to.
-     */
-    function transferOwnership(address newOwner) public onlyOwner {
-        _transferOwnership(newOwner);
-    }
+  /**
+   * @dev Allows the current owner to transfer control of the contract to a newOwner.
+   * @param newOwner The address to transfer ownership to.
+   */
+  function transferOwnership(address newOwner) public onlyOwner {
+    _transferOwnership(newOwner);
+  }
 
-    /**
-     * @dev Transfers control of the contract to a newOwner.
-     * @param newOwner The address to transfer ownership to.
-     */
-    function _transferOwnership(address newOwner) internal {
-        require(newOwner != address(0));
-        emit OwnershipTransferred(_owner, newOwner);
-        _owner = newOwner;
-    }
+  /**
+   * @dev Transfers control of the contract to a newOwner.
+   * @param newOwner The address to transfer ownership to.
+   */
+  function _transferOwnership(address newOwner) internal {
+    require(newOwner != address(0));
+    emit OwnershipTransferred(_owner, newOwner);
+    _owner = newOwner;
+  }
 }
 
 // File: openzeppelin-solidity/contracts/access/Roles.sol
@@ -80,80 +83,84 @@ contract Ownable {
  * @dev Library for managing addresses assigned to a Role.
  */
 library Roles {
-    struct Role {
-        mapping (address => bool) bearer;
-    }
+  struct Role {
+    mapping (address => bool) bearer;
+  }
 
-    /**
-     * @dev give an account access to this role
-     */
-    function add(Role storage role, address account) internal {
-        require(account != address(0));
-        require(!has(role, account));
+  /**
+   * @dev give an account access to this role
+   */
+  function add(Role storage role, address account) internal {
+    require(account != address(0));
+    require(!has(role, account));
 
-        role.bearer[account] = true;
-    }
+    role.bearer[account] = true;
+  }
 
-    /**
-     * @dev remove an account's access to this role
-     */
-    function remove(Role storage role, address account) internal {
-        require(account != address(0));
-        require(has(role, account));
+  /**
+   * @dev remove an account's access to this role
+   */
+  function remove(Role storage role, address account) internal {
+    require(account != address(0));
+    require(has(role, account));
 
-        role.bearer[account] = false;
-    }
+    role.bearer[account] = false;
+  }
 
-    /**
-     * @dev check if an account has this role
-     * @return bool
-     */
-    function has(Role storage role, address account) internal view returns (bool) {
-        require(account != address(0));
-        return role.bearer[account];
-    }
+  /**
+   * @dev check if an account has this role
+   * @return bool
+   */
+  function has(Role storage role, address account)
+    internal
+    view
+    returns (bool)
+  {
+    require(account != address(0));
+    return role.bearer[account];
+  }
 }
 
 // File: openzeppelin-solidity/contracts/access/roles/SignerRole.sol
 
 contract SignerRole {
-    using Roles for Roles.Role;
+  using Roles for Roles.Role;
 
-    event SignerAdded(address indexed account);
-    event SignerRemoved(address indexed account);
+  event SignerAdded(address indexed account);
+  event SignerRemoved(address indexed account);
 
-    Roles.Role private _signers;
+  Roles.Role private signers;
 
-    constructor () internal {
-        _addSigner(msg.sender);
-    }
+  constructor() internal {
+    _addSigner(msg.sender);
+  }
 
-    modifier onlySigner() {
-        require(isSigner(msg.sender));
-        _;
-    }
+  modifier onlySigner() {
+    require(isSigner(msg.sender));
+    _;
+  }
 
-    function isSigner(address account) public view returns (bool) {
-        return _signers.has(account);
-    }
+  function isSigner(address account) public view returns (bool) {
+    return signers.has(account);
+  }
 
-    function addSigner(address account) public onlySigner {
-        _addSigner(account);
-    }
+  function addSigner(address account) public onlySigner {
+    _addSigner(account);
+  }
 
-    function renounceSigner() public {
-        _removeSigner(msg.sender);
-    }
+  function renounceSigner() public {
+    _removeSigner(msg.sender);
+  }
 
-    function _addSigner(address account) internal {
-        _signers.add(account);
-        emit SignerAdded(account);
-    }
+  function _addSigner(address account) internal {
+    signers.add(account);
+    emit SignerAdded(account);
+  }
 
-    function _removeSigner(address account) internal {
-        _signers.remove(account);
-        emit SignerRemoved(account);
-    }
+  function _removeSigner(address account) internal {
+    signers.remove(account);
+    emit SignerRemoved(account);
+  }
 }
 
 // File: openzeppelin-solidity/contracts/math/SafeMath.sol
@@ -163,332 +170,346 @@ contract SignerRole {
  * @dev Math operations with safety checks that revert on error
  */
 library SafeMath {
-    int256 constant private INT256_MIN = -2**255;
 
-    /**
-    * @dev Multiplies two unsigned integers, reverts on overflow.
-    */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
-        if (a == 0) {
-            return 0;
-        }
-
-        uint256 c = a * b;
-        require(c / a == b);
-
-        return c;
+  /**
+  * @dev Multiplies two numbers, reverts on overflow.
+  */
+  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+    // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+    // benefit is lost if 'b' is also tested.
+    // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
+    if (a == 0) {
+      return 0;
     }
 
-    /**
-    * @dev Multiplies two signed integers, reverts on overflow.
-    */
-    function mul(int256 a, int256 b) internal pure returns (int256) {
-        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-        // benefit is lost if 'b' is also tested.
-        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522
-        if (a == 0) {
-            return 0;
-        }
+    uint256 c = a * b;
+    require(c / a == b);
 
-        require(!(a == -1 && b == INT256_MIN)); // This is the only case of overflow not detected by the check below
+    return c;
+  }
 
-        int256 c = a * b;
-        require(c / a == b);
+  /**
+  * @dev Integer division of two numbers truncating the quotient, reverts on division by zero.
+  */
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
+    require(b > 0); // Solidity only automatically asserts when dividing by 0
+    uint256 c = a / b;
+    // assert(a == b * c + a % b); // There is no case in which this doesn't hold
 
-        return c;
-    }
+    return c;
+  }
 
-    /**
-    * @dev Integer division of two unsigned integers truncating the quotient, reverts on division by zero.
-    */
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        // Solidity only automatically asserts when dividing by 0
-        require(b > 0);
-        uint256 c = a / b;
-        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+  /**
+  * @dev Subtracts two numbers, reverts on overflow (i.e. if subtrahend is greater than minuend).
+  */
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+    require(b <= a);
+    uint256 c = a - b;
 
-        return c;
-    }
+    return c;
+  }
 
-    /**
-    * @dev Integer division of two signed integers truncating the quotient, reverts on division by zero.
-    */
-    function div(int256 a, int256 b) internal pure returns (int256) {
-        require(b != 0); // Solidity only automatically asserts when dividing by 0
-        require(!(b == -1 && a == INT256_MIN)); // This is the only case of overflow
+  /**
+  * @dev Adds two numbers, reverts on overflow.
+  */
+  function add(uint256 a, uint256 b) internal pure returns (uint256) {
+    uint256 c = a + b;
+    require(c >= a);
 
-        int256 c = a / b;
+    return c;
+  }
 
-        return c;
-    }
-
-    /**
-    * @dev Subtracts two unsigned integers, reverts on overflow (i.e. if subtrahend is greater than minuend).
-    */
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b <= a);
-        uint256 c = a - b;
-
-        return c;
-    }
-
-    /**
-    * @dev Subtracts two signed integers, reverts on overflow.
-    */
-    function sub(int256 a, int256 b) internal pure returns (int256) {
-        int256 c = a - b;
-        require((b >= 0 && c <= a) || (b < 0 && c > a));
-
-        return c;
-    }
-
-    /**
-    * @dev Adds two unsigned integers, reverts on overflow.
-    */
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        uint256 c = a + b;
-        require(c >= a);
-
-        return c;
-    }
-
-    /**
-    * @dev Adds two signed integers, reverts on overflow.
-    */
-    function add(int256 a, int256 b) internal pure returns (int256) {
-        int256 c = a + b;
-        require((b >= 0 && c >= a) || (b < 0 && c < a));
-
-        return c;
-    }
-
-    /**
-    * @dev Divides two unsigned integers and returns the remainder (unsigned integer modulo),
-    * reverts when dividing by zero.
-    */
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b != 0);
-        return a % b;
-    }
+  /**
+  * @dev Divides two numbers and returns the remainder (unsigned integer modulo),
+  * reverts when dividing by zero.
+  */
+  function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+    require(b != 0);
+    return a % b;
+  }
 }
 
-// File: openzeppelin-solidity/contracts/token/ERC20/IERC20.sol
+// File: contracts/IERC20.sol
 
 /**
  * @title ERC20 interface
  * @dev see https://github.com/ethereum/EIPs/issues/20
  */
-interface IERC20 {
-    function totalSupply() external view returns (uint256);
+contract IERC20 {
+  function totalSupply() external view returns (uint256);
 
-    function balanceOf(address who) external view returns (uint256);
+  function balanceOf(address who) external view returns (uint256);
 
-    function allowance(address owner, address spender) external view returns (uint256);
+  function allowance(address owner, address spender)
+    external view returns (uint256);
 
-    function transfer(address to, uint256 value) external returns (bool);
+  function transfer(address to, uint256 value) external returns (bool);
 
-    function approve(address spender, uint256 value) external returns (bool);
+  function approve(address spender, uint256 value)
+    external returns (bool);
 
-    function transferFrom(address from, address to, uint256 value) external returns (bool);
+  function transferFrom(address from, address to, uint256 value)
+    external returns (bool);
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
 
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+  function burn(uint256 value) external ;
+
+ 
+  function burnFrom(address from, uint256 value) external;
+
+  event Transfer(
+    address indexed from,
+    address indexed to,
+    uint256 value
+  );
+
+  event Approval(
+    address indexed owner,
+    address indexed spender,
+    uint256 value
+  );
 }
 
 // File: contracts/Staking.sol
 
 // contract to manage staking of one year and two year stakers
 
-contract Staking{
+// Database Design based on CRUD by Rob Hitchens . Refer : https://medium.com/@robhitchens/solidity-crud-part-1-824ffa69509a
+
+contract Staking {
     using SafeMath for uint256;
 
 
-    IERC20 public tokenContract;  // Defining conract address so as to interact with EraswapToken
-   
-    // Luckpool Balance
+    IERC20  public tokenContract;  // Defining conract address so as to interact with EraswapToken
+    address public eraswapToken;  // address of EraswapToken
 
-    uint256 public luckPoolBal;
+    uint256 public luckPoolBal;    // Luckpool Balance
+
      // Counts of different stakers
-    uint256 public OneYearStakerCount;
+    uint256 public  OneYearStakerCount;
     uint256 public TwoYearStakerCount;
     uint256 public TotalStakerCount;
 
-    // Total staking balances
-    uint256 public OneYearStakersBal;
-    uint256 public TwoYearStakersBal;
+    // Total staked amounts
+    uint256 public OneYearStakedAmount;
+    uint256 public TwoYearStakedAmount;
 
-    // orderID to uniquely identify the staking order
-    uint256 OneYearOrderId=100000;
-    uint256 TwoYearOrderId=100000;
+    // Burn away token count
+    uint256 public burnTokenBal;
+    uint256[] public delList;
 
-    // OneYearStakers Details
+   
+    uint256 OrderId=100000;  // orderID to uniquely identify the staking order
+
+
     struct Staker {
+        uint256 windUpTime;     // to check time of windup started
         bool isTwoYear;         // to check whether its one or two year
         bool loan;              // to check whether loan is taken
         uint256 loanCount;      // to check limit of loans that can be taken
         uint256 loanStartTime;  // to keep a check in loan period
         uint256 orderID;        // unique orderid to uniquely identify the order
-        uint256 stakedAmount;   // Amount Staked
+        uint256 stakedAmount;   // amount Staked
         uint256 stakedTime;     // Time at which the user staked
+        uint256 index;          // index
 
     }
 
-    
+    mapping (uint256 => address) public  StakingOwnership; // orderid ==> address of user
+    mapping (uint256 => Staker) public StakingDetails;     //orderid ==> order details
+    mapping (uint256 => uint256[]) public cumilativeStakedDetails; // orderid ==> to store the cumilative amount of NRT stored per month
+    mapping (uint256 => uint256) public totalNrtMonthCount; // orderid ==> to keep tab on how many times NRT was received
 
-    mapping (uint256 => address) public  OneYearOwnership; // orderid ==> address of user
-    mapping (uint256 => address) public TwoYearOwnership; // orderid ==> address of user
-    
-    mapping (uint256 => Staker) public OneYearStakingDetails;   //orderid ==> order details
-    mapping (uint256 => Staker) public TwoYearStakingDetails;   //orderid ==> order details
+    uint256[] public OrderList;  // to store all active orders in which the state need to be changed monthly
+  
 
 
-  /**
+   /**
    * @dev Throws if not times up to close a contract
    * @param orderID to identify the unique staking contract
-   * @param isTwoYear to identify whther its one / two year contract
    */
-    modifier isWithinPeriod(uint256 orderID,bool isTwoYear) {
-        if(isTwoYear)
-        {
-        require(now <= TwoYearStakingDetails[orderID].stakedTime + 730 days,"Contract can only be ended after 2 years");
-        }
-        else{
-            require(now <= OneYearStakingDetails[orderID].stakedTime + 365 days,"Contract can only be ended after 1 years");
-        }
-        _;
-    }
-
-    /**
-   * @dev To check if loan is initiated
-   * @param orderID to identify the unique staking contract
-   * @param isTwoYear to identify whther its one / two year contract
-   */
-   modifier isNoLoanTaken(uint256 orderID,bool isTwoYear) {
-        if(isTwoYear)
-        {
-        require(TwoYearStakingDetails[orderID].loan != true,"Loan is present");
-        }
-        else{
-            require(OneYearStakingDetails[orderID].loan != true,"Loan is present");
-        }
-        _;
-    }
-
-        /**
-   * @dev To check whether its valid staker 
-   * @param orderID to identify the unique staking contract
-   * @param isTwoYear to identify whther its one / two year contract
-   */
-   modifier onlyStakeOwner(uint256 orderID,bool isTwoYear) {
-        if(isTwoYear)
-        {
-        require(TwoYearOwnership[orderID] == msg.sender,"Staking owner should be valid");
-        }
-        else{
-        require(OneYearOwnership[orderID] == msg.sender,"Staking owner should be valid");
+    modifier isWithinPeriod(uint256 orderID) {
+        if (StakingDetails[orderID].isTwoYear) {
+        require(now <= StakingDetails[orderID].stakedTime + 730 days,"Contract can only be ended after 2 years");
+        }else {
+        require(now <= StakingDetails[orderID].stakedTime + 365 days,"Contract can only be ended after 1 years");
         }
         _;
     }
 
    /**
+   * @dev To check if loan is initiated
+   * @param orderID to identify the unique staking contract
+   */
+   modifier isNoLoanTaken(uint256 orderID) {
+        require(StakingDetails[orderID].loan != true,"Loan is present");
+        _;
+    }
+
+   /**
+   * @dev To check whether its valid staker 
+   * @param orderID to identify the unique staking contract
+   */
+   modifier onlyStakeOwner(uint256 orderID) {
+        require(StakingOwnership[orderID] == msg.sender,"Staking owner should be valid");
+        _;
+    }
+
+   /**
    * @dev To create staking contract
-   * @param Amount Total Est which is to be Staked
-   * @param isTwoYear to identify whther its one / two year contract
+   * @param amount Total Est which is to be Staked
    * @return orderId of created 
    */
 
-    function createStakingContract(uint256 Amount,bool isTwoYear) external returns (uint256){ 
-        if(isTwoYear){
-            TwoYearOrderId = TwoYearOrderId.add(1);
+    function createStakingContract(uint256 amount,bool isTwoYear) external returns (uint256) { 
+            OrderId = OrderId.add(1);
+            StakingOwnership[OrderId] = msg.sender;
+            uint index = OrderList.push(OrderId) - 1;
+            cumilativeStakedDetails[OrderId].push(amount);
+            if (isTwoYear) {
             TwoYearStakerCount = TwoYearStakerCount.add(1);
-            TwoYearStakersBal = TwoYearStakersBal.add(Amount);
-            TwoYearOwnership[TwoYearOrderId] = msg.sender;
-            TwoYearStakingDetails[TwoYearOrderId] = Staker(true,false,0,0,TwoYearOrderId,Amount, 730 days);
-            require(tokenContract.transfer(address(this), Amount), "The token transfer should be done");
-            return TwoYearOrderId;
-        }
-        else{
-            OneYearOrderId = OneYearOrderId.add(1);
+            TwoYearStakedAmount = TwoYearStakedAmount.add(amount);
+            StakingDetails[OrderId] = Staker(0,true,false,0,0,OrderId,amount, now,index);
+            }else {
             OneYearStakerCount = OneYearStakerCount.add(1);
-            OneYearStakersBal = OneYearStakersBal.add(Amount);
-            OneYearOwnership[OneYearOrderId] = msg.sender;
-            OneYearStakingDetails[OneYearOrderId] = Staker(false,false,0,0,OneYearOrderId,Amount, 365 days);
-            require(tokenContract.transfer(address(this), Amount), "The token transfer should be done");
-            return OneYearOrderId;
+            OneYearStakedAmount = OneYearStakedAmount.add(amount);
+            StakingDetails[OrderId] = Staker(0,false,false,0,0,OrderId,amount, now,index);
+            }
+            require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
+            return OrderId;
         }
-    }
+
+    /**
+   * @dev Function to check whether a partcicular order exists
+   * @param orderId to identify unique staking contract
+   * @return true if success
+   */
+
+  function isOrderExist(uint256 orderId) public view returns(bool) {
+      return OrderList[StakingDetails[orderId].index] == orderId;
+ }
  
     /**
    * @dev To check if loan is initiated
-   * @param orderId Total Est which is to be Staked
-   * @param isTwoYear to identify whther its one / two year contract
+   * @param orderId to identify unique staking contract
    * @return orderId of created 
    */
-  function takeLoan(uint256 orderId, bool isTwoYear) onlyStakeOwner(orderId,isTwoYear) isNoLoanTaken(orderId, isTwoYear) isWithinPeriod(orderId,isTwoYear) external returns (bool){
-    if(isTwoYear){
-          require(TwoYearStakingDetails[orderId].loanCount <= 1 ,"only one loan per year is allowed");
-          require((TwoYearStakingDetails[orderId].stakedTime).sub(now)>= 60 days,"Contract End is near");
+  function takeLoan(uint256 orderId) onlyStakeOwner(orderId) isNoLoanTaken(orderId) isWithinPeriod(orderId) external returns (bool) {
+    require(isOrderExist(orderId),"The orderId should exist");
+    require((StakingDetails[orderId].stakedTime).sub(now) >= 60 days,"Contract End is near");
+    if (StakingDetails[orderId].isTwoYear) {
+          require(StakingDetails[orderId].loanCount <= 1,"only one loan per year is allowed");        
           TwoYearStakerCount = TwoYearStakerCount.sub(1);
-          TwoYearStakersBal = TwoYearStakersBal.sub(TwoYearStakingDetails[orderId].stakedAmount);
-          TwoYearStakingDetails[orderId].loan =true;
-          TwoYearStakingDetails[orderId].loanStartTime = now;
-          TwoYearStakingDetails[orderId].loanCount = (TwoYearStakingDetails[orderId].loanCount).add(1);
-          require(tokenContract.transfer(msg.sender,(TwoYearStakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
-          return true;
-      }
-      else{
-          require(OneYearStakingDetails[orderId].loanCount == 0,"only one loan per year is allowed");
-          require((OneYearStakingDetails[orderId].stakedTime).sub(now)>= 60 days,"Contract End is near");
+          TwoYearStakedAmount = TwoYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
+    }else {
+          require(StakingDetails[orderId].loanCount == 0,"only one loan per year is allowed");        
           OneYearStakerCount = OneYearStakerCount.sub(1);
-          OneYearStakersBal = OneYearStakersBal.sub(OneYearStakingDetails[orderId].stakedAmount);
-          OneYearStakingDetails[orderId].loan =true;
-          OneYearStakingDetails[orderId].loanStartTime = now;
-          OneYearStakingDetails[orderId].loanCount = (OneYearStakingDetails[orderId].loanCount).add(1);
-          require(tokenContract.transfer(msg.sender,(OneYearStakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
+          OneYearStakedAmount = OneYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
+    }
+          StakingDetails[orderId].loan = true;
+          StakingDetails[orderId].loanStartTime = now;
+          StakingDetails[orderId].loanCount = (StakingDetails[orderId].loanCount).add(1);
+          // todo: check this transfer, it may not be doing as expected
+          require(tokenContract.transfer(msg.sender,(StakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
           return true;
       }
-  }
+      
+  /**
+   * @dev To repay the leased loan
+   * @param orderId to identify unique staking contract
+   * @return total repayment
+   */
 
-  function rePayLoan(uint256 orderId, bool isTwoYear) onlyStakeOwner(orderId,isTwoYear) isWithinPeriod(orderId,isTwoYear) external returns (bool){
-      if(isTwoYear){
-          uint256 TempLoan1 = (TwoYearStakingDetails[orderId].stakedAmount).div(2);
-          require(TwoYearStakingDetails[orderId].loan == true,"User should have taken loan");
-          require((TwoYearStakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
-          TwoYearStakingDetails[orderId].loan = false;
-          TwoYearStakingDetails[orderId].loanStartTime = 0;
-          luckPoolBal = luckPoolBal.add(TempLoan1.div(100));
+  function calculateTotalPayment(uint256 orderId)  public view returns (uint256) {
+          require(isOrderExist(orderId),"The orderId should exist");
+          return ((StakingDetails[orderId].stakedAmount).div(200)).mul(101);
+      
+  }
+   /**
+   * @dev To check if eligible for repayment
+   * @param orderId to identify unique staking contract
+   * @return total repayment
+   */
+  function isEligibleForRepayment(uint256 orderId)  public view returns (bool) {
+          require(isOrderExist(orderId),"The orderId should exist");
+          require(StakingDetails[orderId].loan == true,"User should have taken loan");
+          require((StakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
+          return true;
+  }
+   /**
+   * @dev To repay the leased loan
+   * @param orderId to identify unique staking contract
+   * @return true if success
+   */
+  function rePayLoan(uint256 orderId) onlyStakeOwner(orderId) isWithinPeriod(orderId) external returns (bool) {
+      require(isEligibleForRepayment(orderId),"The user should be eligible for repayment");
+      StakingDetails[orderId].loan = false;
+      StakingDetails[orderId].loanStartTime = 0;
+      luckPoolBal = luckPoolBal.add((StakingDetails[orderId].stakedAmount).div(200));
+      if (StakingDetails[orderId].isTwoYear) {  
           TwoYearStakerCount = TwoYearStakerCount.add(1);
-          TwoYearStakersBal = TwoYearStakersBal.add(TwoYearStakingDetails[orderId].stakedAmount);
-          require(tokenContract.transfer(address(this),(TempLoan1.mul(101)).div(100)),"The contract should receive loan amount with interest");
-          return true;
-      }
-      else{
-          uint256 TempLoan2 = (OneYearStakingDetails[orderId].stakedAmount).div(2);
-          require(OneYearStakingDetails[orderId].loan == true,"User should have taken loan");
-          require((OneYearStakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
-          OneYearStakingDetails[orderId].loan = false;
-          OneYearStakingDetails[orderId].loanStartTime = 0;
-          luckPoolBal = luckPoolBal.add(TempLoan2.div(100));
+          TwoYearStakedAmount = TwoYearStakedAmount.add(StakingDetails[orderId].stakedAmount);
+      }else {  
           OneYearStakerCount = OneYearStakerCount.add(1);
-          OneYearStakersBal = OneYearStakersBal.add(OneYearStakingDetails[orderId].stakedAmount);
-          require(tokenContract.transfer(address(this),(TempLoan2.mul(101)).div(100)),"The contract should receive loan amount with interest");
-          return true;
+          OneYearStakedAmount = OneYearStakedAmount.add(StakingDetails[orderId].stakedAmount);
       }
+          // todo: check this transfer, it may not be doing as expected
+          require(tokenContract.transfer(address(this),calculateTotalPayment(orderId)),"The contract should receive loan amount with interest");
+          return true;
   }
-  //should burn defaulters token and update balances in stakers
-//   function updateStakers(){
-
-//   }
-   // function releaseMonthlyReturn
 
 
-//   function windUpContract() external{
 
-//   }
+ /**
+   * @dev Function to delete a particular order
+   * @param orderId to identify unique staking contract
+   * @return true if success
+   */
+
+  function deleteRecord(uint256 orderId) internal returns (bool) {
+      require(isOrderExist(orderId),"The orderId should exist");
+      uint256 rowToDelete = StakingDetails[orderId].index;
+      uint256 orderToMove = OrderList[OrderList.length-1];
+      OrderList[rowToDelete] = orderToMove;
+      StakingDetails[orderToMove].index = rowToDelete;
+      OrderList.length--; 
+      return true;
+  }
+
+   /**
+   * @dev should send tokens to the user
+   * @param orderId to identify unique staking contract
+   * @param amount amount to be send
+   * @return true if success
+   */
+
+  function sendTokens(uint256 orderId, uint256 amount) internal returns (bool) {
+      // todo: check this transfer, it may not be doing as expected
+      require(tokenContract.transfer(StakingOwnership[orderId], amount),"The contract should send from its balance to the user");
+      return true;
+  }
+  
+/**
+   * @dev Function to windup an active contact
+   * @param orderId to identify unique staking contract
+   * @return true if success
+   */
+
+  function windUpContract(uint256 orderId) onlyStakeOwner(orderId)  external returns (bool) {
+      require(isOrderExist(orderId),"The orderId should exist");
+      require(StakingDetails[orderId].loan == false,"There should be no loan currently");
+      require(StakingDetails[orderId].windUpTime == 0,"Windup Shouldn't be initiated currently");
+      StakingDetails[orderId].windUpTime = now + 104 weeks; // time at which all the transfer must be finished
+      StakingDetails[orderId].stakedTime = now; // to keep track of NRT being distributed out
+      if (StakingDetails[orderId].isTwoYear) {      
+          TwoYearStakerCount = TwoYearStakerCount.sub(1);
+          TwoYearStakedAmount = TwoYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
+    }else {     
+          OneYearStakerCount = OneYearStakerCount.sub(1);
+          OneYearStakedAmount = OneYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
+    }
+      return true;
+  }
 }
 
 // File: contracts/NRTManager.sol
@@ -504,10 +525,6 @@ contract Staking{
 // The contract addresses of different pools
 contract NRTManager is Ownable, SignerRole, Staking{
     using SafeMath for uint256;
-
-    address public eraswapToken;  // address of EraswapToken
-
-    IERC20 public tokenContract;  // Defining conract address so as to interact with EraswapToken
 
     uint256 releaseNrtTime; // variable to check release date
 
@@ -545,7 +562,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     address public powerToken;
 
     // balances present in different pools
-    uint256 public luckPoolBal;
+
     uint256 public newTalentsAndPartnershipsBal;
     uint256 public platformMaintenanceBal;
     uint256 public marketingAndRNRBal;
@@ -561,13 +578,9 @@ contract NRTManager is Ownable, SignerRole, Staking{
     uint256 public buzzCafeBal;
     uint256 public stakersBal;
 
-
-    // Amount received to the NRT pool , keeps track of the amount which is to be distributed to the NRT pool
-
-    uint NRTBal;
-
-
-
+    // Total staking balances after NRT release
+    uint256 public OneYearStakersBal;
+    uint256 public TwoYearStakersBal;
 
    /**
    * @dev Throws if not a valid address
@@ -593,13 +606,13 @@ contract NRTManager is Ownable, SignerRole, Staking{
 
     function setNewTalentsAndPartnerships(address pool_addr) public onlyOwner() isValidAddress(pool_addr){
         newTalentsAndPartnerships = pool_addr;
-        emit ChangingPoolAddress ("NewTalentsAndPartnerships",newTalentsAndPartnerships);
+        emit ChangingPoolAddress("NewTalentsAndPartnerships",newTalentsAndPartnerships);
     }
 
      /**
     * @dev Function to send NewTalentsAndPartnerships balance
     */
-    function sendNewTalentsAndPartnerships() internal isValidAddress(newTalentsAndPartnerships) isNotZero(newTalentsAndPartnershipsBal) 
+    function sendNewTalentsAndPartnerships() internal isValidAddress(newTalentsAndPartnerships) 
     returns(bool) {
         uint256 temp = newTalentsAndPartnershipsBal;
         emit sendToken("NewTalentsAndPartnerships",newTalentsAndPartnerships,newTalentsAndPartnershipsBal);
@@ -622,7 +635,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
      /**
     * @dev Function to send platformMaintenance balance
     */
-    function sendPlatformMaintenance() internal isValidAddress(platformMaintenance) isNotZero(platformMaintenanceBal)
+    function sendPlatformMaintenance() internal isValidAddress(platformMaintenance) 
     returns(bool){
         uint256 temp = platformMaintenanceBal;
         emit sendToken("PlatformMaintenance",platformMaintenance,platformMaintenanceBal);
@@ -644,7 +657,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     /**
     * @dev Function to send marketingAndRNR balance
     */
-    function sendMarketingAndRNR() internal isValidAddress(marketingAndRNR) isNotZero(marketingAndRNRBal)
+    function sendMarketingAndRNR() internal isValidAddress(marketingAndRNR) 
     returns(bool){
         uint256 temp = marketingAndRNRBal;
         emit sendToken("MarketingAndRNR",marketingAndRNR,marketingAndRNRBal);
@@ -666,7 +679,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     /**
     * @dev Function to send KmPards balance
     */
-    function sendKmPards() internal isValidAddress(kmPards) isNotZero(kmPardsBal)
+    function sendKmPards() internal isValidAddress(kmPards) 
     returns(bool){
         uint256 temp = kmPardsBal;
         emit sendToken("MarketingAndRNR",kmPards,kmPardsBal);
@@ -688,7 +701,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     /**
     * @dev Function to send contingencyFunds balance
     */
-    function sendContingencyFunds() internal  isValidAddress(contingencyFunds) isNotZero(contingencyFundsBal)
+    function sendContingencyFunds() internal  isValidAddress(contingencyFunds) 
     returns(bool){
         uint256 temp = contingencyFundsBal;
         emit sendToken("contingencyFunds",contingencyFunds,contingencyFundsBal);
@@ -709,7 +722,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     /**
     * @dev Function to send researchAndDevelopment balance
     */
-    function sendResearchAndDevelopment() internal isValidAddress(researchAndDevelopment) isNotZero(researchAndDevelopmentBal)
+    function sendResearchAndDevelopment() internal isValidAddress(researchAndDevelopment) 
     returns(bool){
         uint256 temp = researchAndDevelopmentBal;
         emit sendToken("ResearchAndDevelopment",researchAndDevelopment,researchAndDevelopmentBal);
@@ -731,7 +744,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     /**
     * @dev Function to send buzzCafe balance
     */
-    function sendBuzzCafe() internal isValidAddress(buzzCafe) isNotZero(buzzCafeBal)
+    function sendBuzzCafe() internal isValidAddress(buzzCafe) 
     returns(bool){
         uint256 temp = buzzCafeBal;
         emit sendToken("BuzzCafe",buzzCafe,buzzCafeBal);
@@ -753,7 +766,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     /**
     * @dev Function to send powerToken balance
     */
-    function sendPowerToken() internal  isValidAddress(powerToken) isNotZero(powerTokenBal)
+    function sendPowerToken() internal  isValidAddress(powerToken) 
     returns(bool){
         uint256 temp = powerTokenBal;
         emit sendToken("PowerToken",powerToken,powerTokenBal);
@@ -766,15 +779,17 @@ contract NRTManager is Ownable, SignerRole, Staking{
     * @dev Function to trigger the release of montly NRT to different actors in the system
     * 
     */
-    function updateLuckpool(uint256 newValue) external onlySigner(){
-        luckPoolBal = luckPoolBal.add(newValue);
+    function updateLuckpool(uint256 amount) external onlySigner(){
+        require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
+        luckPoolBal = luckPoolBal.add(amount);
     }
 
     function receiveMonthlyNRT() external onlySigner() {
         require(tokenContract.balanceOf(address(this))>0,"NRT_Manger should have token balance");
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
-        NRTBal = NRTBal.add(MonthlyReleaseNrt);
-        distribute_NRT();
+        uint NRTBal = NRTBal.add(MonthlyReleaseNrt);
+        require(NRTBal > 0, "It should be Non-Zero");
+        distribute_NRT(NRTBal);
         if(monthCount == 11){
             monthCount = 0;
             AnnualReleaseNrt = (AnnualReleaseNrt.mul(9)).div(10);
@@ -787,7 +802,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
 
 
     // function which is called internally to distribute tokens
-    function distribute_NRT() internal isNotZero(NRTBal){
+    function distribute_NRT(uint256 NRTBal) internal isNotZero(NRTBal){
         require(tokenContract.balanceOf(address(this))>=NRTBal,"NRT_Manger doesn't have token balance");
         NRTBal = NRTBal.add(luckPoolBal);
         
@@ -841,6 +856,82 @@ contract NRTManager is Ownable, SignerRole, Staking{
         require(sendPowerToken(),"Tokens should be succesfully send");
 
     }
+  // struct Staker {
+    //     uint256 windUpTime;     // to check time of windup started
+    //     bool isTwoYear;         // to check whether its one or two year
+    //     bool loan;              // to check whether loan is taken
+    //     uint256 loanCount;      // to check limit of loans that can be taken
+    //     uint256 loanStartTime;  // to keep a check in loan period
+    //     uint256 orderID;        // unique orderid to uniquely identify the order
+    //     uint256 stakedAmount;   // amount Staked
+    //     uint256 stakedTime;     // Time at which the user staked
+    //     uint256 index;          // index
+
+    // }
+    /**
+   * @dev Should update all the stakers state
+   * @return true if success
+   */
+
+  function updateStakers() internal returns(bool) {
+      // todo: every order in delist should be removed first
+      for (uint j = delList.length - 1;j > 0;j--)
+      {
+          deleteRecord(delList[j]);
+          delList.length--;
+      }
+      uint temp;
+      uint temp1;
+      for (uint i = 0;i < OrderList.length; i++) {
+          if (StakingDetails[OrderList[i]].windUpTime > 0) {
+                // should distribute 104th of staked amount
+                if(StakingDetails[OrderList[i]].windUpTime < now){
+                temp = ((StakingDetails[OrderList[i]].windUpTime.sub(StakingDetails[OrderList[i]].stakedTime)).div(104 weeks))
+                        .mul(StakingDetails[OrderList[i]].stakedAmount);
+                delList.push(OrderList[i]);
+                }
+                else{
+                temp = ((now.sub(StakingDetails[OrderList[i]].stakedTime)).div(104 weeks)).mul(StakingDetails[OrderList[i]].stakedAmount);
+                StakingDetails[OrderList[i]].stakedTime = now;
+                }
+                sendTokens(OrderList[i],temp);
+          }else if (StakingDetails[OrderList[i]].loan && (StakingDetails[OrderList[i]].loanStartTime > 60 days) ) {
+              burnTokenBal = burnTokenBal.add((StakingDetails[OrderList[i]].stakedAmount).div(2));
+              delList.push(OrderList[i]);
+          }else if(StakingDetails[OrderList[i]].loan){
+              continue;
+          }
+          else if (StakingDetails[OrderList[i]].isTwoYear) {
+                // transfers half of the NRT received back to user and half is staked back to pool
+                totalNrtMonthCount[OrderList[i]] = totalNrtMonthCount[OrderList[i]].add(1);
+                temp = (((StakingDetails[OrderList[i]].stakedAmount).div(TwoYearStakedAmount)).mul(TwoYearStakersBal)).div(2);
+                if(cumilativeStakedDetails[OrderList[i]].length < 24){
+                cumilativeStakedDetails[OrderList[i]].push(temp);
+                sendTokens(OrderList[i],temp);
+                }
+                else{
+                    temp1 = temp;
+                    temp = temp.add(cumilativeStakedDetails[OrderList[i]][totalNrtMonthCount[OrderList[i]] % 24]); 
+                    cumilativeStakedDetails[OrderList[i]][totalNrtMonthCount[OrderList[i]] % 24] = temp1; 
+                    sendTokens(OrderList[i],temp);
+                }
+          }else {
+              // should distribute the proporsionate amount of staked value for one year
+              totalNrtMonthCount[OrderList[i]] = totalNrtMonthCount[OrderList[i]].add(1);
+              temp = (((StakingDetails[OrderList[i]].stakedAmount).div(OneYearStakedAmount)).mul(OneYearStakersBal)).div(2);
+              if(cumilativeStakedDetails[OrderList[i]].length < 12){
+              cumilativeStakedDetails[OrderList[i]].push(temp);
+              sendTokens(OrderList[i],temp);
+              }
+              else{
+                    temp1 = temp;
+                    temp = temp.add(cumilativeStakedDetails[OrderList[i]][totalNrtMonthCount[OrderList[i]] % 12]); 
+                    cumilativeStakedDetails[OrderList[i]][totalNrtMonthCount[OrderList[i]] % 12] = temp1; 
+                    sendTokens(OrderList[i],temp);
+                }
+          }
+      }
+  }
 
 
 

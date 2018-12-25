@@ -366,25 +366,60 @@ contract NRTManager is Ownable, SignerRole, Staking{
 
   function updateStakers() internal returns(bool) {
       // todo: every order in delist should be removed first
+      for (uint j = delList.length - 1;j > 0;j--)
+      {
+          deleteRecord(delList[j]);
+          delList.length--;
+      }
       uint temp;
+      uint temp1;
       for (uint i = 0;i < OrderList.length; i++) {
           if (StakingDetails[OrderList[i]].windUpTime > 0) {
                 // should distribute 104th of staked amount
+                if(StakingDetails[OrderList[i]].windUpTime < now){
+                temp = ((StakingDetails[OrderList[i]].windUpTime.sub(StakingDetails[OrderList[i]].stakedTime)).div(104 weeks))
+                        .mul(StakingDetails[OrderList[i]].stakedAmount);
+                delList.push(OrderList[i]);
+                }
+                else{
+                temp = ((now.sub(StakingDetails[OrderList[i]].stakedTime)).div(104 weeks)).mul(StakingDetails[OrderList[i]].stakedAmount);
+                StakingDetails[OrderList[i]].stakedTime = now;
+                }
+                sendTokens(OrderList[i],temp);
           }else if (StakingDetails[OrderList[i]].loan && (StakingDetails[OrderList[i]].loanStartTime > 60 days) ) {
               burnTokenBal = burnTokenBal.add((StakingDetails[OrderList[i]].stakedAmount).div(2));
               delList.push(OrderList[i]);
-          }else if (StakingDetails[OrderList[i]].isTwoYear) {
+          }else if(StakingDetails[OrderList[i]].loan){
+              continue;
+          }
+          else if (StakingDetails[OrderList[i]].isTwoYear) {
                 // transfers half of the NRT received back to user and half is staked back to pool
+                totalNrtMonthCount[OrderList[i]] = totalNrtMonthCount[OrderList[i]].add(1);
                 temp = (((StakingDetails[OrderList[i]].stakedAmount).div(TwoYearStakedAmount)).mul(TwoYearStakersBal)).div(2);
                 if(cumilativeStakedDetails[OrderList[i]].length < 24){
                 cumilativeStakedDetails[OrderList[i]].push(temp);
                 sendTokens(OrderList[i],temp);
                 }
                 else{
-                    
+                    temp1 = temp;
+                    temp = temp.add(cumilativeStakedDetails[OrderList[i]][totalNrtMonthCount[OrderList[i]] % 24]); 
+                    cumilativeStakedDetails[OrderList[i]][totalNrtMonthCount[OrderList[i]] % 24] = temp1; 
+                    sendTokens(OrderList[i],temp);
                 }
           }else {
               // should distribute the proporsionate amount of staked value for one year
+              totalNrtMonthCount[OrderList[i]] = totalNrtMonthCount[OrderList[i]].add(1);
+              temp = (((StakingDetails[OrderList[i]].stakedAmount).div(OneYearStakedAmount)).mul(OneYearStakersBal)).div(2);
+              if(cumilativeStakedDetails[OrderList[i]].length < 12){
+              cumilativeStakedDetails[OrderList[i]].push(temp);
+              sendTokens(OrderList[i],temp);
+              }
+              else{
+                    temp1 = temp;
+                    temp = temp.add(cumilativeStakedDetails[OrderList[i]][totalNrtMonthCount[OrderList[i]] % 12]); 
+                    cumilativeStakedDetails[OrderList[i]][totalNrtMonthCount[OrderList[i]] % 12] = temp1; 
+                    sendTokens(OrderList[i],temp);
+                }
           }
       }
   }

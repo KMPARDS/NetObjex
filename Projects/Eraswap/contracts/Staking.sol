@@ -229,7 +229,8 @@ contract Staking {
       require(isOrderExist(orderId),"The orderId should exist");
       require(StakingDetails[orderId].loan == false,"There should be no loan currently");
       require(StakingDetails[orderId].windUpTime == 0,"Windup Shouldn't be initiated currently");
-      StakingDetails[orderId].windUpTime = now;
+      StakingDetails[orderId].windUpTime = now + 104 weeks; // time at which all the transfer must be finished
+      StakingDetails[orderId].stakedTime = now; // to keep track of NRT being distributed out
       if (StakingDetails[orderId].isTwoYear) {      
           TwoYearStakerCount = TwoYearStakerCount.sub(1);
           TwoYearStakedAmount = TwoYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
