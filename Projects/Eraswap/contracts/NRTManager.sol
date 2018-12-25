@@ -347,24 +347,13 @@ contract NRTManager is Ownable, SignerRole, Staking{
         require(sendPowerToken(),"Tokens should be succesfully send");
 
     }
-  // struct Staker {
-    //     uint256 windUpTime;     // to check time of windup started
-    //     bool isTwoYear;         // to check whether its one or two year
-    //     bool loan;              // to check whether loan is taken
-    //     uint256 loanCount;      // to check limit of loans that can be taken
-    //     uint256 loanStartTime;  // to keep a check in loan period
-    //     uint256 orderID;        // unique orderid to uniquely identify the order
-    //     uint256 stakedAmount;   // amount Staked
-    //     uint256 stakedTime;     // Time at which the user staked
-    //     uint256 index;          // index
 
-    // }
     /**
    * @dev Should update all the stakers state
    * @return true if success
    */
 
-  function updateStakers() internal returns(bool) {
+  function updateStakers() external returns(bool) {
       // todo: every order in delist should be removed first
       for (uint j = delList.length - 1;j > 0;j--)
       {
@@ -422,6 +411,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
                 }
           }
       }
+      return true;
   }
 
 
