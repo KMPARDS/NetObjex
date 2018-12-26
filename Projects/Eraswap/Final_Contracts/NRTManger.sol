@@ -297,8 +297,8 @@ contract Staking {
     uint256 orderid
     );
 
-    IERC20  public tokenContract;  // Defining conract address so as to interact with EraswapToken
-    address public eraswapToken;  // address of EraswapToken
+    IERC20   tokenContract;  // Defining conract address so as to interact with EraswapToken
+    
 
     uint256 public luckPoolBal;    // Luckpool Balance
 
@@ -601,6 +601,8 @@ contract NRTManager is Ownable, SignerRole, Staking{
     // Total staking balances after NRT release
     uint256 public OneYearStakersBal;
     uint256 public TwoYearStakersBal;
+
+    address public eraswapToken;  // address of EraswapToken
 
    /**
    * @dev Throws if not a valid address
