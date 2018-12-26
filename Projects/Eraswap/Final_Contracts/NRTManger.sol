@@ -313,31 +313,31 @@ contract Staking {
 
     // Burn away token count
     uint256 public burnTokenBal;
-    uint256[] public delList;
+    uint64[] public delList;
 
    
-    uint256 OrderId=100000;  // orderID to uniquely identify the staking order
+    uint64 OrderId=100000;  // orderID to uniquely identify the staking order
 
 
     struct Staker {
-        uint256 windUpTime;     // to check time of windup started
         bool isTwoYear;         // to check whether its one or two year
         bool loan;              // to check whether loan is taken
-        uint256 loanCount;      // to check limit of loans that can be taken
-        uint256 loanStartTime;  // to keep a check in loan period
-        uint256 orderID;        // unique orderid to uniquely identify the order
+        uint8 loanCount;      // to check limit of loans that can be taken
+        uint64 index;          // index
+        uint64 orderID;        // unique orderid to uniquely identify the order
         uint256 stakedAmount;   // amount Staked
         uint256 stakedTime;     // Time at which the user staked
-        uint256 index;          // index
+        uint256 windUpTime;     // to check time of windup started
+        uint256 loanStartTime;  // to keep a check in loan period
 
     }
 
-    mapping (uint256 => address) public  StakingOwnership; // orderid ==> address of user
-    mapping (uint256 => Staker) public StakingDetails;     //orderid ==> order details
-    mapping (uint256 => uint256[]) public cumilativeStakedDetails; // orderid ==> to store the cumilative amount of NRT stored per month
-    mapping (uint256 => uint256) public totalNrtMonthCount; // orderid ==> to keep tab on how many times NRT was received
+    mapping (uint64 => address) public  StakingOwnership; // orderid ==> address of user
+    mapping (uint64 => Staker) public StakingDetails;     //orderid ==> order details
+    mapping (uint64 => uint256[]) public cumilativeStakedDetails; // orderid ==> to store the cumilative amount of NRT stored per month
+    mapping (uint64 => uint256) public totalNrtMonthCount; // orderid ==> to keep tab on how many times NRT was received
 
-    uint256[] public OrderList;  // to store all active orders in which the state need to be changed monthly
+    uint64[] public OrderList;  // to store all active orders in which the state need to be changed monthly
   
 
 
@@ -345,7 +345,7 @@ contract Staking {
    * @dev Throws if not times up to close a contract
    * @param orderID to identify the unique staking contract
    */
-    modifier isWithinPeriod(uint256 orderID) {
+    modifier isWithinPeriod(uint64 orderID) {
         if (StakingDetails[orderID].isTwoYear) {
         require(now <= StakingDetails[orderID].stakedTime + 730 days,"Contract can only be ended after 2 years");
         }else {
@@ -358,7 +358,7 @@ contract Staking {
    * @dev To check if loan is initiated
    * @param orderID to identify the unique staking contract
    */
-   modifier isNoLoanTaken(uint256 orderID) {
+   modifier isNoLoanTaken(uint64 orderID) {
         require(StakingDetails[orderID].loan != true,"Loan is present");
         _;
     }
@@ -367,7 +367,7 @@ contract Staking {
    * @dev To check whether its valid staker 
    * @param orderID to identify the unique staking contract
    */
-   modifier onlyStakeOwner(uint256 orderID) {
+   modifier onlyStakeOwner(uint64 orderID) {
         require(StakingOwnership[orderID] == msg.sender,"Staking owner should be valid");
         _;
     }
@@ -378,19 +378,19 @@ contract Staking {
    * @return orderId of created 
    */
 
-    function createStakingContract(uint256 amount,bool isTwoYear) external returns (uint256) { 
-            OrderId = OrderId.add(1);
+    function createStakingContract(uint256 amount,bool isTwoYear) external returns (uint64) { 
+            OrderId = OrderId + 1;
             StakingOwnership[OrderId] = msg.sender;
-            uint index = OrderList.push(OrderId) - 1;
+            uint64 index = uint64(OrderList.push(OrderId) - 1);
             cumilativeStakedDetails[OrderId].push(amount);
             if (isTwoYear) {
             TwoYearStakerCount = TwoYearStakerCount.add(1);
             TwoYearStakedAmount = TwoYearStakedAmount.add(amount);
-            StakingDetails[OrderId] = Staker(0,true,false,0,0,OrderId,amount, now,index);
+            StakingDetails[OrderId] = Staker(true,false,0,index,OrderId,amount, now,0,0);
             }else {
             OneYearStakerCount = OneYearStakerCount.add(1);
             OneYearStakedAmount = OneYearStakedAmount.add(amount);
-            StakingDetails[OrderId] = Staker(0,false,false,0,0,OrderId,amount, now,index);
+            StakingDetails[OrderId] = Staker(false,false,0,index,OrderId,amount, now,0,0);
             }
             require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
             emit stakeCreation(OrderId,StakingOwnership[OrderId], amount);
@@ -403,7 +403,7 @@ contract Staking {
    * @return true if success
    */
 
-  function isOrderExist(uint256 orderId) public view returns(bool) {
+  function isOrderExist(uint64 orderId) public view returns(bool) {
       return OrderList[StakingDetails[orderId].index] == orderId;
  }
  
@@ -412,7 +412,7 @@ contract Staking {
    * @param orderId to identify unique staking contract
    * @return orderId of created 
    */
-  function takeLoan(uint256 orderId) onlyStakeOwner(orderId) isNoLoanTaken(orderId) isWithinPeriod(orderId) external returns (bool) {
+  function takeLoan(uint64 orderId) onlyStakeOwner(orderId) isNoLoanTaken(orderId) isWithinPeriod(orderId) external returns (bool) {
     require(isOrderExist(orderId),"The orderId should exist");
     require((StakingDetails[orderId].stakedTime).sub(now) >= 60 days,"Contract End is near");
     if (StakingDetails[orderId].isTwoYear) {
@@ -426,7 +426,7 @@ contract Staking {
     }
           StakingDetails[orderId].loan = true;
           StakingDetails[orderId].loanStartTime = now;
-          StakingDetails[orderId].loanCount = (StakingDetails[orderId].loanCount).add(1);
+          StakingDetails[orderId].loanCount = StakingDetails[orderId].loanCount + 1;
           // todo: check this transfer, it may not be doing as expected
           require(tokenContract.transfer(msg.sender,(StakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
           emit loanTaken(orderId);
@@ -439,7 +439,7 @@ contract Staking {
    * @return total repayment
    */
 
-  function calculateTotalPayment(uint256 orderId)  public view returns (uint256) {
+  function calculateTotalPayment(uint64 orderId)  public view returns (uint256) {
           require(isOrderExist(orderId),"The orderId should exist");
           return ((StakingDetails[orderId].stakedAmount).div(200)).mul(101);
       
@@ -449,7 +449,7 @@ contract Staking {
    * @param orderId to identify unique staking contract
    * @return total repayment
    */
-  function isEligibleForRepayment(uint256 orderId)  public view returns (bool) {
+  function isEligibleForRepayment(uint64 orderId)  public view returns (bool) {
           require(isOrderExist(orderId),"The orderId should exist");
           require(StakingDetails[orderId].loan == true,"User should have taken loan");
           require((StakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
@@ -460,7 +460,7 @@ contract Staking {
    * @param orderId to identify unique staking contract
    * @return true if success
    */
-  function rePayLoan(uint256 orderId) onlyStakeOwner(orderId) isWithinPeriod(orderId) external returns (bool) {
+  function rePayLoan(uint64 orderId) onlyStakeOwner(orderId) isWithinPeriod(orderId) external returns (bool) {
       require(isEligibleForRepayment(orderId),"The user should be eligible for repayment");
       StakingDetails[orderId].loan = false;
       StakingDetails[orderId].loanStartTime = 0;
@@ -485,10 +485,10 @@ contract Staking {
    * @return true if success
    */
 
-  function deleteRecord(uint256 orderId) internal returns (bool) {
+  function deleteRecord(uint64 orderId) internal returns (bool) {
       require(isOrderExist(orderId),"The orderId should exist");
-      uint256 rowToDelete = StakingDetails[orderId].index;
-      uint256 orderToMove = OrderList[OrderList.length-1];
+      uint64 rowToDelete = StakingDetails[orderId].index;
+      uint64 orderToMove = OrderList[OrderList.length-1];
       OrderList[rowToDelete] = orderToMove;
       StakingDetails[orderToMove].index = rowToDelete;
       OrderList.length--; 
@@ -502,7 +502,7 @@ contract Staking {
    * @return true if success
    */
 
-  function sendTokens(uint256 orderId, uint256 amount) internal returns (bool) {
+  function sendTokens(uint64 orderId, uint256 amount) internal returns (bool) {
       // todo: check this transfer, it may not be doing as expected
       require(tokenContract.transfer(StakingOwnership[orderId], amount),"The contract should send from its balance to the user");
       return true;
@@ -514,7 +514,7 @@ contract Staking {
    * @return true if success
    */
 
-  function windUpContract(uint256 orderId) onlyStakeOwner(orderId)  external returns (bool) {
+  function windUpContract(uint64 orderId) onlyStakeOwner(orderId)  external returns (bool) {
       require(isOrderExist(orderId),"The orderId should exist");
       require(StakingDetails[orderId].loan == false,"There should be no loan currently");
       require(StakingDetails[orderId].windUpTime == 0,"Windup Shouldn't be initiated currently");
@@ -939,12 +939,6 @@ function burnTokens() internal returns (bool){
    */
 
   function updateStakers() external returns(bool) {
-      // todo: every order in delist should be removed first
-      for (uint j = delList.length - 1;j > 0;j--)
-      {
-          deleteRecord(delList[j]);
-          delList.length--;
-      }
       uint temp;
       uint temp1;
       for (uint i = 0;i < OrderList.length; i++) {
