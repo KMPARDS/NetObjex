@@ -272,15 +272,30 @@ contract IERC20 {
 
 // File: contracts/Staking.sol
 
-// contract to manage staking of one year and two year stakers
-
-
+// contract to manage staking of one year and two year stakers
 
 // Database Design based on CRUD by Rob Hitchens . Refer : https://medium.com/@robhitchens/solidity-crud-part-1-824ffa69509a
 
 contract Staking {
     using SafeMath for uint256;
 
+    // Event to watch staking creations
+    event stakeCreation(
+    uint256 orderid,
+    address indexed ownerAddress,
+    uint256 value
+    );
+
+
+    // Event to watch loans repayed taken
+    event loanTaken(
+    uint256 orderid
+    );
+
+    // Event to watch wind up of contracts
+    event windupContract(
+    uint256 orderid
+    );
 
     IERC20  public tokenContract;  // Defining conract address so as to interact with EraswapToken
     address public eraswapToken;  // address of EraswapToken
@@ -378,6 +393,7 @@ contract Staking {
             StakingDetails[OrderId] = Staker(0,false,false,0,0,OrderId,amount, now,index);
             }
             require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
+            emit stakeCreation(OrderId,StakingOwnership[OrderId], amount);
             return OrderId;
         }
 
@@ -413,6 +429,7 @@ contract Staking {
           StakingDetails[orderId].loanCount = (StakingDetails[orderId].loanCount).add(1);
           // todo: check this transfer, it may not be doing as expected
           require(tokenContract.transfer(msg.sender,(StakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
+          emit loanTaken(orderId);
           return true;
       }
       
@@ -510,6 +527,7 @@ contract Staking {
           OneYearStakerCount = OneYearStakerCount.sub(1);
           OneYearStakedAmount = OneYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
     }
+      emit windupContract( orderId);
       return true;
   }
 }
@@ -538,7 +556,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     // Event to watch token redemption
     event sendToken(
     string pool,
-    address indexed sendedAddress,
+    address indexed sendAddress,
     uint256 value
     );
 
@@ -778,7 +796,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
     }
 
     /**
-    * @dev Function to trigger the release of montly NRT to different actors in the system
+    * @dev Function to trigger the release of monthly NRT to different actors in the system
     * 
     */
     function updateLuckpool(uint256 amount) external onlySigner(){
@@ -786,12 +804,61 @@ contract NRTManager is Ownable, SignerRole, Staking{
         luckPoolBal = luckPoolBal.add(amount);
     }
 
-    function receiveMonthlyNRT() external onlySigner() {
+    /**
+    * @dev Function to trigger to update  for burning of tokens
+    * 
+    */
+    function updateBurnBal(uint256 amount) external onlySigner(){
+        require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
+        burnTokenBal = burnTokenBal.add(amount);
+    }
+
+
+   /**
+   * @dev cleanup process after distribution
+   * @return true if success
+   */
+
+function cleanupAfterDistribution() internal returns (bool){
+      require(deleteList(),"It should delete all unwanted orders");
+      require(burnTokens(),"It should burn all unwanted tokens");
+}
+ 
+ 
+  /**
+   * @dev Should delete unwanted orders
+   * @return true if success
+   */
+
+function deleteList() internal returns (bool){
+      for (uint j = delList.length - 1;j > 0;j--)
+      {
+          deleteRecord(delList[j]);
+          delList.length--;
+      }
+      return true;
+}
+
+  /**
+   * @dev Should burn tokens
+   * @return true if success
+   */
+
+function burnTokens() internal returns (bool){
+      tokenContract.burn(burnTokenBal);
+      return true;
+}
+    /**
+   * @dev To invoke monthly release
+   * @return true if success
+   */
+
+    function receiveMonthlyNRT() external onlySigner() returns (bool) {
         require(tokenContract.balanceOf(address(this))>0,"NRT_Manger should have token balance");
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
         uint NRTBal = NRTBal.add(MonthlyReleaseNrt);
         require(NRTBal > 0, "It should be Non-Zero");
-        distribute_NRT(NRTBal);
+        require(distribute_NRT(NRTBal));
         if(monthCount == 11){
             monthCount = 0;
             AnnualReleaseNrt = (AnnualReleaseNrt.mul(9)).div(10);
@@ -799,12 +866,16 @@ contract NRTManager is Ownable, SignerRole, Staking{
         }
         else{
             monthCount = monthCount.add(1);
-        }        
+        }     
+        return true;   
     }
 
-
-    // function which is called internally to distribute tokens
-    function distribute_NRT(uint256 NRTBal) internal isNotZero(NRTBal){
+    /**
+   * @dev To invoke monthly release
+   * @param NRTBal Nrt balance to distribute
+   * @return true if success
+   */
+    function distribute_NRT(uint256 NRTBal) internal isNotZero(NRTBal) returns (bool){
         require(tokenContract.balanceOf(address(this))>=NRTBal,"NRT_Manger doesn't have token balance");
         NRTBal = NRTBal.add(luckPoolBal);
         
@@ -856,6 +927,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
         require(sendResearchAndDevelopment(),"Tokens should be succesfully send");
         require(sendBuzzCafe(),"Tokens should be succesfully send");
         require(sendPowerToken(),"Tokens should be succesfully send");
+        return true;
 
     }
 

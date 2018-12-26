@@ -9,6 +9,23 @@ import "./IERC20.sol";
 contract Staking {
     using SafeMath for uint256;
 
+    // Event to watch staking creations
+    event stakeCreation(
+    uint256 orderid,
+    address indexed ownerAddress,
+    uint256 value
+    );
+
+
+    // Event to watch loans repayed taken
+    event loanTaken(
+    uint256 orderid
+    );
+
+    // Event to watch wind up of contracts
+    event windupContract(
+    uint256 orderid
+    );
 
     IERC20  public tokenContract;  // Defining conract address so as to interact with EraswapToken
     address public eraswapToken;  // address of EraswapToken
@@ -106,6 +123,7 @@ contract Staking {
             StakingDetails[OrderId] = Staker(0,false,false,0,0,OrderId,amount, now,index);
             }
             require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
+            emit stakeCreation(OrderId,StakingOwnership[OrderId], amount);
             return OrderId;
         }
 
@@ -141,6 +159,7 @@ contract Staking {
           StakingDetails[orderId].loanCount = (StakingDetails[orderId].loanCount).add(1);
           // todo: check this transfer, it may not be doing as expected
           require(tokenContract.transfer(msg.sender,(StakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
+          emit loanTaken(orderId);
           return true;
       }
       
@@ -238,6 +257,7 @@ contract Staking {
           OneYearStakerCount = OneYearStakerCount.sub(1);
           OneYearStakedAmount = OneYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
     }
+      emit windupContract( orderId);
       return true;
   }
 }
