@@ -73,6 +73,8 @@ contract NRTManager is Ownable, SignerRole, Staking{
     uint256 public OneYearStakersBal;
     uint256 public TwoYearStakersBal;
 
+    address public eraswapToken;  // address of EraswapToken
+
    /**
    * @dev Throws if not a valid address
    */

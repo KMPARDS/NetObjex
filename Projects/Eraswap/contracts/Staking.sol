@@ -27,8 +27,8 @@ contract Staking {
     uint256 orderid
     );
 
-    IERC20  public tokenContract;  // Defining conract address so as to interact with EraswapToken
-    address public eraswapToken;  // address of EraswapToken
+    IERC20   tokenContract;  // Defining conract address so as to interact with EraswapToken
+    
 
     uint256 public luckPoolBal;    // Luckpool Balance
 
