@@ -92,6 +92,33 @@ contract NRTManager is Ownable, SignerRole, Staking{
     }
 
 
+     /**
+    * @dev Function to initialise the contract
+    * @param token Address of eraswaptoken
+    * @param pool Array of different pools
+    * NewTalentsAndPartnerships(pool[0]);
+    * PlatformMaintenance(pool[1]);
+    * MarketingAndRNR(pool[2]);
+    * KmPards(pool[3]);
+    * ContingencyFunds(pool[4]);
+    * ResearchAndDevelopment(pool[5]);
+    * BuzzCafe(pool[6]);
+    * PowerToken(pool[7]);
+    */
+
+    function setEraswapTokenAndPools(address token, address[] memory pool) public onlyOwner() isValidAddress(token){
+        eraswapToken = token;
+        tokenContract = IERC20(eraswapToken);
+         // Setting up different pools
+        setNewTalentsAndPartnerships(pool[0]);
+        setPlatformMaintenance(pool[1]);
+        setMarketingAndRNR(pool[2]);
+        setKmPards(pool[3]);
+        setContingencyFunds(pool[4]);
+        setResearchAndDevelopment(pool[5]);
+        setBuzzCafe(pool[6]);
+        setPowerToken(pool[7]);
+    }
     /**
     * @dev Function to initialise NewTalentsAndPartnerships pool address
     * @param pool_addr Address to be set 
@@ -468,31 +495,9 @@ function burnTokens() internal returns (bool){
 
     /**
     * @dev Constructor
-    * @param token Address of eraswaptoken
-    * @param pool Array of different pools
-    * NewTalentsAndPartnerships(pool[0]);
-    * PlatformMaintenance(pool[1]);
-    * MarketingAndRNR(pool[2]);
-    * KmPards(pool[3]);
-    * ContingencyFunds(pool[4]);
-    * ResearchAndDevelopment(pool[5]);
-    * BuzzCafe(pool[6]);
-    * PowerToken(pool[7]);
     */
 
-    constructor (address token, address[] memory pool) public{
-        require(token != address(0),"Token address must be defined");
-        // Setting up different pools
-        setNewTalentsAndPartnerships(pool[0]);
-        setPlatformMaintenance(pool[1]);
-        setMarketingAndRNR(pool[2]);
-        setKmPards(pool[3]);
-        setContingencyFunds(pool[4]);
-        setResearchAndDevelopment(pool[5]);
-        setBuzzCafe(pool[6]);
-        setPowerToken(pool[7]);
-        eraswapToken = token;
-        tokenContract = IERC20(eraswapToken);
+    constructor () public{
         releaseNrtTime = now.add(30 days + 6 hours);
         AnnualReleaseNrt = 81900000000000000;
         MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));
