@@ -410,12 +410,6 @@ function burnTokens() internal returns (bool){
    */
 
   function updateStakers() external returns(bool) {
-      // todo: every order in delist should be removed first
-      for (uint j = delList.length - 1;j > 0;j--)
-      {
-          deleteRecord(delList[j]);
-          delList.length--;
-      }
       uint temp;
       uint temp1;
       for (uint i = 0;i < OrderList.length; i++) {
