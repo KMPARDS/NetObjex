@@ -272,7 +272,9 @@ contract IERC20 {
 
 // File: contracts/Staking.sol
 
-// contract to manage staking of one year and two year stakers
+// contract to manage staking of one year and two year stakers
+
+
 
 // Database Design based on CRUD by Rob Hitchens . Refer : https://medium.com/@robhitchens/solidity-crud-part-1-824ffa69509a
 
