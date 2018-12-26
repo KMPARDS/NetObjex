@@ -281,7 +281,7 @@ contract Staking {
 
     // Event to watch staking creations
     event stakeCreation(
-    uint256 orderid,
+    uint64 orderid,
     address indexed ownerAddress,
     uint256 value
     );
@@ -289,12 +289,12 @@ contract Staking {
 
     // Event to watch loans repayed taken
     event loanTaken(
-    uint256 orderid
+    uint64 orderid
     );
 
     // Event to watch wind up of contracts
     event windupContract(
-    uint256 orderid
+    uint64 orderid
     );
 
     IERC20   tokenContract;  // Defining conract address so as to interact with EraswapToken
