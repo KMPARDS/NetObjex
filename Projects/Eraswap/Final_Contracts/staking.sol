@@ -860,7 +860,7 @@ function deleteList() internal returns (bool){
             OneYearStakedAmount = OneYearStakedAmount.add(amount);
             StakingDetails[OrderId] = Staker(false,false,0,index,OrderId,amount, now,0,0);
             }
-            require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
+            require(tokenContract.transferFrom(msg.sender,address(this), amount), "The token transfer should be done");
             emit stakeCreation(OrderId,StakingOwnership[OrderId], amount);
             return OrderId;
         }
@@ -897,7 +897,7 @@ function deleteList() internal returns (bool){
           StakingDetails[orderId].loanStartTime = now;
           StakingDetails[orderId].loanCount = StakingDetails[orderId].loanCount + 1;
           // todo: check this transfer, it may not be doing as expected
-          require(tokenContract.transfer(msg.sender,(StakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
+          require(tokenContract.transferFrom(address(this),msg.sender,(StakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
           emit loanTaken(orderId);
           return true;
       }
@@ -945,7 +945,7 @@ function deleteList() internal returns (bool){
           OneYearStakedAmount = OneYearStakedAmount.add(StakingDetails[orderId].stakedAmount);
       }
           // todo: check this transfer, it may not be doing as expected
-          require(tokenContract.transfer(address(this),calculateRepaymentTotalPayment(orderId)),"The contract should receive loan amount with interest");
+          require(tokenContract.transferFrom(msg.sender,address(this),calculateRepaymentTotalPayment(orderId)),"The contract should receive loan amount with interest");
           return true;
   }
 
@@ -976,7 +976,7 @@ function deleteList() internal returns (bool){
 
   function sendTokens(uint64 orderId, uint256 amount) internal returns (bool) {
       // todo: check this transfer, it may not be doing as expected
-      require(tokenContract.transfer(StakingOwnership[orderId], amount),"The contract should send from its balance to the user");
+      require(tokenContract.transferFrom(address(this),StakingOwnership[orderId], amount),"The contract should send from its balance to the user");
       return true;
   }
   
