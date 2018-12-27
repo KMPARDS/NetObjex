@@ -594,6 +594,11 @@ contract NRTManager is Ownable, SignerRole{
    */
 
 function burnTokens() internal returns (bool){
+
+      if(burnTokenBal == 0){
+          return true;
+      }
+      else{
       uint temp = (TotalCirculation.mul(2)).div(100);   // max amount permitted to burn in a month
       if(temp >= burnTokenBal ){
           tokenContract.burn(burnTokenBal);
@@ -604,6 +609,7 @@ function burnTokens() internal returns (bool){
           tokenContract.burn(temp);
       }
       return true;
+      }
 }
 
         /**
