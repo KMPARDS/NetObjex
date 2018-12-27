@@ -114,7 +114,7 @@ contract Staking {
    * @dev Should delete unwanted orders
    * @return true if success
    */
-
+// todo recheck the limit for this
 function deleteList() internal returns (bool){
       for (uint j = delList.length - 1;j > 0;j--)
       {
@@ -167,12 +167,13 @@ function deleteList() internal returns (bool){
    */
   function takeLoan(uint64 orderId) onlyStakeOwner(orderId) isNoLoanTaken(orderId) isWithinPeriod(orderId) external returns (bool) {
     require(isOrderExist(orderId),"The orderId should exist");
-    require((StakingDetails[orderId].stakedTime).sub(now) >= 60 days,"Contract End is near");
     if (StakingDetails[orderId].isTwoYear) {
+          require(((StakingDetails[orderId].stakedTime).add(730 days)).sub(now) >= 60 days,"Contract End is near");
           require(StakingDetails[orderId].loanCount <= 1,"only one loan per year is allowed");        
           TwoYearStakerCount = TwoYearStakerCount.sub(1);
           TwoYearStakedAmount = TwoYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
     }else {
+          require(((StakingDetails[orderId].stakedTime).add(365 days)).sub(now) >= 60 days,"Contract End is near");
           require(StakingDetails[orderId].loanCount == 0,"only one loan per year is allowed");        
           OneYearStakerCount = OneYearStakerCount.sub(1);
           OneYearStakedAmount = OneYearStakedAmount.sub(StakingDetails[orderId].stakedAmount);
@@ -288,6 +289,7 @@ function deleteList() internal returns (bool){
   }
 
 function preStakingDistribution() internal returns(bool){
+    require(deleteList(),"should update lists");
     uint256 temp = NRTContract.stakersBal();
     if(temp == 0)
     {
