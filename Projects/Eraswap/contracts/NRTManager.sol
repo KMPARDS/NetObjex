@@ -1,8 +1,9 @@
 pragma solidity ^0.4.24;
 
+import "./IERC20.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 import "openzeppelin-solidity/contracts/access/roles/SignerRole.sol";
-import "./Staking.sol";
 
 
 /**
@@ -14,10 +15,11 @@ import "./Staking.sol";
 
 
 // The contract addresses of different pools
-contract NRTManager is Ownable, SignerRole, Staking{
+contract NRTManager is Ownable, SignerRole{
     using SafeMath for uint256;
 
     uint256 releaseNrtTime; // variable to check release date
+    IERC20   tokenContract;  // Defining conract address so as to interact with EraswapToken
 
     // Variables to keep track of tokens released
     uint256 MonthlyReleaseNrt;
@@ -67,16 +69,21 @@ contract NRTManager is Ownable, SignerRole, Staking{
     uint256 public timeTradersBal;
     uint256 public daySwappersBal;
     uint256 public buzzCafeBal;
-    uint256 public stakersBal;
+    uint256 public stakersBal; 
+    uint256 public luckPoolBal;    // Luckpool Balance
 
     // Total staking balances after NRT release
     uint256 public OneYearStakersBal;
     uint256 public TwoYearStakersBal;
+    
+    uint256 public burnTokenBal;// tokens to be burned
 
     address public eraswapToken;  // address of EraswapToken
+    address public stakingContract;
 
    /**
    * @dev Throws if not a valid address
+   * @param addr address
    */
     modifier isValidAddress(address addr) {
         require(addr != address(0),"It should be a valid address");
@@ -85,40 +92,13 @@ contract NRTManager is Ownable, SignerRole, Staking{
 
    /**
    * @dev Throws if the value is zero
+   * @param value alue to be checked
    */
     modifier isNotZero(uint256 value) {
         require(value != 0,"It should be non zero");
         _;
     }
 
-
-     /**
-    * @dev Function to initialise the contract
-    * @param token Address of eraswaptoken
-    * @param pool Array of different pools
-    * NewTalentsAndPartnerships(pool[0]);
-    * PlatformMaintenance(pool[1]);
-    * MarketingAndRNR(pool[2]);
-    * KmPards(pool[3]);
-    * ContingencyFunds(pool[4]);
-    * ResearchAndDevelopment(pool[5]);
-    * BuzzCafe(pool[6]);
-    * PowerToken(pool[7]);
-    */
-
-    function setEraswapTokenAndPools(address token, address[] memory pool) public onlyOwner() isValidAddress(token){
-        eraswapToken = token;
-        tokenContract = IERC20(eraswapToken);
-         // Setting up different pools
-        setNewTalentsAndPartnerships(pool[0]);
-        setPlatformMaintenance(pool[1]);
-        setMarketingAndRNR(pool[2]);
-        setKmPards(pool[3]);
-        setContingencyFunds(pool[4]);
-        setResearchAndDevelopment(pool[5]);
-        setBuzzCafe(pool[6]);
-        setPowerToken(pool[7]);
-    }
     /**
     * @dev Function to initialise NewTalentsAndPartnerships pool address
     * @param pool_addr Address to be set 
@@ -296,8 +276,33 @@ contract NRTManager is Ownable, SignerRole, Staking{
     }
 
     /**
+    * @dev Function to update staking contract address
+    * @param token Address to be set 
+    */
+    function setStakingContract(address token) external onlyOwner() isValidAddress(token){
+        stakingContract = token;
+        emit ChangingPoolAddress("stakingContract",stakingContract);
+    }
+
+    /**
+    * @dev Function to send powerToken balance
+    */
+    function sendStakingContract() internal  isValidAddress(stakingContract) 
+    returns(bool){
+        emit sendToken("staking contract",stakingContract,stakersBal);
+        require(tokenContract.transfer(stakingContract, stakersBal),"The transfer must not fail");
+        return true;
+    }
+
+    function resetStaking() external returns(bool) {
+        require(msg.sender == stakingContract , "shoul reset staking " );
+        stakersBal = 0;
+        return true;
+    }
+
+    /**
     * @dev Function to trigger the release of monthly NRT to different actors in the system
-    * 
+    * @param amount amount to be updated
     */
     function updateLuckpool(uint256 amount) external onlySigner(){
         require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
@@ -306,7 +311,7 @@ contract NRTManager is Ownable, SignerRole, Staking{
 
     /**
     * @dev Function to trigger to update  for burning of tokens
-    * 
+    * @param amount amount to be updated
     */
     function updateBurnBal(uint256 amount) external onlySigner(){
         require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
@@ -314,33 +319,8 @@ contract NRTManager is Ownable, SignerRole, Staking{
     }
 
 
-   /**
-   * @dev cleanup process after distribution
-   * @return true if success
-   */
-
-function cleanupAfterDistribution() internal returns (bool){
-      require(deleteList(),"It should delete all unwanted orders");
-      require(burnTokens(),"It should burn all unwanted tokens");
-}
- 
- 
-  /**
-   * @dev Should delete unwanted orders
-   * @return true if success
-   */
-
-function deleteList() internal returns (bool){
-      for (uint j = delList.length - 1;j > 0;j--)
-      {
-          deleteRecord(delList[j]);
-          delList.length--;
-      }
-      return true;
-}
-
-  /**
-   * @dev Should burn tokens
+      /**
+   * @dev Should burn tokens according to the total circulation
    * @return true if success
    */
 
@@ -348,7 +328,8 @@ function burnTokens() internal returns (bool){
       tokenContract.burn(burnTokenBal);
       return true;
 }
-    /**
+
+        /**
    * @dev To invoke monthly release
    * @return true if success
    */
@@ -358,6 +339,7 @@ function burnTokens() internal returns (bool){
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
         uint NRTBal = NRTBal.add(MonthlyReleaseNrt);
         require(NRTBal > 0, "It should be Non-Zero");
+
         require(distribute_NRT(NRTBal));
         if(monthCount == 11){
             monthCount = 0;
@@ -394,20 +376,6 @@ function burnTokens() internal returns (bool){
         powerTokenBal = powerTokenBal.add((NRTBal.mul(10)).div(100));
         stakersBal = stakersBal.add((NRTBal.mul(15)).div(100));
 
-        // Updating one and 2 year balances
-
-        if(OneYearStakerCount>0)
-        {
-        TotalStakerCount = OneYearStakerCount.add(TwoYearStakerCount);
-        OneYearStakersBal = (stakersBal.mul(OneYearStakerCount)).div(TotalStakerCount);
-        TwoYearStakersBal = (stakersBal.mul(TwoYearStakerCount)).div(TotalStakerCount);
-        luckPoolBal = (OneYearStakersBal.mul(2)).div(15);
-        OneYearStakersBal = OneYearStakersBal.sub(luckPoolBal);
-        }
-        else{
-            TwoYearStakersBal = stakersBal;
-        }
-
         
 
         // Reseting NRT
@@ -427,77 +395,39 @@ function burnTokens() internal returns (bool){
         require(sendResearchAndDevelopment(),"Tokens should be succesfully send");
         require(sendBuzzCafe(),"Tokens should be succesfully send");
         require(sendPowerToken(),"Tokens should be succesfully send");
+        require(sendStakingContract(),"Tokens should be succesfully send");
         return true;
 
     }
 
-    /**
-   * @dev Should update all the stakers state
-   * @return true if success
-   */
-
-  function updateStakers() external returns(bool) {
-      uint temp;
-      uint temp1;
-      for (uint i = 0;i < OrderList.length; i++) {
-          if (StakingDetails[OrderList[i]].windUpTime > 0) {
-                // should distribute 104th of staked amount
-                if(StakingDetails[OrderList[i]].windUpTime < now){
-                temp = ((StakingDetails[OrderList[i]].windUpTime.sub(StakingDetails[OrderList[i]].stakedTime)).div(104 weeks))
-                        .mul(StakingDetails[OrderList[i]].stakedAmount);
-                delList.push(OrderList[i]);
-                }
-                else{
-                temp = ((now.sub(StakingDetails[OrderList[i]].stakedTime)).div(104 weeks)).mul(StakingDetails[OrderList[i]].stakedAmount);
-                StakingDetails[OrderList[i]].stakedTime = now;
-                }
-                sendTokens(OrderList[i],temp);
-          }else if (StakingDetails[OrderList[i]].loan && (StakingDetails[OrderList[i]].loanStartTime > 60 days) ) {
-              burnTokenBal = burnTokenBal.add((StakingDetails[OrderList[i]].stakedAmount).div(2));
-              delList.push(OrderList[i]);
-          }else if(StakingDetails[OrderList[i]].loan){
-              continue;
-          }
-          else if (StakingDetails[OrderList[i]].isTwoYear) {
-                // transfers half of the NRT received back to user and half is staked back to pool
-                totalNrtMonthCount[OrderList[i]] = totalNrtMonthCount[OrderList[i]].add(1);
-                temp = (((StakingDetails[OrderList[i]].stakedAmount).div(TwoYearStakedAmount)).mul(TwoYearStakersBal)).div(2);
-                if(cumilativeStakedDetails[OrderList[i]].length < 24){
-                cumilativeStakedDetails[OrderList[i]].push(temp);
-                sendTokens(OrderList[i],temp);
-                }
-                else{
-                    temp1 = temp;
-                    temp = temp.add(cumilativeStakedDetails[OrderList[i]][totalNrtMonthCount[OrderList[i]] % 24]); 
-                    cumilativeStakedDetails[OrderList[i]][totalNrtMonthCount[OrderList[i]] % 24] = temp1; 
-                    sendTokens(OrderList[i],temp);
-                }
-          }else {
-              // should distribute the proporsionate amount of staked value for one year
-              totalNrtMonthCount[OrderList[i]] = totalNrtMonthCount[OrderList[i]].add(1);
-              temp = (((StakingDetails[OrderList[i]].stakedAmount).div(OneYearStakedAmount)).mul(OneYearStakersBal)).div(2);
-              if(cumilativeStakedDetails[OrderList[i]].length < 12){
-              cumilativeStakedDetails[OrderList[i]].push(temp);
-              sendTokens(OrderList[i],temp);
-              }
-              else{
-                    temp1 = temp;
-                    temp = temp.add(cumilativeStakedDetails[OrderList[i]][totalNrtMonthCount[OrderList[i]] % 12]); 
-                    cumilativeStakedDetails[OrderList[i]][totalNrtMonthCount[OrderList[i]] % 12] = temp1; 
-                    sendTokens(OrderList[i],temp);
-                }
-          }
-      }
-      return true;
-  }
-
-
 
     /**
     * @dev Constructor
+    * @param token Address of eraswaptoken
+    * @param pool Array of different pools
+    * NewTalentsAndPartnerships(pool[0]);
+    * PlatformMaintenance(pool[1]);
+    * MarketingAndRNR(pool[2]);
+    * KmPards(pool[3]);
+    * ContingencyFunds(pool[4]);
+    * ResearchAndDevelopment(pool[5]);
+    * BuzzCafe(pool[6]);
+    * PowerToken(pool[7]);
     */
 
-    constructor () public{
+    constructor (address token, address[] memory pool) public{
+        require(token != address(0),"address should be valid");
+        eraswapToken = token;
+        tokenContract = IERC20(eraswapToken);
+         // Setting up different pools
+        setNewTalentsAndPartnerships(pool[0]);
+        setPlatformMaintenance(pool[1]);
+        setMarketingAndRNR(pool[2]);
+        setKmPards(pool[3]);
+        setContingencyFunds(pool[4]);
+        setResearchAndDevelopment(pool[5]);
+        setBuzzCafe(pool[6]);
+        setPowerToken(pool[7]);
         releaseNrtTime = now.add(30 days + 6 hours);
         AnnualReleaseNrt = 81900000000000000;
         MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));
