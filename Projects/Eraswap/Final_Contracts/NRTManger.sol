@@ -23,7 +23,7 @@ contract IERC20 {
     external returns (bool);
 
 
-  function burn(uint256 value) external ;
+  function burn(uint256 value) external;
 
  
   function burnFrom(address from, uint256 value) external;
@@ -345,7 +345,9 @@ contract NRTManager is Ownable, SignerRole{
     uint256 public burnTokenBal;// tokens to be burned
 
     address public eraswapToken;  // address of EraswapToken
-    address public stakingContract;
+    address public stakingContract; //address of Staking Contract
+
+    uint256 public TotalCirculation = 910000000000000000000000000; // 910 million
 
    /**
    * @dev Throws if not a valid address
@@ -579,9 +581,10 @@ contract NRTManager is Ownable, SignerRole{
     * @dev Function to trigger to update  for burning of tokens
     * @param amount amount to be updated
     */
-    function updateBurnBal(uint256 amount) external onlySigner(){
+    function updateBurnBal(uint256 amount) external onlySigner() returns(bool){
         require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
         burnTokenBal = burnTokenBal.add(amount);
+        return true;
     }
 
 
@@ -591,7 +594,15 @@ contract NRTManager is Ownable, SignerRole{
    */
 
 function burnTokens() internal returns (bool){
-      tokenContract.burn(burnTokenBal);
+      uint temp = (TotalCirculation.mul(2)).div(100);   // max amount permitted to burn in a month
+      if(temp >= burnTokenBal ){
+          tokenContract.burn(burnTokenBal);
+          burnTokenBal = 0;
+      }
+      else{
+          burnTokenBal = burnTokenBal.sub(temp);
+          tokenContract.burn(temp);
+      }
       return true;
 }
 
@@ -604,6 +615,7 @@ function burnTokens() internal returns (bool){
         require(tokenContract.balanceOf(address(this))>0,"NRT_Manger should have token balance");
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
         uint NRTBal = NRTBal.add(MonthlyReleaseNrt);
+        TotalCirculation = TotalCirculation.add(NRTBal);
         require(NRTBal > 0, "It should be Non-Zero");
 
         require(distribute_NRT(NRTBal));
@@ -662,6 +674,7 @@ function burnTokens() internal returns (bool){
         require(sendBuzzCafe(),"Tokens should be succesfully send");
         require(sendPowerToken(),"Tokens should be succesfully send");
         require(sendStakingContract(),"Tokens should be succesfully send");
+        require(burnTokens(),"Should burns 2% of token in circulation");
         return true;
 
     }

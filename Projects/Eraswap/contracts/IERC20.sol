@@ -21,7 +21,7 @@ contract IERC20 {
     external returns (bool);
 
 
-  function burn(uint256 value) external ;
+  function burn(uint256 value) external;
 
  
   function burnFrom(address from, uint256 value) external;

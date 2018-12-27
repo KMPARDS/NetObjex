@@ -23,7 +23,7 @@ contract IERC20 {
     external returns (bool);
 
 
-  function burn(uint256 value) external ;
+  function burn(uint256 value) external;
 
  
   function burnFrom(address from, uint256 value) external;
@@ -345,7 +345,9 @@ contract NRTManager is Ownable, SignerRole{
     uint256 public burnTokenBal;// tokens to be burned
 
     address public eraswapToken;  // address of EraswapToken
-    address public stakingContract;
+    address public stakingContract; //address of Staking Contract
+
+    uint256 public TotalCirculation = 910000000000000000000000000; // 910 million
 
    /**
    * @dev Throws if not a valid address
@@ -579,9 +581,10 @@ contract NRTManager is Ownable, SignerRole{
     * @dev Function to trigger to update  for burning of tokens
     * @param amount amount to be updated
     */
-    function updateBurnBal(uint256 amount) external onlySigner(){
+    function updateBurnBal(uint256 amount) external onlySigner() returns(bool){
         require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
         burnTokenBal = burnTokenBal.add(amount);
+        return true;
     }
 
 
@@ -591,7 +594,15 @@ contract NRTManager is Ownable, SignerRole{
    */
 
 function burnTokens() internal returns (bool){
-      tokenContract.burn(burnTokenBal);
+      uint temp = (TotalCirculation.mul(2)).div(100);   // max amount permitted to burn in a month
+      if(temp >= burnTokenBal ){
+          tokenContract.burn(burnTokenBal);
+          burnTokenBal = 0;
+      }
+      else{
+          burnTokenBal = burnTokenBal.sub(temp);
+          tokenContract.burn(temp);
+      }
       return true;
 }
 
@@ -604,6 +615,7 @@ function burnTokens() internal returns (bool){
         require(tokenContract.balanceOf(address(this))>0,"NRT_Manger should have token balance");
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
         uint NRTBal = NRTBal.add(MonthlyReleaseNrt);
+        TotalCirculation = TotalCirculation.add(NRTBal);
         require(NRTBal > 0, "It should be Non-Zero");
 
         require(distribute_NRT(NRTBal));
@@ -662,6 +674,7 @@ function burnTokens() internal returns (bool){
         require(sendBuzzCafe(),"Tokens should be succesfully send");
         require(sendPowerToken(),"Tokens should be succesfully send");
         require(sendStakingContract(),"Tokens should be succesfully send");
+        require(burnTokens(),"Should burns 2% of token in circulation");
         return true;
 
     }
@@ -747,7 +760,6 @@ contract Staking {
     uint256 public TwoYearStakedAmount;
 
     // Burn away token count
-    uint256 public burnTokenBal;
     uint64[] public delList;
 
     // Total staking balances after NRT release
@@ -895,8 +907,9 @@ function deleteList() internal returns (bool){
    * @return total repayment
    */
 
-  function calculateTotalPayment(uint64 orderId)  public view returns (uint256) {
-          require(isOrderExist(orderId),"The orderId should exist");
+  function calculateRepaymentTotalPayment(uint64 orderId)  public view returns (uint256) {
+          require(isOrderExist(orderId) == true,"The orderId should exist");
+          require((StakingDetails[orderId].loan && (StakingDetails[orderId].loanStartTime < now.add(60 days))) == true,"should have loan");
           return ((StakingDetails[orderId].stakedAmount).div(200)).mul(101);
       
   }
@@ -906,7 +919,7 @@ function deleteList() internal returns (bool){
    * @return total repayment
    */
   function isEligibleForRepayment(uint64 orderId)  public view returns (bool) {
-          require(isOrderExist(orderId),"The orderId should exist");
+          require(isOrderExist(orderId) == true,"The orderId should exist");
           require(StakingDetails[orderId].loan == true,"User should have taken loan");
           require((StakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
           return true;
@@ -917,7 +930,7 @@ function deleteList() internal returns (bool){
    * @return true if success
    */
   function rePayLoan(uint64 orderId) onlyStakeOwner(orderId) isWithinPeriod(orderId) external returns (bool) {
-      require(isEligibleForRepayment(orderId),"The user should be eligible for repayment");
+      require(isEligibleForRepayment(orderId) == true,"The user should be eligible for repayment");
       StakingDetails[orderId].loan = false;
       StakingDetails[orderId].loanStartTime = 0;
       luckPoolBal = luckPoolBal.add((StakingDetails[orderId].stakedAmount).div(200));
@@ -929,7 +942,7 @@ function deleteList() internal returns (bool){
           OneYearStakedAmount = OneYearStakedAmount.add(StakingDetails[orderId].stakedAmount);
       }
           // todo: check this transfer, it may not be doing as expected
-          require(tokenContract.transfer(address(this),calculateTotalPayment(orderId)),"The contract should receive loan amount with interest");
+          require(tokenContract.transfer(address(this),calculateRepaymentTotalPayment(orderId)),"The contract should receive loan amount with interest");
           return true;
   }
 
@@ -942,7 +955,7 @@ function deleteList() internal returns (bool){
    */
 
   function deleteRecord(uint64 orderId) internal returns (bool) {
-      require(isOrderExist(orderId),"The orderId should exist");
+      require(isOrderExist(orderId) == true,"The orderId should exist");
       uint64 rowToDelete = StakingDetails[orderId].index;
       uint64 orderToMove = OrderList[OrderList.length-1];
       OrderList[rowToDelete] = orderToMove;
@@ -971,7 +984,7 @@ function deleteList() internal returns (bool){
    */
 
   function windUpContract(uint64 orderId) onlyStakeOwner(orderId)  external returns (bool) {
-      require(isOrderExist(orderId),"The orderId should exist");
+      require(isOrderExist(orderId) == true,"The orderId should exist");
       require(StakingDetails[orderId].loan == false,"There should be no loan currently");
       require(StakingDetails[orderId].windUpTime == 0,"Windup Shouldn't be initiated currently");
       StakingDetails[orderId].windUpTime = now + 104 weeks; // time at which all the transfer must be finished
@@ -1011,11 +1024,12 @@ function preStakingDistribution() internal returns(bool){
    * @dev Should update all the stakers state
    * @return true if success
    */
-
+//todo should send burn tokens to nrt and update burn balance
   function updateStakers() external returns(bool) {
       uint temp;
       uint temp1;
-      require(preStakingDistribution(),"pre staking disribution should be done");
+      uint256 burnTokenBal;
+      require(preStakingDistribution() == true,"pre staking disribution should be done");
       for (uint i = 0;i < OrderList.length; i++) {
           if (StakingDetails[OrderList[i]].windUpTime > 0) {
                 // should distribute 104th of staked amount
@@ -1065,6 +1079,8 @@ function preStakingDistribution() internal returns(bool){
                 }
           }
       }
+      require(NRTContract.updateBurnBal(burnTokenBal),"updating burnable token");
+      burnTokenBal = 0;
       return true;
   }
 
