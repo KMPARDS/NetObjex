@@ -686,14 +686,15 @@ contract ERC20Pausable is ERC20, Pausable {
 // File: contracts/EraswapToken.sol
 
 contract EraswapToken is ERC20Detailed , ERC20Burnable ,ERC20Capped ,ERC20Pausable {
-    string private _name;
-    string private _symbol;
-    uint8 private _decimals;
+    string private _name = "Eraswap";
+    string private _symbol = "EST";
+    uint8 private _decimals = 18;
+    uint256 private _cap = 9100000000000000000000000000;
 
-    constructor (string  name, string  symbol, uint8  decimals, uint256 cap) public
-    ERC20Detailed(name ,symbol ,decimals)
-    ERC20Capped(cap){
-        _mint(msg.sender, cap);
+    constructor() public
+    ERC20Detailed(_name ,_symbol ,_decimals)
+    ERC20Capped(_cap){
+        _mint(msg.sender, _cap);
     }
 
 }
