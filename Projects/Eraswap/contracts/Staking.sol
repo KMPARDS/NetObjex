@@ -193,9 +193,11 @@ function deleteList() internal returns (bool){
    */
 
   function calculateRepaymentTotalPayment(uint64 orderId)  public view returns (uint256) {
-          require(isOrderExist(orderId) == true,"The orderId should exist");
-          require((StakingDetails[orderId].loan && (StakingDetails[orderId].loanStartTime < now.add(60 days))) == true,"should have loan");
-          return ((StakingDetails[orderId].stakedAmount).div(200)).mul(101);
+          uint temp;
+          require(isOrderExist(orderId),"The orderId should exist");
+          require((StakingDetails[orderId].loan && (StakingDetails[orderId].loanStartTime < now.add(60 days))),"should have loan");
+          temp = ((StakingDetails[orderId].stakedAmount).div(200)).mul(101);
+          return temp;
       
   }
    /**
