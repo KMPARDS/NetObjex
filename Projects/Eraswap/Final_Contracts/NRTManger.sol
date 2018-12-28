@@ -459,8 +459,8 @@ contract NRTManager is Ownable, SignerRole{
     /**
    * @dev should send tokens to the user
    * @param text text to be emited
-   * @param amount amount to be send
    * @param addr address of pool to be send
+   * @param amount amount to be send
    * @return true if success
    */
 
@@ -474,12 +474,12 @@ contract NRTManager is Ownable, SignerRole{
    * @dev should send tokens to the user
    * @param text text to be emited
    * @param amount amount to be send
-   * @param addr address of pool to be send
+   * @param fromAddr address of pool to be send
    * @return true if success
    */
 
   function receiveTokens(string text,  address fromAddr ,uint256 amount) internal returns (bool) {
-        emit sendToken(text,addr,amount);
+        emit receiveToken(text,fromAddr,amount);
         require(tokenContract.transferFrom(fromAddr,address(this), amount), "The token transfer should be done");
         return true;
   }

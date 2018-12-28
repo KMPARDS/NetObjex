@@ -108,7 +108,47 @@ contract Staking {
         _;
     }
 
-       
+    
+ /**
+   * @dev Function to delete a particular order
+   * @param orderId to identify unique staking contract
+   * @return true if success
+   */
+
+  function deleteRecord(uint256 orderId) internal returns (bool) {
+      require(isOrderExist(orderId) == true,"The orderId should exist");
+      uint256 rowToDelete = StakingDetails[orderId].index;
+      uint256 orderToMove = OrderList[OrderList.length-1];
+      OrderList[rowToDelete] = orderToMove;
+      StakingDetails[orderToMove].index = rowToDelete;
+      OrderList.length--; 
+      return true;
+  }
+
+   /**
+   * @dev should send tokens to the user
+   * @param orderId to identify unique staking contract
+   * @param amount amount to be send
+   * @return true if success
+   */
+
+  function sendTokens(uint256 orderId, uint256 amount) internal returns (bool) {
+      // todo: check this transfer, it may not be doing as expected
+      require(tokenContract.transfer(StakingOwnership[orderId], amount),"The contract should send from its balance to the user");
+      return true;
+  }
+
+    /**
+   * @dev should send tokens to the user
+   * @param amount amount to be send
+   * @param fromAddr address of pool to be send
+   * @return true if success
+   */
+
+  function receiveTokens( address fromAddr ,uint256 amount) internal returns (bool) {
+        require(tokenContract.transferFrom(fromAddr,address(this), amount), "The token transfer should be done");
+        return true;
+  } 
  
   /**
    * @dev Should delete unwanted orders
@@ -146,8 +186,8 @@ function deleteList() internal returns (bool){
             OneYearStakedAmount = OneYearStakedAmount.add(amount);
             StakingDetails[OrderId] = Staker(false,false,0,index,OrderId,amount, now,0,0);
             }
-            
-            require(tokenContract.transferFrom(msg.sender,address(this), amount), "The token transfer should be done");
+
+            require(receiveTokens(msg.sender, amount), "The token transfer should be done");
             emit stakeCreation(OrderId,StakingOwnership[OrderId], amount);
             return OrderId;
         }
@@ -232,40 +272,12 @@ function deleteList() internal returns (bool){
           OneYearStakedAmount = OneYearStakedAmount.add(StakingDetails[orderId].stakedAmount);
       }
           // todo: check this transfer, it may not be doing as expected
-          require(tokenContract.transferFrom(msg.sender,address(this),calculateRepaymentTotalPayment(orderId)),"The contract should receive loan amount with interest");
+          require(receiveTokens(msg.sender, calculateRepaymentTotalPayment(orderId)), "The contract should receive loan amount with interest");
           return true;
   }
 
 
 
- /**
-   * @dev Function to delete a particular order
-   * @param orderId to identify unique staking contract
-   * @return true if success
-   */
-
-  function deleteRecord(uint256 orderId) internal returns (bool) {
-      require(isOrderExist(orderId) == true,"The orderId should exist");
-      uint256 rowToDelete = StakingDetails[orderId].index;
-      uint256 orderToMove = OrderList[OrderList.length-1];
-      OrderList[rowToDelete] = orderToMove;
-      StakingDetails[orderToMove].index = rowToDelete;
-      OrderList.length--; 
-      return true;
-  }
-
-   /**
-   * @dev should send tokens to the user
-   * @param orderId to identify unique staking contract
-   * @param amount amount to be send
-   * @return true if success
-   */
-
-  function sendTokens(uint256 orderId, uint256 amount) internal returns (bool) {
-      // todo: check this transfer, it may not be doing as expected
-      require(tokenContract.transfer(StakingOwnership[orderId], amount),"The contract should send from its balance to the user");
-      return true;
-  }
   
 /**
    * @dev Function to windup an active contact
