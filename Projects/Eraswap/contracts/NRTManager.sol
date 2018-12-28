@@ -18,10 +18,10 @@ import "openzeppelin-solidity/contracts/access/roles/SignerRole.sol";
 contract NRTManager is Ownable, SignerRole{
     using SafeMath for uint256;
 
-    uint256 releaseNrtTime; // variable to check release date
-    IERC20   tokenContract;  // Defining conract address so as to interact with EraswapToken
+    IERC20 tokenContract;  // Defining conract address so as to interact with EraswapToken
 
     // Variables to keep track of tokens released
+    uint256 releaseNrtTime; // variable to check release date
     uint256 MonthlyReleaseNrt;
     uint256 AnnualReleaseNrt;
     uint256 monthCount;
@@ -45,6 +45,7 @@ contract NRTManager is Ownable, SignerRole{
     );
 
 
+    // different pool address
     address public newTalentsAndPartnerships;
     address public platformMaintenance;
     address public marketingAndRNR;
