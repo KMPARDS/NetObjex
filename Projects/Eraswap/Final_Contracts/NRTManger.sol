@@ -299,6 +299,13 @@ contract NRTManager is Ownable, SignerRole{
     uint256 value
     );
 
+    // Event to watch token redemption
+    event receiveToken(
+    string pool,
+    address indexed sendAddress,
+    uint256 value
+    );
+
     // Event To watch pool address change
     event ChangingPoolAddress(
     string pool,
@@ -339,7 +346,7 @@ contract NRTManager is Ownable, SignerRole{
     address public eraswapToken;  // address of EraswapToken
     address public stakingContract; //address of Staking Contract
 
-    uint256 public TotalCirculation = 910000000000000000000000000; // 910 million
+    uint256 public TotalCirculation = 910000000000000000000000000; // 910 million which was intially distributed in ICO
 
    /**
    * @dev Throws if not a valid address
@@ -464,6 +471,20 @@ contract NRTManager is Ownable, SignerRole{
   }
 
      /**
+   * @dev should send tokens to the user
+   * @param text text to be emited
+   * @param amount amount to be send
+   * @param addr address of pool to be send
+   * @return true if success
+   */
+
+  function receiveTokens(string text,  address fromAddr ,uint256 amount) internal returns (bool) {
+        emit sendToken(text,addr,amount);
+        require(tokenContract.transferFrom(fromAddr,address(this), amount), "The token transfer should be done");
+        return true;
+  }
+
+     /**
    * @dev to reset Staking amount
    * @return true if success
    */
@@ -488,7 +509,7 @@ contract NRTManager is Ownable, SignerRole{
     * @param amount amount to be updated
     */
     function updateLuckpool(uint256 amount) external onlySigner() returns(bool){
-        require(tokenContract.transferFrom(msg.sender,address(this), amount), "The token transfer should be done");
+        require(receiveTokens("updating Luckpool",msg.sender, amount), "The token transfer should be done");
         luckPoolBal = luckPoolBal.add(amount);
         return true;
     }
@@ -498,7 +519,7 @@ contract NRTManager is Ownable, SignerRole{
     * @param amount amount to be updated
     */
     function updateBurnBal(uint256 amount) external onlySigner() returns(bool){
-        require(tokenContract.transferFrom(msg.sender,address(this), amount), "The token transfer should be done");
+        require(receiveTokens("updating burn Balance",msg.sender, amount), "The token transfer should be done");
         burnTokenBal = burnTokenBal.add(amount);
         return true;
     }
@@ -537,9 +558,7 @@ function burnTokens() internal returns (bool){
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
         uint NRTBal = NRTBal.add(MonthlyReleaseNrt);
         TotalCirculation = TotalCirculation.add(NRTBal);
-        require(tokenContract.balanceOf(address(this))>NRTBal,"NRT_Manger should have token balance");
-        require(NRTBal > 0, "It should be Non-Zero");
-
+        require((tokenContract.balanceOf(address(this))>NRTBal) && (NRTBal > 0),"NRT_Manger should have token balance");
         require(distribute_NRT(NRTBal));
         if(monthCount == 11){
             monthCount = 0;
@@ -567,6 +586,7 @@ function burnTokens() internal returns (bool){
         uint256  kmPardsBal;
         uint256  contingencyFundsBal;
         uint256  researchAndDevelopmentBal;
+       
         // Distibuting the newly released tokens to each of the pools
         
         newTalentsAndPartnershipsBal = newTalentsAndPartnershipsBal.add((NRTBal.mul(5)).div(100));
