@@ -903,7 +903,7 @@ function deleteList() internal returns (bool){
           StakingDetails[orderId].loanStartTime = now;
           StakingDetails[orderId].loanCount = StakingDetails[orderId].loanCount + 1;
           // todo: check this transfer, it may not be doing as expected
-          require(tokenContract.transferFrom(address(this),msg.sender,(StakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
+          require(tokenContract.transfer(msg.sender,(StakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
           emit loanTaken(orderId);
           return true;
       }
@@ -982,7 +982,7 @@ function deleteList() internal returns (bool){
 
   function sendTokens(uint64 orderId, uint256 amount) internal returns (bool) {
       // todo: check this transfer, it may not be doing as expected
-      require(tokenContract.transferFrom(address(this),StakingOwnership[orderId], amount),"The contract should send from its balance to the user");
+      require(tokenContract.transfer(StakingOwnership[orderId], amount),"The contract should send from its balance to the user");
       return true;
   }
   
