@@ -318,22 +318,13 @@ contract NRTManager is Ownable, SignerRole{
     address public contingencyFunds;
     address public researchAndDevelopment;
     address public buzzCafe;
-    address public powerToken;
+    address public timeSwappers; // which include powerToken , curators ,timeTraders , daySwappers
+
 
     // balances present in different pools
 
-    uint256 public newTalentsAndPartnershipsBal;
-    uint256 public platformMaintenanceBal;
-    uint256 public marketingAndRNRBal;
-    uint256 public kmPardsBal;
-    uint256 public contingencyFundsBal;
-    uint256 public researchAndDevelopmentBal;
-    uint256 public powerTokenBal;
 
-    // balances timeAlly workpool distribute
-    uint256 public curatorsBal;
-    uint256 public timeTradersBal;
-    uint256 public daySwappersBal;
+    uint256 public timeSwappersBal;
     uint256 public buzzCafeBal;
     uint256 public stakersBal; 
     uint256 public luckPoolBal;    // Luckpool Balance
@@ -377,18 +368,6 @@ contract NRTManager is Ownable, SignerRole{
         emit ChangingPoolAddress("NewTalentsAndPartnerships",newTalentsAndPartnerships);
     }
 
-     /**
-    * @dev Function to send NewTalentsAndPartnerships balance
-    */
-    function sendNewTalentsAndPartnerships() internal isValidAddress(newTalentsAndPartnerships) 
-    returns(bool) {
-        uint256 temp = newTalentsAndPartnershipsBal;
-        emit sendToken("NewTalentsAndPartnerships",newTalentsAndPartnerships,newTalentsAndPartnershipsBal);
-        newTalentsAndPartnershipsBal = 0;
-        require(tokenContract.transfer(newTalentsAndPartnerships, temp),"The transfer must not fail");
-        return true;
-    }
-
     /**
     * @dev Function to initialise PlatformMaintenance pool address
     * @param pool_addr Address to be set 
@@ -399,18 +378,6 @@ contract NRTManager is Ownable, SignerRole{
         emit ChangingPoolAddress("PlatformMaintenance",platformMaintenance);
     }
     
-
-     /**
-    * @dev Function to send platformMaintenance balance
-    */
-    function sendPlatformMaintenance() internal isValidAddress(platformMaintenance) 
-    returns(bool){
-        uint256 temp = platformMaintenanceBal;
-        emit sendToken("PlatformMaintenance",platformMaintenance,platformMaintenanceBal);
-        platformMaintenanceBal = 0;
-        require(tokenContract.transfer(platformMaintenance, temp),"The transfer must not fail");
-        return true;    
-    }
 
     /**
     * @dev Function to initialise MarketingAndRNR pool address
@@ -423,18 +390,6 @@ contract NRTManager is Ownable, SignerRole{
     }
 
     /**
-    * @dev Function to send marketingAndRNR balance
-    */
-    function sendMarketingAndRNR() internal isValidAddress(marketingAndRNR) 
-    returns(bool){
-        uint256 temp = marketingAndRNRBal;
-        emit sendToken("MarketingAndRNR",marketingAndRNR,marketingAndRNRBal);
-        marketingAndRNRBal = 0;
-        require(tokenContract.transfer(marketingAndRNR, temp),"The transfer must not fail");
-        return true;
-    }
-
-    /**
     * @dev Function to initialise setKmPards pool address
     * @param pool_addr Address to be set 
     */
@@ -443,19 +398,6 @@ contract NRTManager is Ownable, SignerRole{
         kmPards = pool_addr;
         emit ChangingPoolAddress("kmPards",kmPards);
     }
-
-    /**
-    * @dev Function to send KmPards balance
-    */
-    function sendKmPards() internal isValidAddress(kmPards) 
-    returns(bool){
-        uint256 temp = kmPardsBal;
-        emit sendToken("MarketingAndRNR",kmPards,kmPardsBal);
-        kmPardsBal = 0;
-        require(tokenContract.transfer(kmPards, temp),"The transfer must not fail");
-        return true;
-    }
-
     /**
     * @dev Function to initialise ContingencyFunds pool address
     * @param pool_addr Address to be set 
@@ -467,17 +409,6 @@ contract NRTManager is Ownable, SignerRole{
     }
 
     /**
-    * @dev Function to send contingencyFunds balance
-    */
-    function sendContingencyFunds() internal  isValidAddress(contingencyFunds) 
-    returns(bool){
-        uint256 temp = contingencyFundsBal;
-        emit sendToken("contingencyFunds",contingencyFunds,contingencyFundsBal);
-        contingencyFundsBal = 0;
-        require(tokenContract.transfer(contingencyFunds, temp),"The transfer must not fail");
-        return true;
-    }
-    /**
     * @dev Function to initialise ResearchAndDevelopment pool address
     * @param pool_addr Address to be set 
     */
@@ -485,18 +416,6 @@ contract NRTManager is Ownable, SignerRole{
     function setResearchAndDevelopment(address pool_addr) public onlyOwner() isValidAddress(pool_addr){
         researchAndDevelopment = pool_addr;
         emit ChangingPoolAddress("ResearchAndDevelopment",researchAndDevelopment);
-    }
-
-    /**
-    * @dev Function to send researchAndDevelopment balance
-    */
-    function sendResearchAndDevelopment() internal isValidAddress(researchAndDevelopment) 
-    returns(bool){
-        uint256 temp = researchAndDevelopmentBal;
-        emit sendToken("ResearchAndDevelopment",researchAndDevelopment,researchAndDevelopmentBal);
-        researchAndDevelopmentBal = 0;
-        require(tokenContract.transfer(researchAndDevelopment, temp),"The transfer must not fail");
-        return true;
     }
 
     /**
@@ -510,38 +429,15 @@ contract NRTManager is Ownable, SignerRole{
     }
 
     /**
-    * @dev Function to send buzzCafe balance
-    */
-    function sendBuzzCafe() internal isValidAddress(buzzCafe) 
-    returns(bool){
-        uint256 temp = buzzCafeBal;
-        emit sendToken("BuzzCafe",buzzCafe,buzzCafeBal);
-        buzzCafeBal = 0;
-        require(tokenContract.transfer(buzzCafe, temp),"The transfer must not fail");
-        return true;
-    }
-
-    /**
     * @dev Function to initialise PowerToken pool address
     * @param pool_addr Address to be set 
     */
 
-    function setPowerToken(address pool_addr) public onlyOwner() isValidAddress(pool_addr){
-        powerToken = pool_addr;
-        emit ChangingPoolAddress("PowerToken",powerToken);
+    function setTimeSwapper(address pool_addr) public onlyOwner() isValidAddress(pool_addr){
+        timeSwappers = pool_addr;
+        emit ChangingPoolAddress("TimeSwapper",timeSwappers);
     }
 
-    /**
-    * @dev Function to send powerToken balance
-    */
-    function sendPowerToken() internal  isValidAddress(powerToken) 
-    returns(bool){
-        uint256 temp = powerTokenBal;
-        emit sendToken("PowerToken",powerToken,powerTokenBal);
-        powerTokenBal = 0;
-        require(tokenContract.transfer(powerToken, temp),"The transfer must not fail");
-        return true;
-    }
 
     /**
     * @dev Function to update staking contract address
@@ -553,28 +449,47 @@ contract NRTManager is Ownable, SignerRole{
     }
 
     /**
-    * @dev Function to send powerToken balance
-    */
-    function sendStakingContract() internal  isValidAddress(stakingContract) 
-    returns(bool){
-        emit sendToken("staking contract",stakingContract,stakersBal);
-        require(tokenContract.transfer(stakingContract, stakersBal),"The transfer must not fail");
-        return true;
-    }
+   * @dev should send tokens to the user
+   * @param text text to be emited
+   * @param amount amount to be send
+   * @param addr address of pool to be send
+   * @return true if success
+   */
 
+  function sendTokens(string text,  address addr ,uint256 amount) internal returns (bool) {
+        emit sendToken(text,addr,amount);
+        require(tokenContract.transfer(addr, amount),"The transfer must not fail");
+        return true;
+  }
+
+     /**
+   * @dev to reset Staking amount
+   * @return true if success
+   */
     function resetStaking() external returns(bool) {
-        require(msg.sender == stakingContract , "shoul reset staking " );
+        require(msg.sender == stakingContract , "shouldd reset staking " );
         stakersBal = 0;
         return true;
     }
 
+       /**
+   * @dev to reset timeSwappers amount
+   * @return true if success
+   */
+    function resetTimeSwappers() external returns(bool) {
+        require(msg.sender == timeSwappers , "should reset TimeSwappers " );
+        timeSwappersBal = 0;
+        return true;
+    }
+
     /**
-    * @dev Function to trigger the release of monthly NRT to different actors in the system
+    * @dev Function to update luckpoo; balance
     * @param amount amount to be updated
     */
-    function updateLuckpool(uint256 amount) external onlySigner(){
-        require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
+    function updateLuckpool(uint256 amount) external onlySigner() returns(bool){
+        require(tokenContract.transferFrom(msg.sender,address(this), amount), "The token transfer should be done");
         luckPoolBal = luckPoolBal.add(amount);
+        return true;
     }
 
     /**
@@ -582,7 +497,7 @@ contract NRTManager is Ownable, SignerRole{
     * @param amount amount to be updated
     */
     function updateBurnBal(uint256 amount) external onlySigner() returns(bool){
-        require(tokenContract.transfer(address(this), amount), "The token transfer should be done");
+        require(tokenContract.transferFrom(msg.sender,address(this), amount), "The token transfer should be done");
         burnTokenBal = burnTokenBal.add(amount);
         return true;
     }
@@ -618,10 +533,10 @@ function burnTokens() internal returns (bool){
    */
 
     function receiveMonthlyNRT() external onlySigner() returns (bool) {
-        require(tokenContract.balanceOf(address(this))>0,"NRT_Manger should have token balance");
         require(now >= releaseNrtTime,"NRT can be distributed only after 30 days");
         uint NRTBal = NRTBal.add(MonthlyReleaseNrt);
         TotalCirculation = TotalCirculation.add(NRTBal);
+        require(tokenContract.balanceOf(address(this))>NRTBal,"NRT_Manger should have token balance");
         require(NRTBal > 0, "It should be Non-Zero");
 
         require(distribute_NRT(NRTBal));
@@ -645,6 +560,12 @@ function burnTokens() internal returns (bool){
         require(tokenContract.balanceOf(address(this))>=NRTBal,"NRT_Manger doesn't have token balance");
         NRTBal = NRTBal.add(luckPoolBal);
         
+        uint256  newTalentsAndPartnershipsBal;
+        uint256  platformMaintenanceBal;
+        uint256  marketingAndRNRBal;
+        uint256  kmPardsBal;
+        uint256  contingencyFundsBal;
+        uint256  researchAndDevelopmentBal;
         // Distibuting the newly released tokens to each of the pools
         
         newTalentsAndPartnershipsBal = newTalentsAndPartnershipsBal.add((NRTBal.mul(5)).div(100));
@@ -653,12 +574,9 @@ function burnTokens() internal returns (bool){
         kmPardsBal = kmPardsBal.add((NRTBal.mul(10)).div(100));
         contingencyFundsBal = contingencyFundsBal.add((NRTBal.mul(10)).div(100));
         researchAndDevelopmentBal = researchAndDevelopmentBal.add((NRTBal.mul(5)).div(100));
-        curatorsBal = curatorsBal.add((NRTBal.mul(5)).div(100));
-        timeTradersBal = timeTradersBal.add((NRTBal.mul(5)).div(100));
-        daySwappersBal = daySwappersBal.add((NRTBal.mul(125)).div(1000));
         buzzCafeBal = buzzCafeBal.add((NRTBal.mul(25)).div(1000)); 
-        powerTokenBal = powerTokenBal.add((NRTBal.mul(10)).div(100));
         stakersBal = stakersBal.add((NRTBal.mul(15)).div(100));
+        timeSwappersBal = timeSwappersBal.add((NRTBal.mul(325)).div(1000));
 
         
 
@@ -671,15 +589,15 @@ function burnTokens() internal returns (bool){
 
 
         // sending tokens to respective wallets
-        require(sendNewTalentsAndPartnerships(),"Tokens should be succesfully send");
-        require(sendPlatformMaintenance(),"Tokens should be succesfully send");
-        require(sendMarketingAndRNR(),"Tokens should be succesfully send");
-        require(sendKmPards(),"Tokens should be succesfully send");
-        require(sendContingencyFunds(),"Tokens should be succesfully send");
-        require(sendResearchAndDevelopment(),"Tokens should be succesfully send");
-        require(sendBuzzCafe(),"Tokens should be succesfully send");
-        require(sendPowerToken(),"Tokens should be succesfully send");
-        require(sendStakingContract(),"Tokens should be succesfully send");
+        require(sendTokens("NewTalentsAndPartnerships",newTalentsAndPartnerships,newTalentsAndPartnershipsBal),"Tokens should be succesfully send");
+        require(sendTokens("PlatformMaintenance",platformMaintenance,platformMaintenanceBal),"Tokens should be succesfully send");
+        require(sendTokens("MarketingAndRNR",marketingAndRNR,marketingAndRNRBal),"Tokens should be succesfully send");
+        require(sendTokens("kmPards",kmPards,kmPardsBal),"Tokens should be succesfully send");
+        require(sendTokens("contingencyFunds",contingencyFunds,contingencyFundsBal),"Tokens should be succesfully send");
+        require(sendTokens("ResearchAndDevelopment",researchAndDevelopment,researchAndDevelopmentBal),"Tokens should be succesfully send");
+        require(sendTokens("BuzzCafe",buzzCafe,buzzCafeBal),"Tokens should be succesfully send");
+        require(sendTokens("staking contract",stakingContract,stakersBal),"Tokens should be succesfully send");
+        require(sendTokens("send timeSwappers",timeSwappers,timeSwappersBal),"Tokens should be succesfully send");
         require(burnTokens(),"Should burns 2% of token in circulation");
         return true;
 
@@ -697,7 +615,7 @@ function burnTokens() internal returns (bool){
     * ContingencyFunds(pool[4]);
     * ResearchAndDevelopment(pool[5]);
     * BuzzCafe(pool[6]);
-    * PowerToken(pool[7]);
+    * TimeSwapper(pool[7]);
     */
 
     constructor (address token, address[] memory pool) public{
@@ -712,7 +630,7 @@ function burnTokens() internal returns (bool){
         setContingencyFunds(pool[4]);
         setResearchAndDevelopment(pool[5]);
         setBuzzCafe(pool[6]);
-        setPowerToken(pool[7]);
+        setTimeSwapper(pool[7]);
         releaseNrtTime = now.add(30 days + 6 hours);
         AnnualReleaseNrt = 81900000000000000;
         MonthlyReleaseNrt = AnnualReleaseNrt.div(uint256(12));
