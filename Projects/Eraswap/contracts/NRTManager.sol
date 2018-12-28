@@ -186,6 +186,11 @@ contract NRTManager is Ownable, SignerRole{
     * @param token Address to be set 
     */
     function setStakingContract(address token) external onlyOwner() isValidAddress(token){
+        if( stakingContract != address(0))
+        {
+            _removeSigner(stakingContract);
+        }
+        _addSigner(token);
         stakingContract = token;
         emit ChangingPoolAddress("stakingContract",stakingContract);
     }

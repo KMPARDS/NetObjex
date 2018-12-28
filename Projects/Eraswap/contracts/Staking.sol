@@ -19,7 +19,6 @@ contract Staking {
     uint256 value
     );
 
-
     // Event to watch loans repayed taken
     event loanTaken(
     uint256 orderid
@@ -74,8 +73,6 @@ contract Staking {
     mapping (uint256 => uint256) public totalNrtMonthCount; // orderid ==> to keep tab on how many times NRT was received
 
     uint256[] public OrderList;  // to store all active orders in which the state need to be changed monthly
-  
-
 
    /**
    * @dev Throws if not times up to close a contract
@@ -108,8 +105,32 @@ contract Staking {
         _;
     }
 
-    
- /**
+   /**
+   * @dev should send tokens to the user
+   * @param orderId to identify unique staking contract
+   * @param amount amount to be send
+   * @return true if success
+   */
+
+  function sendTokens(uint256 orderId, uint256 amount) internal returns (bool) {
+      // todo: check this transfer, it may not be doing as expected
+      require(tokenContract.transfer(StakingOwnership[orderId], amount),"The contract should send from its balance to the user");
+      return true;
+  }
+
+   /**
+   * @dev should send tokens to the user
+   * @param orderId to identify unique staking contract
+   * @param amount amount to be send
+   * @return true if success
+   */
+
+  function receiveTokens(uint256 orderId ,uint256 amount) internal returns (bool) {
+        require(tokenContract.transferFrom(StakingOwnership[orderId],address(this), amount), "The token transfer should be done");
+        return true;
+  } 
+
+   /**
    * @dev Function to delete a particular order
    * @param orderId to identify unique staking contract
    * @return true if success
@@ -125,30 +146,6 @@ contract Staking {
       return true;
   }
 
-   /**
-   * @dev should send tokens to the user
-   * @param orderId to identify unique staking contract
-   * @param amount amount to be send
-   * @return true if success
-   */
-
-  function sendTokens(uint256 orderId, uint256 amount) internal returns (bool) {
-      // todo: check this transfer, it may not be doing as expected
-      require(tokenContract.transfer(StakingOwnership[orderId], amount),"The contract should send from its balance to the user");
-      return true;
-  }
-
-    /**
-   * @dev should send tokens to the user
-   * @param amount amount to be send
-   * @param fromAddr address of pool to be send
-   * @return true if success
-   */
-
-  function receiveTokens( address fromAddr ,uint256 amount) internal returns (bool) {
-        require(tokenContract.transferFrom(fromAddr,address(this), amount), "The token transfer should be done");
-        return true;
-  } 
  
   /**
    * @dev Should delete unwanted orders
@@ -164,6 +161,76 @@ function deleteList() internal returns (bool){
       return true;
 }
 
+   /**
+   * @dev Function to check whether a partcicular order exists
+   * @param orderId to identify unique staking contract
+   * @return true if success
+   */
+
+  function isOrderExist(uint256 orderId) public view returns(bool) {
+      return OrderList[StakingDetails[orderId].index] == orderId;
+ }
+  
+   /**
+   * @dev To repay the leased loan
+   * @param orderId to identify unique staking contract
+   * @return total repayment
+   */
+
+  function calculateRepaymentTotalPayment(uint256 orderId)  public view returns (uint256) {
+          uint temp;
+          require(isOrderExist(orderId),"The orderId should exist");
+          require((StakingDetails[orderId].loan && (StakingDetails[orderId].loanStartTime < now.add(60 days))),"should have loan");
+          temp = ((StakingDetails[orderId].stakedAmount).div(200)).mul(101);
+          return temp;
+      
+  }
+   /**
+   * @dev To update burn token in NRT manager
+   * @param amount amount to be burned
+   * @return true if everything went right
+   */
+
+  function updateBurnToken(uint256 amount) internal returns (bool){
+      if(amount == 0){
+          return true;
+      }
+      else{
+          require(tokenContract.increaseAllowance(NRTManagerAddr,amount),"the allowance should be incresed inorder to send token");
+          require(NRTContract.updateBurnBal(amount),"Burn should be updated");
+      }
+      return true;
+  }
+
+     /**
+   * @dev To update luck pool in NRT manager
+   * @param amount amount to be updated in luck pool
+   * @return true if everything went right
+   */
+
+  function updateLuckPool(uint256 amount) internal returns (bool){
+      if(amount == 0){
+          return true;
+      }
+      else{
+          require(tokenContract.increaseAllowance(NRTManagerAddr,amount),"the allowance should be incresed inorder to send token");
+          require(NRTContract.updateLuckpool(amount),"Burn should be updated");
+      }
+      return true;
+  }
+
+    
+   /**
+   * @dev To check if eligible for repayment
+   * @param orderId to identify unique staking contract
+   * @return total repayment
+   */
+  function isEligibleForRepayment(uint256 orderId)  public view returns (bool) {
+          require(isOrderExist(orderId) == true,"The orderId should exist");
+          require(StakingDetails[orderId].loan == true,"User should have taken loan");
+          require((StakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
+          return true;
+  }
 
    /**
    * @dev To create staking contract
@@ -187,20 +254,12 @@ function deleteList() internal returns (bool){
             StakingDetails[OrderId] = Staker(false,false,0,index,OrderId,amount, now,0,0);
             }
 
-            require(receiveTokens(msg.sender, amount), "The token transfer should be done");
+            require(receiveTokens(OrderId, amount), "The token transfer should be done");
             emit stakeCreation(OrderId,StakingOwnership[OrderId], amount);
             return OrderId;
         }
 
-    /**
-   * @dev Function to check whether a partcicular order exists
-   * @param orderId to identify unique staking contract
-   * @return true if success
-   */
 
-  function isOrderExist(uint256 orderId) public view returns(bool) {
-      return OrderList[StakingDetails[orderId].index] == orderId;
- }
  
     /**
    * @dev To check if loan is initiated
@@ -224,36 +283,12 @@ function deleteList() internal returns (bool){
           StakingDetails[orderId].loanStartTime = now;
           StakingDetails[orderId].loanCount = StakingDetails[orderId].loanCount + 1;
           // todo: check this transfer, it may not be doing as expected
-          require(tokenContract.transfer(msg.sender,(StakingDetails[orderId].stakedAmount).div(2)),"The contract should transfer loan amount");
+          require(sendTokens(orderId,(StakingDetails[orderId].stakedAmount).div(2)),"Tokens should be succesfully send");
           emit loanTaken(orderId);
           return true;
       }
       
-  /**
-   * @dev To repay the leased loan
-   * @param orderId to identify unique staking contract
-   * @return total repayment
-   */
 
-  function calculateRepaymentTotalPayment(uint256 orderId)  public view returns (uint256) {
-          uint temp;
-          require(isOrderExist(orderId),"The orderId should exist");
-          require((StakingDetails[orderId].loan && (StakingDetails[orderId].loanStartTime < now.add(60 days))),"should have loan");
-          temp = ((StakingDetails[orderId].stakedAmount).div(200)).mul(101);
-          return temp;
-      
-  }
-   /**
-   * @dev To check if eligible for repayment
-   * @param orderId to identify unique staking contract
-   * @return total repayment
-   */
-  function isEligibleForRepayment(uint256 orderId)  public view returns (bool) {
-          require(isOrderExist(orderId) == true,"The orderId should exist");
-          require(StakingDetails[orderId].loan == true,"User should have taken loan");
-          require((StakingDetails[orderId].loanStartTime).sub(now) < 60 days,"Loan repayment should be done on time");
-          return true;
-  }
    /**
    * @dev To repay the leased loan
    * @param orderId to identify unique staking contract
@@ -272,7 +307,9 @@ function deleteList() internal returns (bool){
           OneYearStakedAmount = OneYearStakedAmount.add(StakingDetails[orderId].stakedAmount);
       }
           // todo: check this transfer, it may not be doing as expected
-          require(receiveTokens(msg.sender, calculateRepaymentTotalPayment(orderId)), "The contract should receive loan amount with interest");
+          require(updateLuckPool(luckPoolBal),"updating burnable token");
+          luckPoolBal = 0;
+          require(receiveTokens(orderId, calculateRepaymentTotalPayment(orderId)), "The contract should receive loan amount with interest");
           return true;
   }
 
@@ -320,6 +357,8 @@ function preStakingDistribution() internal returns(bool){
         else{
             TwoYearStakersBal = temp;
         }
+        require(updateLuckPool(luckPoolBal),"updating burnable token");
+        luckPoolBal = 0;
         return true;
 }
 
@@ -382,8 +421,8 @@ function preStakingDistribution() internal returns(bool){
                 }
           }
       }
-      require(NRTContract.updateBurnBal(burnTokenBal),"updating burnable token");
-      burnTokenBal = 0;
+      
+      require(updateBurnToken(burnTokenBal),"updating burnable token");
       return true;
   }
 

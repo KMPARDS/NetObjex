@@ -28,6 +28,13 @@ contract IERC20 {
  
   function burnFrom(address from, uint256 value) external;
 
+  function increaseAllowance(
+    address spender,
+    uint256 addedValue
+  )
+    public
+    returns (bool);
+
   event Transfer(
     address indexed from,
     address indexed to,
@@ -452,6 +459,11 @@ contract NRTManager is Ownable, SignerRole{
     * @param token Address to be set 
     */
     function setStakingContract(address token) external onlyOwner() isValidAddress(token){
+        if( stakingContract != address(0))
+        {
+            _removeSigner(stakingContract);
+        }
+        _addSigner(token);
         stakingContract = token;
         emit ChangingPoolAddress("stakingContract",stakingContract);
     }

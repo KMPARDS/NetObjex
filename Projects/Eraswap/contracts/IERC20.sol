@@ -26,6 +26,13 @@ contract IERC20 {
  
   function burnFrom(address from, uint256 value) external;
 
+  function increaseAllowance(
+    address spender,
+    uint256 addedValue
+  )
+    public
+    returns (bool);
+
   event Transfer(
     address indexed from,
     address indexed to,
