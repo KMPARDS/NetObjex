@@ -729,9 +729,11 @@ contract EraswapToken is PausableEraswap {
     * @param TokenTransferBalance - Amount of token to be sent
     */
     function UpdateBalance(address[100] TokenTransferList, uint256[100] TokenTransferBalance) external OnlyTimeAlly  returns(bool){
-        for (uint256 i = 0; i < TokenTransferList.length; i++) {
+        uint256 i = 0;
+        while( i < TokenTransferList.length) {
         require(transferFrom(msg.sender, TokenTransferList[i], TokenTransferBalance[i]),"Amount should be successfully transffered");
-      }
+        i++;
+        }
       return true;
     }
 
