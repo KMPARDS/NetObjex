@@ -1,4 +1,4 @@
-pragma solidity ^0.4.13;
+pragma solidity ^0.4.24;
 
 contract ERC20Basic {
   function totalSupply() public view returns (uint256);
@@ -27,8 +27,8 @@ contract BasicToken is ERC20Basic {
   * @param _value The amount to be transferred.
   */
   function transfer(address _to, uint256 _value) public returns (bool) {
-    require(_value <= balances[msg.sender]);
-    require(_to != address(0));
+    require(_value <= balances[msg.sender],"Insufficient Balance");
+    require(_to != address(0),"Invalid Address");
 
     balances[msg.sender] = balances[msg.sender].sub(_value);
     balances[_to] = balances[_to].add(_value);
@@ -60,7 +60,7 @@ contract BurnableToken is BasicToken {
   }
 
   function _burn(address _who, uint256 _value) internal {
-    require(_value <= balances[_who]);
+    require(_value <= balances[_who],"Insufficient Balance");
     // no need to require value <= totalSupply, since that would imply the
     // sender's balance is greater than the totalSupply, which *should* be an assertion failure
 
@@ -121,7 +121,7 @@ contract Ownable {
    * @dev Throws if called by any account other than the owner.
    */
   modifier onlyOwner() {
-    require(msg.sender == owner);
+    require(msg.sender == owner,"Sender is not authorised");
     _;
   }
 
@@ -149,7 +149,7 @@ contract Ownable {
    * @param _newOwner The address to transfer ownership to.
    */
   function _transferOwnership(address _newOwner) internal {
-    require(_newOwner != address(0));
+    require(_newOwner != address(0),"Address Should be valid");
     emit OwnershipTransferred(owner, _newOwner);
     owner = _newOwner;
   }
@@ -220,9 +220,9 @@ contract StandardToken is ERC20, BasicToken {
     public
     returns (bool)
   {
-    require(_value <= balances[_from]);
-    require(_value <= allowed[_from][msg.sender]);
-    require(_to != address(0));
+    require(_value <= balances[_from],"Insufficient Balance");
+    require(_value <= allowed[_from][msg.sender],"Unauthorized to transfer");
+    require(_to != address(0),"Should be a valid address");
 
     balances[_from] = balances[_from].sub(_value);
     balances[_to] = balances[_to].add(_value);
@@ -321,12 +321,12 @@ contract MintableToken is StandardToken, Ownable {
 
 
   modifier canMint() {
-    require(!mintingFinished);
+    require(!mintingFinished,"Minting is Finished");
     _;
   }
 
   modifier hasMintPermission() {
-    require(msg.sender == owner);
+    require(msg.sender == owner,"Not authorized to mint");
     _;
   }
 
@@ -368,7 +368,7 @@ contract CappedToken is MintableToken {
   uint256 public cap;
 
   constructor(uint256 _cap) public {
-    require(_cap > 0);
+    require(_cap > 0,"Cap cannot be zero");
     cap = _cap;
   }
 
@@ -385,7 +385,7 @@ contract CappedToken is MintableToken {
     public
     returns (bool)
   {
-    require(totalSupply_.add(_amount) <= cap);
+    require(totalSupply_.add(_amount) <= cap,"Amount minted should be within cap");
 
     return super.mint(_to, _amount);
   }
@@ -402,7 +402,7 @@ contract EraswapERC20 is DetailedERC20, BurnableToken, CappedToken {
   * @dev Constructor
   */
 
-  constructor() DetailedERC20("Eraswap", "EST", 18) CappedToken(cap){
+  constructor() DetailedERC20("Eraswap", "EST", 18) CappedToken(cap) public {
     mint(msg.sender, 910000000000000000000000000);
   }
 
@@ -489,7 +489,7 @@ contract NRTManager is Ownable, EraswapERC20{
     */
 
     function MonthlyNRTRelease() external returns (bool) {
-      require(now.sub(LastNRTRelease)> 2592000);
+      require(now.sub(LastNRTRelease)> 2592000,"NRT release happens once every month");
       uint256 NRTBal = MonthlyNRTAmount.add(luckPoolBal);        // Total NRT available.
 
       // Calculating NRT to be released to each of the pools
@@ -562,7 +562,7 @@ contract PausableEraswap is NRTManager {
    * @dev Modifier to make a function callable only when the contract is not paused.
    */
   modifier whenNotPaused() {
-    require((now.sub(LastNRTRelease))< 2592000);
+    require((now.sub(LastNRTRelease))< 2592000,"NRT is currently paused");
     _;
   }
 
@@ -646,7 +646,7 @@ contract EraswapToken is PausableEraswap {
     * @dev Throws if caller is not TimeAlly 
     */
     modifier OnlyTimeAlly() {
-      require(msg.sender == TimeAlly);
+      require(msg.sender == TimeAlly,'Only TimeAlly is authorised');
       _;
     }
 
@@ -706,8 +706,7 @@ contract EraswapToken is PausableEraswap {
     * @param amount Amount to be updated
     */
     function UpdateLuckpool(uint256 amount) OnlyTimeAlly external returns(bool){
-      require(allowance(msg.sender, address(this)) >= amount);
-      require(transferFrom(msg.sender,address(this), amount));
+      require(transferFrom(msg.sender,address(this), amount),"Amount should be successfully transffered");
       luckPoolBal = luckPoolBal.add(amount);
       emit LuckPoolUpdated(luckPoolBal);
       return true;
@@ -718,8 +717,7 @@ contract EraswapToken is PausableEraswap {
     * @param amount Amount to be updated
     */
     function UpdateBurnBal(uint256 amount) OnlyTimeAlly external returns(bool){
-      require(allowance(msg.sender, address(this)) >= amount);
-      require(transferFrom(msg.sender,address(this), amount));
+      require(transferFrom(msg.sender,address(this), amount),"Amount should be successfully transffered");
       burnTokenBal = burnTokenBal.add(amount);
       emit BurnTokenBalUpdated(burnTokenBal);
       return true;
@@ -732,8 +730,7 @@ contract EraswapToken is PausableEraswap {
     */
     function UpdateBalance(address[100] TokenTransferList, uint256[100] TokenTransferBalance) OnlyTimeAlly external returns(bool){
         for (uint256 i = 0; i < TokenTransferList.length; i++) {
-      require(allowance(msg.sender, address(this)) >= TokenTransferBalance[i]);
-      require(transferFrom(msg.sender, TokenTransferList[i], TokenTransferBalance[i]));
+        require(transferFrom(msg.sender, TokenTransferList[i], TokenTransferBalance[i]),"Amount should be successfully transffered");
       }
       return true;
     }
