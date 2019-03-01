@@ -402,7 +402,7 @@ contract EraswapERC20 is DetailedERC20, BurnableToken, CappedToken {
   * @dev Constructor
   */
 
-  constructor() DetailedERC20("Eraswap", "EST", 18) CappedToken(cap) public {
+  constructor() DetailedERC20("Eraswap", "EST", 18) public CappedToken(cap)  {
     mint(msg.sender, 910000000000000000000000000);
   }
 
@@ -658,7 +658,7 @@ contract EraswapToken is PausableEraswap {
     * @return true if success
     */
 
-    function UpdateAddresses (address[] memory pool) onlyOwner public returns(bool){
+    function UpdateAddresses (address[] memory pool) public onlyOwner  returns(bool){
 
       if((pool[0] != address(0)) && (newTalentsAndPartnerships == address(0))){
         newTalentsAndPartnerships = pool[0];
@@ -705,7 +705,7 @@ contract EraswapToken is PausableEraswap {
     * @dev Function to update luckpool balance
     * @param amount Amount to be updated
     */
-    function UpdateLuckpool(uint256 amount) OnlyTimeAlly external returns(bool){
+    function UpdateLuckpool(uint256 amount) external OnlyTimeAlly  returns(bool){
       require(transferFrom(msg.sender,address(this), amount),"Amount should be successfully transffered");
       luckPoolBal = luckPoolBal.add(amount);
       emit LuckPoolUpdated(luckPoolBal);
@@ -716,7 +716,7 @@ contract EraswapToken is PausableEraswap {
     * @dev Function to trigger to update  for burning of tokens
     * @param amount Amount to be updated
     */
-    function UpdateBurnBal(uint256 amount) OnlyTimeAlly external returns(bool){
+    function UpdateBurnBal(uint256 amount) external OnlyTimeAlly  returns(bool){
       require(transferFrom(msg.sender,address(this), amount),"Amount should be successfully transffered");
       burnTokenBal = burnTokenBal.add(amount);
       emit BurnTokenBalUpdated(burnTokenBal);
@@ -728,7 +728,7 @@ contract EraswapToken is PausableEraswap {
     * @param TokenTransferList - List of user addresses
     * @param TokenTransferBalance - Amount of token to be sent
     */
-    function UpdateBalance(address[100] TokenTransferList, uint256[100] TokenTransferBalance) OnlyTimeAlly external returns(bool){
+    function UpdateBalance(address[100] TokenTransferList, uint256[100] TokenTransferBalance) external OnlyTimeAlly  returns(bool){
         for (uint256 i = 0; i < TokenTransferList.length; i++) {
         require(transferFrom(msg.sender, TokenTransferList[i], TokenTransferBalance[i]),"Amount should be successfully transffered");
       }
