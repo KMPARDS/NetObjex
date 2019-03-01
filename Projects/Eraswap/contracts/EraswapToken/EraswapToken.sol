@@ -658,7 +658,7 @@ contract EraswapToken is PausableEraswap {
     * @return true if success
     */
 
-    function UpdateAddresses (address[] memory pool) public onlyOwner  returns(bool){
+    function UpdateAddresses (address[9]  pool) external onlyOwner  returns(bool){
 
       if((pool[0] != address(0)) && (newTalentsAndPartnerships == address(0))){
         newTalentsAndPartnerships = pool[0];
