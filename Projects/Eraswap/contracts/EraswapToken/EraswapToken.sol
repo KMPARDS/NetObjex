@@ -325,11 +325,6 @@ contract MintableToken is StandardToken, Ownable {
     _;
   }
 
-  modifier hasMintPermission() {
-    require(msg.sender == owner,"Not authorized to mint");
-    _;
-  }
-
   /**
    * @dev Function to mint tokens
    * @param _to The address that will receive the minted tokens.
@@ -340,8 +335,7 @@ contract MintableToken is StandardToken, Ownable {
     address _to,
     uint256 _amount
   )
-    public
-    hasMintPermission
+    internal
     canMint
     returns (bool)
   {
