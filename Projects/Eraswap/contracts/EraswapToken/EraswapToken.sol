@@ -335,7 +335,7 @@ contract MintableToken is StandardToken, Ownable {
     address _to,
     uint256 _amount
   )
-    internal
+    public
     canMint
     returns (bool)
   {
@@ -640,7 +640,7 @@ contract EraswapToken is PausableEraswap {
     * @dev Throws if caller is not TimeAlly 
     */
     modifier OnlyTimeAlly() {
-      require(msg.sender == TimeAlly,'Only TimeAlly is authorised');
+      require(msg.sender == TimeAlly,"Only TimeAlly is authorised");
       _;
     }
 
