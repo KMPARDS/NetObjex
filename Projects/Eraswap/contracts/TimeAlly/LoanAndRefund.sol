@@ -73,7 +73,7 @@ event LoanDefaulted(uint256 contractid);
   }
 
   function MonthlyRefundHandler() public OnlyTimeAlly() returns (uint[]){
-    uint256[] UserPayment;
+    uint256[] memory UserPayment;
     uint256 character;
     Refund memory refund;
     bool check = false;
@@ -87,7 +87,7 @@ event LoanDefaulted(uint256 contractid);
       refund = Refunds[contractID];
       character = contractID;
       character |= refund.RefundAmount<<128;
-      UserPayment.push(character);
+      UserPayment[UserPayment.length] = character;
       emit RefundInitiated(contractID, refund.Refundcount, refund.RefundAmount);
       refund.Refundcount++;
       Refunds[contractID] = refund;
@@ -101,7 +101,7 @@ event LoanDefaulted(uint256 contractid);
   }
 
   function MonthlyLoanHandler() public OnlyTimeAlly() returns (uint[]){
-    uint256[] Defaultlist;
+    uint256[] memory Defaultlist;
     Loan memory loan;
     bool check = false;
     for (uint256 i = 0; i < LoanList.length; i++) {
@@ -112,7 +112,7 @@ event LoanDefaulted(uint256 contractid);
       uint256 contractID = LoanList[i];
       loan = Loans[contractID];
       if ((now.sub(loan.loanStartTime)) > loan.LoanPeriod ) {
-        Defaultlist.push(contractID);
+        Defaultlist[Defaultlist.length] = contractID;
         DeleteLoanListElement(loan.LoanListIndex);
         emit LoanDefaulted(contractID);
         check = true;
