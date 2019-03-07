@@ -1,9 +1,8 @@
 pragma solidity ^0.4.24;
 
-import "./SafeMath.sol";
 import "./Staking.sol";
 import "./LoanAndRefund.sol";
-import "../EraswapToken/EraswapToken.sol";
+import "./EraswapToken.sol";
 
 contract TimeAllyCore {
 
@@ -137,8 +136,8 @@ function MonthlyPlansHandler(uint256 Size) external OnlyOwner() returns(bool){
 
 function MonthlyPaymentHandler() external OnlyOwner() returns(bool){
 require(MonthlyHandlerCount == 4);
-uint256[100] paymentlist;
-address[100] addresslist;
+uint256[100] memory paymentlist;
+address[100] memory addresslist;
 uint256 contractID;
 uint256 amount;
 address add;
