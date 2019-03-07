@@ -169,7 +169,7 @@ contract TimeAlly is TimeAllyCore{
     require(loanAndRefund.AddLoan(contractID, uint32(Plans[planid].LoanPeriod), uint128(loanamount)));
     LoanRepaymentAmount[contractID] = repayamount;
     Contracts[contractID].status = 2;
-   // require(EraswapTokens.transfer(Contracts[contractID].owner, loanamount));
+    require(EraswapTokens.transfer(Contracts[contractID].owner, loanamount));
     emit LoanTaken(contractID, Contracts[ContractID].owner, loanamount, planid);
     return true;
   }
@@ -179,14 +179,14 @@ contract TimeAlly is TimeAllyCore{
   */
 
   function rePayLoan(uint256 contractID) external OnlyContractOwner(contractID) LoanCanBeRepayed(contractID) returns(bool) {
-  //  require(EraswapTokens.allowance(msg.sender, address(this)) >= LoanRepaymentAmount[contractID]));
-  //  require(EraswapTokens.transferFrom(msg.sender, address(this), LoanRepaymentAmount[contractID]));
+    require(EraswapTokens.allowance(msg.sender, address(this)) >= LoanRepaymentAmount[contractID]);
+    require(EraswapTokens.transferFrom(msg.sender, address(this), LoanRepaymentAmount[contractID]));
     require(loanAndRefund.RemoveLoan(contractID));
     uint256 planid = Contracts[contractID].planid;
     ( , , uint256 amount) = loanAndRefund.ViewLoan(contractID);
     uint256 luckPoolBal = LoanRepaymentAmount[contractID].sub(amount);
-    //require(EraswapTokens.increaseApproval(EraswapTokenAddress, luckPoolBal));
-    //require(EraswapTokens.UpdateLuckpool(luckPoolBal));
+    require(EraswapTokens.increaseApproval(EraswapTokenAddress, luckPoolBal));
+    require(EraswapTokens.UpdateLuckpool(luckPoolBal));
     require(staking.Resume(planid, contractID));
     Contracts[contractID].status = 1;
     emit LoanRepayed(contractID, Contracts[ContractID].owner, amount, luckPoolBal, planid);
