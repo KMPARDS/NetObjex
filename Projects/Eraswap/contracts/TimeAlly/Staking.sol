@@ -121,7 +121,7 @@ contract Staking{
     uint256 Index;
     uint256 Interest;
     uint256 PrincipalToRelease;
-    uint256[] UserPayment;
+    uint256[] memory UserPayment;
     uint256 limit;
     if(plan.UpdateCount + size >= plan.ActivePlanList.length){
     limit = plan.ActivePlanList.length;
@@ -147,7 +147,7 @@ contract Staking{
          stake.monthcount++;
          Index = contractid;
          Index |= (Interest + PrincipalToRelease)<<128;
-         UserPayment.push(Index);
+         UserPayment[UserPayment.length] = Index;
          Stakes[contractid] = stake;
        }
   plan.UpdateCount =  uint128(limit);
