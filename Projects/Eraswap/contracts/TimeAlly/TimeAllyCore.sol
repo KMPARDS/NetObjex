@@ -77,8 +77,8 @@ function Setaddress(address stakingaddress, address loanandrefundaddress) public
 
 
 function MonthlyMasterHandler() external OnlyOwner() returns(bool){
-  require(now.sub(LastMonthlyHandler)> 1 minutes);
-  require(now.sub(EraswapTokens.LastNRTRelease())< 2592000);
+  require(now.sub(LastMonthlyHandler)> 30 days);
+  require(now.sub(EraswapTokens.LastNRTRelease())< 30 days);
   require(MonthlyHandlerCount<3);
   Paused = true;
   if(MonthlyHandlerCount == 0){
@@ -139,8 +139,6 @@ require(MonthlyHandlerCount == 4);
 uint256[100] memory paymentlist;
 address[100] memory addresslist;
 uint256 contractID;
-uint256 amount;
-address add;
 uint256 start = 0;
 uint256 stop = 100;
 while(start < TokenTransferList.length){
@@ -154,10 +152,8 @@ if((start+100) > TokenTransferList.length)
 }
   for (uint256 i = 0; i < stop; i++) {
       contractID = uint256(TokenTransferList[start+i]);
-      amount = uint256(uint128(TokenTransferList[start+i]>>128));
-      add = Contracts[contractID].owner;
-      addresslist[i] = add;
-      paymentlist[i] = amount;
+      paymentlist[i] = uint256(uint128(TokenTransferList[start+i]>>128));
+      addresslist[i] = Contracts[contractID].owner;
   }
   require(EraswapTokens.UpdateBalance(addresslist, paymentlist));
   emit TokenSent(addresslist, paymentlist);
@@ -168,6 +164,7 @@ delete TokenTransferList;
 MonthlyHandlerCount = 0;
 LastMonthlyHandler = now;
 Paused = false;
+return true;
 }
 
 
