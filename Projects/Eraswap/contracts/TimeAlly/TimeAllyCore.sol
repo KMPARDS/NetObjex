@@ -76,7 +76,7 @@ function Setaddress(address stakingaddress, address loanandrefundaddress) public
 }
 
 
-function MonthlyMasterHandler() external OnlyOwner() returns(bool){
+function MonthlyMasterHandler() external OnlyOwner() returns(uint256){
   require(now.sub(LastMonthlyHandler)> 30 days);
   require(now.sub(EraswapTokens.LastNRTRelease())< 30 days);
   require(MonthlyHandlerCount<3);
@@ -90,7 +90,7 @@ function MonthlyMasterHandler() external OnlyOwner() returns(bool){
   }
   emit NRTRecieved(NRT);
   MonthlyHandlerCount = 1;
-  return true;
+  return MonthlyHandlerCount;
 }
 
   else if(MonthlyHandlerCount == 1){
@@ -98,7 +98,7 @@ function MonthlyMasterHandler() external OnlyOwner() returns(bool){
   RefundList = loanAndRefund.MonthlyRefundHandler();
   AddToTransferList(RefundList);
   MonthlyHandlerCount = 2;
-  return true;
+  return MonthlyHandlerCount;
 }
 
   else if(MonthlyHandlerCount == 2){
@@ -113,7 +113,7 @@ function MonthlyMasterHandler() external OnlyOwner() returns(bool){
     emit ContractBurned(contractID, amount);
   }
   MonthlyHandlerCount = 3;
-  return true;
+  return MonthlyHandlerCount;
 }
 }
 
