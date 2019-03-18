@@ -90,6 +90,7 @@ function MonthlyMasterHandler() external OnlyOwner() returns(bool){
   }
   emit NRTRecieved(NRT);
   MonthlyHandlerCount = 1;
+  return true;
 }
 
   else if(MonthlyHandlerCount == 1){
@@ -97,6 +98,7 @@ function MonthlyMasterHandler() external OnlyOwner() returns(bool){
   RefundList = loanAndRefund.MonthlyRefundHandler();
   AddToTransferList(RefundList);
   MonthlyHandlerCount = 2;
+  return true;
 }
 
   else if(MonthlyHandlerCount == 2){
@@ -111,6 +113,7 @@ function MonthlyMasterHandler() external OnlyOwner() returns(bool){
     emit ContractBurned(contractID, amount);
   }
   MonthlyHandlerCount = 3;
+  return true;
 }
 }
 
