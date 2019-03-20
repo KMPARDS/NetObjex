@@ -209,13 +209,9 @@ contract TimeAlly is TimeAllyCore{
    * @dev Constructor
    */
 
-  constructor(address eraswapTokenAddress, address stakingaddress, address loanandrefundaddress) public {
+  constructor(address eraswapTokenAddress) public {
     EraswapTokenAddress = eraswapTokenAddress;
-    StakingAddress = stakingaddress;
-    LoanandRefundAddress = loanandrefundaddress;
     EraswapTokens = EraswapToken(eraswapTokenAddress);
-    staking = Staking(stakingaddress);
-    loanAndRefund = LoanAndRefund(loanandrefundaddress);
   }
 
 }
