@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.0;
 import "./SafeMath.sol";
 
 contract LoanAndRefund{
@@ -72,7 +72,7 @@ event LoanDefaulted(uint256 contractid);
   return true;
   }
 
-  function MonthlyRefundHandler() public OnlyTimeAlly() returns (uint[]){
+  function MonthlyRefundHandler() public OnlyTimeAlly() returns (uint[] memory){
     uint256[] memory UserPayment;
     uint256 character;
     Refund memory refund;
@@ -100,7 +100,7 @@ event LoanDefaulted(uint256 contractid);
     return(UserPayment);
   }
 
-  function MonthlyLoanHandler() public OnlyTimeAlly() returns (uint[]){
+  function MonthlyLoanHandler() public OnlyTimeAlly() returns (uint[] memory){
     uint256[] memory Defaultlist;
     Loan memory loan;
     bool check = false;
@@ -121,14 +121,13 @@ event LoanDefaulted(uint256 contractid);
     return(Defaultlist);
   }
 
-
     function DeleteRefundListElement(uint32 index) internal returns(bool){
       require(index < RefundList.length);
       uint256 last = RefundList.length-1;
       Refunds[RefundList[last]].RefundListIndex = index;
       RefundList[index] = RefundList[last];
       delete RefundList[last];
-      RefundList.length--;
+      RefundList.pop();
       return true;
     }
 
@@ -138,7 +137,7 @@ event LoanDefaulted(uint256 contractid);
       Loans[LoanList[last]].LoanListIndex = index;
       LoanList[index] = LoanList[last];
       delete LoanList[last];
-      LoanList.length--;
+      LoanList.pop();
       return true;
     }
 

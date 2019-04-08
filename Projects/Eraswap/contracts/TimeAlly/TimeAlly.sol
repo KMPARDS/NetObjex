@@ -84,7 +84,7 @@ contract TimeAlly is TimeAllyCore{
 
   function PlanDetails(uint256 planID) public view returns(uint256, uint256, uint256, uint256) {
     return (Plans[planID].LoanInterestRate, Plans[planID].RefundWeeks, Plans[planID].LoanPeriod, Plans[planID].PlanPeriod);
-  }
+
 
 
   /**
@@ -93,9 +93,7 @@ contract TimeAlly is TimeAllyCore{
    */
 
   function CreateContract(address owner, uint256 planid, uint256 stakedamount) public NotPaused() returns(bool) {
-    EraswapTokens.allowance(msg.sender, address(this));
     require(EraswapTokens.transferFrom(msg.sender, address(this), stakedamount));
-
    require(staking.AddStake(planid, ContractID, Plans[planid].PlanPeriod, stakedamount));
    require(NewContract(owner, planid));
     return true;
@@ -107,7 +105,6 @@ contract TimeAlly is TimeAllyCore{
    */
 
   function CreateContractsByBatch(uint256 batchlength, uint256 planid, address[] contractOwner, uint256[] amount, uint256 total) public NotPaused() OnlyOwner() returns(bool) {
-     EraswapTokens.allowance(msg.sender, address(this));
      require(EraswapTokens.transferFrom(msg.sender, address(this), total));
     require(staking.BatchAddStake(batchlength, planid, ContractID, Plans[planid].PlanPeriod, amount));
     for (uint i = 0; i < batchlength; i++) {

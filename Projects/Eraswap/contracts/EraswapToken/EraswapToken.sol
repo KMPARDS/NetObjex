@@ -387,7 +387,7 @@ contract CappedToken is MintableToken {
 }
 
 contract EraswapERC20 is DetailedERC20, BurnableToken, CappedToken {
-    
+
   /**
   * @dev Constructor
   */
@@ -633,7 +633,7 @@ contract EraswapToken is PausableEraswap {
     event BurnTokenBalUpdated(uint256 burnTokenBal);
 
     /**
-    * @dev Throws if caller is not TimeAlly 
+    * @dev Throws if caller is not TimeAlly
     */
     modifier OnlyTimeAlly() {
       require(msg.sender == TimeAlly,"Only TimeAlly is authorised");
@@ -696,7 +696,7 @@ contract EraswapToken is PausableEraswap {
     * @param amount Amount to be updated
     */
     function UpdateLuckpool(uint256 amount) external OnlyTimeAlly  returns(bool){
-      require(transferFrom(msg.sender,address(this), amount),"Amount should be successfully transffered");
+      require(transferFrom(msg.sender,address(this), amount),"Amount should be successfully transfered");
       luckPoolBal = luckPoolBal.add(amount);
       emit LuckPoolUpdated(luckPoolBal);
       return true;
@@ -707,7 +707,7 @@ contract EraswapToken is PausableEraswap {
     * @param amount Amount to be updated
     */
     function UpdateBurnBal(uint256 amount) external OnlyTimeAlly  returns(bool){
-      require(transferFrom(msg.sender,address(this), amount),"Amount should be successfully transffered");
+      require(transferFrom(msg.sender,address(this), amount),"Amount should be successfully transfered");
       burnTokenBal = burnTokenBal.add(amount);
       emit BurnTokenBalUpdated(burnTokenBal);
       return true;
@@ -721,10 +721,9 @@ contract EraswapToken is PausableEraswap {
     function UpdateBalance(address[100] TokenTransferList, uint256[100] TokenTransferBalance) external OnlyTimeAlly  returns(bool){
         uint256 i = 0;
         while( i < TokenTransferList.length) {
-        require(transferFrom(msg.sender, TokenTransferList[i], TokenTransferBalance[i]),"Amount should be successfully transffered");
+        require(transferFrom(msg.sender, TokenTransferList[i], TokenTransferBalance[i]),"Amount should be successfully transfered");
         i++;
         }
       return true;
     }
 }
-
