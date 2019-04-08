@@ -84,7 +84,7 @@ contract TimeAlly is TimeAllyCore{
 
   function PlanDetails(uint256 planID) public view returns(uint256, uint256, uint256, uint256) {
     return (Plans[planID].LoanInterestRate, Plans[planID].RefundWeeks, Plans[planID].LoanPeriod, Plans[planID].PlanPeriod);
-
+}
 
 
   /**
