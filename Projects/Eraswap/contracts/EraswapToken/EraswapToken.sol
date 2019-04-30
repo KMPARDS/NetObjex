@@ -524,7 +524,7 @@ contract NRTManager is Ownable, EraswapERC20{
       if(MonthCount == 11){
         MonthCount = 0;
         AnnualNRTAmount = (AnnualNRTAmount.mul(9)).div(10);
-        MonthlyNRTAmount = MonthlyNRTAmount.div(12);
+        MonthlyNRTAmount = AnnualNRTAmount.div(12);
       }
       else{
         MonthCount = MonthCount.add(1);
