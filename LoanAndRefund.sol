@@ -4,43 +4,43 @@ import "./SafeMath.sol";
 
 
 contract LoanAndRefund{
-  using SafeMath for uint256;
+    using SafeMath for uint256;
 
-  struct Loan {
-  uint128 loanAmount;
-  uint32 loanPeriod;
-  uint32 loanStartTime;
-  uint32 loanListIndex;
-  }
-  mapping (uint256 => Loan) public Loans;
+    struct Loan {
+        uint128 loanAmount;
+        uint32 loanPeriod;
+        uint32 loanStartTime;
+        uint32 loanListIndex;
+    }
+    mapping (uint256 => Loan) public Loans;
 
-  struct Refund {
-  uint32 refundWeeks;
-  uint32 refundCount;
-  uint32 refundListIndex;
-   uint64 refundAmount;
-  }
-  mapping (uint256 => Refund) public reFunds;
+    struct Refund {
+        uint32 refundWeeks;
+        uint32 refundCount;
+        uint32 refundListIndex;
+        uint64 refundAmount;
+    }
+    mapping (uint256 => Refund) public reFunds;
 
-  uint256[] public reFundList;
-  uint256[] public loanList;
-  uint256 private refundListUpdateCount;
-  uint256 private loanListUpdateCount;
-  address timeAlly;
+    uint256[] public reFundList;
+    uint256[] public loanList;
+    uint256 private refundListUpdateCount;
+    uint256 private loanListUpdateCount;
+    address timeAlly;
 
-event RefundInitiated(uint256 contractid, uint256 count, uint256 amount);
-event RefundEnded(uint256 contractid);
-event LoanDefaulted(uint256 contractid);
+    event RefundInitiated(uint256 contractid, uint256 count, uint256 amount);
+    event RefundEnded(uint256 contractid);
+    event LoanDefaulted(uint256 contractid);
 
 
-   modifier OnlyTimeAlly() {
-     require(msg.sender == timeAlly, "Owner TimeAlly should be calling");
-     _;
-   }
+    modifier OnlyTimeAlly() {
+        require(msg.sender == timeAlly, "Owner TimeAlly should be calling");
+        _;
+    }
 
-   constructor(address timeally) public {
-     timeAlly = timeally;
-   }
+    constructor(address timeally) public {
+    timeAlly = timeally;
+    }
 
   function ViewLoan(uint256 contractID) public OnlyTimeAlly() view returns(uint256, uint256, uint256){
    return(uint256(Loans[contractID].loanPeriod), uint256(Loans[contractID].loanStartTime), uint256(Loans[contractID].loanAmount));
@@ -51,12 +51,12 @@ event LoanDefaulted(uint256 contractid);
   }
 
   function AddLoan(uint256 contractID, uint32 loanperiod, uint128 loanamount) public OnlyTimeAlly() returns(bool) {
-    Loan memory loan;
-    loan.loanPeriod = loanperiod;
-    loan.loanAmount = uint128(loanamount);
-    loan.loanStartTime = uint32(now);
-    loan.loanListIndex = uint32(loanList.push(contractID).sub(1));
-    Loans[contractID] = loan;
+      Loan memory loan;
+      loan.loanPeriod = loanperiod;
+      loan.loanAmount = uint128(loanamount);
+      loan.loanStartTime = uint32(now);
+      loan.loanListIndex = uint32(loanList.push(contractID).sub(1));
+      Loans[contractID] = loan;
   return true;
   }
 
@@ -66,105 +66,105 @@ event LoanDefaulted(uint256 contractid);
   }
 
   function AddRefund(uint256 contractID, uint32 refundweeks, uint32 refundcount, uint64 refundamount) public OnlyTimeAlly() returns(bool) {
-  Refund memory refund;
-  refund.refundWeeks = refundweeks;
-  refund.refundCount = refundcount;
-  refund.refundAmount = refundamount;
-  refund.refundListIndex = uint32(reFundList.push(contractID).sub(1));
+      Refund memory refund;
+      refund.refundWeeks = refundweeks;
+      refund.refundCount = refundcount;
+      refund.refundAmount = refundamount;
+      refund.refundListIndex = uint32(reFundList.push(contractID).sub(1));
 
-  reFunds[contractID] = refund;
-  return true;
+      reFunds[contractID] = refund;
+      return true;
   }
 
   function MonthlyRefundHandler(uint256 size) public OnlyTimeAlly() returns (uint[] memory, uint){
-    uint256[] memory UserPayment;
-    uint256 character;
-    Refund memory refund;
-    uint256 i = refundListUpdateCount;
-    if(i.add(size) >= reFundList.length){
-    size = reFundList.length;
-    }
-    else{
-    size = i.add(size);
-    }
-    while ( i < size) {
-      uint256 contractID = reFundList[i];
-      refund = reFunds[contractID];
-      character = contractID;
-      character |= refund.refundAmount<<128;
-      UserPayment[UserPayment.length] = character;
-      emit RefundInitiated(contractID, refund.refundCount, refund.refundAmount);
-      refund.refundCount++;
-      reFunds[contractID] = refund;
-      if(refund.refundCount == refund.refundWeeks){
-        DeleteRefundListElement(refund.refundListIndex);
-        emit RefundEnded(contractID);
-        size = size.sub(1);
+      uint256[] memory UserPayment;
+      uint256 character;
+      Refund memory refund;
+      uint256 i = refundListUpdateCount;
+      if(i.add(size) >= reFundList.length){
+          size = reFundList.length;
+      }
+      else{
+          size = i.add(size);
+      }
+      while ( i < size) {
+          uint256 contractID = reFundList[i];
+          refund = reFunds[contractID];
+          character = contractID;
+          character |= refund.refundAmount<<128;
+          UserPayment[UserPayment.length] = character;
+          emit RefundInitiated(contractID, refund.refundCount, refund.refundAmount);
+          refund.refundCount++;
+          reFunds[contractID] = refund;
+          if(refund.refundCount == refund.refundWeeks){
+              DeleteRefundListElement(refund.refundListIndex);
+              emit RefundEnded(contractID);
+              size = size.sub(1);
+          }
+          else {
+              i++;  
+          }
+          
+      }
+      if(size == reFundList.length) {
+          refundListUpdateCount =  0;  
       }
       else {
-        i++;  
+          refundListUpdateCount =  size;
       }
-      
-    }
-  if(size == reFundList.length) {
-  refundListUpdateCount =  0;  
-  }
-  else {
-  refundListUpdateCount =  size;
-  }
-  return(UserPayment, reFundList.length.sub(size));
+      return(UserPayment, reFundList.length.sub(size));
   }
 
   function MonthlyLoanHandler(uint256 size) public OnlyTimeAlly() returns (uint[] memory, uint){
-    uint256[] memory Defaultlist;
-    Loan memory loan;
-    uint256 i = loanListUpdateCount;
-    if(i.add(size) >= loanList.length){
-    size = loanList.length;
-    }
-    else{
-    size = i.add(size);
-    }
-    while (i < size) {
-      uint256 contractID = loanList[i];
-      loan = Loans[contractID];
-      if ((now.sub(loan.loanStartTime)) > loan.loanPeriod ) {
-        Defaultlist[Defaultlist.length] = contractID;
-        DeleteLoanListElement(loan.loanListIndex);
-        emit LoanDefaulted(contractID);
-        size = size.sub(1);
+      uint256[] memory Defaultlist;
+      Loan memory loan;
+      uint256 i = loanListUpdateCount;
+      if(i.add(size) >= loanList.length){
+          size = loanList.length;
       }
-    else {
-        i++;  
+      else{
+          size = i.add(size);
       }
-      
-    }
-  if(size == loanList.length) {
-  loanListUpdateCount =  0;  
-  }
-  else {
-  loanListUpdateCount =  size;
-  }
-    return(Defaultlist, loanList.length.sub(size));
+      while (i < size) {
+          uint256 contractID = loanList[i];
+          loan = Loans[contractID];
+          if ((now.sub(loan.loanStartTime)) > loan.loanPeriod ) {
+              Defaultlist[Defaultlist.length] = contractID;
+              DeleteLoanListElement(loan.loanListIndex);
+              emit LoanDefaulted(contractID);
+              size = size.sub(1);
+          }
+          else {
+              i++;  
+          }
+        
+      }
+      if(size == loanList.length) {
+          loanListUpdateCount =  0;  
+      }
+      else {
+          loanListUpdateCount =  size;
+      }
+      return(Defaultlist, loanList.length.sub(size));
   }
 
 
     function DeleteRefundListElement(uint32 index) internal returns(bool){
-      require(index < reFundList.length);
-      uint256 last = reFundList.length.sub(1);
-      reFunds[reFundList[last]].refundListIndex = index;
-      reFundList[index] = reFundList[last];
-      reFundList.pop();
-      return true;
+        require(index < reFundList.length);
+        uint256 last = reFundList.length.sub(1);
+        reFunds[reFundList[last]].refundListIndex = index;
+        reFundList[index] = reFundList[last];
+        reFundList.pop();
+        return true;
     }
 
     function DeleteLoanListElement(uint32 index) internal returns(bool){
-      require(index < loanList.length);
-      uint256 last = loanList.length.sub(1);
-      Loans[loanList[last]].loanListIndex = index;
-      loanList[index] = loanList[last];
-      loanList.pop();
-      return true;
+        require(index < loanList.length);
+        uint256 last = loanList.length.sub(1);
+        Loans[loanList[last]].loanListIndex = index;
+        loanList[index] = loanList[last];
+        loanList.pop();
+        return true;
     }
 
 }

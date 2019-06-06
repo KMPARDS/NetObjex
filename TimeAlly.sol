@@ -5,54 +5,51 @@ import "./TimeAllyCore.sol";
 
 contract TimeAlly is TimeAllyCore{
 
-  using SafeMath for uint256;
+    using SafeMath for uint256;
 
-  event ContractCreated(uint256 contractid, address owner, uint256 planid);
-  event PlanCreated(uint256 planid);
-  event WindupInitiated(uint256 contractid, address owner, uint256 amount, uint256 planid);
-  event LoanTaken(uint256 contractid, address owner, uint256 loanamnt, uint256 planid);
-  event LoanRepayed(uint256 contractid, address owner, uint256 loanamnt, uint256 interest, uint256 planid);
-  event OwnershipTransfered(uint256 contractid, address owner, address newowner);
-
-
-
-  modifier OnlyContractOwner(uint256 contractid) {
-    require(msg.sender == Contracts[contractid].owner, "Owner should be calling");
-    _;
-  }
-
-
-  /**
-  * @dev Modifier
-  */
-  //todo: this also should check whther the contract have any active loans or not
-  modifier CanBeWindedUp(uint256 contractID) {
-    require(((now.sub(Contracts[contractID].timestamp)) >= Plans[Contracts[contractID].planid].PlanPeriod), "Contract can only be ended after 2 years");
-    require(Contracts[contractID].status == 1);
-    _;
-  }
-
-  /**
-  * @dev Modifier
-  */
-  modifier LoanCanBeTaken(uint256 contractID) {
-    require(Contracts[contractID].status == 1, "Loan should not be present");
-    _;
-  }
-
-  /**
-  * @dev Modifier
-  */
-  modifier LoanCanBeRepayed(uint256 contractID) {
-    require(Contracts[contractID].status == 2, "Loan should not be present");
-    _;
-  }
+    event ContractCreated(uint256 contractid, address owner, uint256 planid);
+    event PlanCreated(uint256 planid);
+    event WindupInitiated(uint256 contractid, address owner, uint256 amount, uint256 planid);
+    event LoanTaken(uint256 contractid, address owner, uint256 loanamnt, uint256 planid);
+    event LoanRepayed(uint256 contractid, address owner, uint256 loanamnt, uint256 interest, uint256 planid);
+    event OwnershipTransfered(uint256 contractid, address owner, address newowner);
 
 
 
-  /**
-  * @dev Function
-  */
+    modifier OnlyContractOwner(uint256 contractid) {
+        require(msg.sender == Contracts[contractid].owner, "Owner should be calling");
+        _;
+    }
+
+    /**
+    * @dev Modifier
+    */
+    //todo: this also should check whther the contract have any active loans or not
+    modifier CanBeWindedUp(uint256 contractID) {
+        require(((now.sub(Contracts[contractID].timestamp)) >= Plans[Contracts[contractID].planid].PlanPeriod), "Contract can only be ended after 2 years");
+        require(Contracts[contractID].status == 1);
+        _;
+    }
+
+    /**
+    * @dev Modifier
+    */
+    modifier LoanCanBeTaken(uint256 contractID) {
+        require(Contracts[contractID].status == 1, "Loan should not be present");
+        _;
+    }
+
+    /**
+    * @dev Modifier
+    */
+    modifier LoanCanBeRepayed(uint256 contractID) {
+        require(Contracts[contractID].status == 2, "Loan should not be present");
+        _;
+    }
+
+    /**
+    * @dev Function
+    */
 
   function ViewContract(uint256 contractID) public view OnlyContractOwner(contractID) returns(uint256, uint256, uint256, address) {
     return (Contracts[ContractID].status, Contracts[ContractID].timestamp, Contracts[ContractID].planid, Contracts[ContractID].owner);
