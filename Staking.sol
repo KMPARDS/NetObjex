@@ -8,22 +8,22 @@ contract Staking{
 
   struct Plan{                         //Structure to store details of different Plans
   uint128 NRTBalance;
-  uint128 ActivePlanAmount;
-  uint128 LastPlanAmount;
-  uint128 UpdateCount;
-  uint32[] ActivePlanList;
+  uint128 activePlanAmount;
+  uint128 lastPlanAmount;
+  uint128 updateCount;
+  uint32[] activePlanList;
   }
-  mapping (uint256 => Plan) public Plans;     //orderid ==> order details
+  mapping (uint256 => Plan) public plans;     //orderid ==> order details
 
   struct Stake {
   uint128 stakedAmount;
-  uint32 PlanTime;
-  uint32 monthcount;
-  uint32 ActivePlanListIndex;
-  uint32[24] MonthlyPrincipal;
+  uint32 planTime;
+  uint32 monthCount;
+  uint32 activePlanListIndex;
+  uint32[24] monthlyPrincipal;
   }
-  mapping (uint256 => Stake) public Stakes;     //orderid ==> order details
-  address TimeAlly;
+  mapping (uint256 => Stake) public stakes;     //orderid ==> order details
+  address timeAlly;
 
 
    event TotalPlanAmount(uint256 amount);
@@ -33,31 +33,31 @@ contract Staking{
    event PlanHandlerStatus(uint256 planid, uint256 current, uint256 total);
 
    modifier OnlyTimeAlly() {
-     require(msg.sender == TimeAlly, "Owner TimeAlly should be calling");
+     require(msg.sender == timeAlly, "Owner TimeAlly should be calling");
      _;
    }
 
    constructor(address timeally) public {
-     TimeAlly = timeally;
+     timeAlly = timeally;
    }
 
   function ViewStake(uint256 contractID) public OnlyTimeAlly() view returns(uint256, uint256, uint256){
-   return(uint256(Stakes[contractID].PlanTime), uint256(Stakes[contractID].stakedAmount), uint256(Stakes[contractID].monthcount));
+   return(uint256(stakes[contractID].planTime), uint256(stakes[contractID].stakedAmount), uint256(stakes[contractID].monthCount));
   }
 
   function ViewStakedAmount(uint256 contractID) public OnlyTimeAlly() view returns(uint256){
-   return(uint256(Stakes[contractID].stakedAmount));
+   return(uint256(stakes[contractID].stakedAmount));
   }
 
   function AddStake(uint256 planID, uint256 contractID, uint256 plantime, uint256 stakedamount) public OnlyTimeAlly() returns(bool) {
   Stake memory stake;
-  stake.PlanTime = uint32(plantime);
+  stake.planTime = uint32(plantime);
   stake.stakedAmount = uint128(stakedamount);
-  stake.monthcount = 0;
-  stake.ActivePlanListIndex = uint32(Plans[planID].ActivePlanList.push(uint32(contractID)).sub(1));
-  stake.MonthlyPrincipal[0] = uint32(stakedamount);
-  Stakes[contractID] = stake;
-  Plans[planID].ActivePlanAmount = uint128(uint256(Plans[planID].ActivePlanAmount).add(stakedamount));
+  stake.monthCount = 0;
+  stake.activePlanListIndex = uint32(plans[planID].activePlanList.push(uint32(contractID)).sub(1));
+  stake.monthlyPrincipal[0] = uint32(stakedamount);
+  stakes[contractID] = stake;
+  plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount).add(stakedamount));
   return true;
   }
 
@@ -69,15 +69,15 @@ contract Staking{
   }
 
   function Pause(uint256 planID, uint256 contractID) public OnlyTimeAlly() returns(bool) {
-  DeleteActivePlanListElement(planID, Stakes[contractID].ActivePlanListIndex);
-  Plans[planID].ActivePlanAmount = uint128(uint256(Plans[planID].ActivePlanAmount).sub(uint256(Stakes[contractID].stakedAmount)));
+  DeleteActivePlanListElement(planID, stakes[contractID].activePlanListIndex);
+  plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount).sub(uint256(stakes[contractID].stakedAmount)));
   return true;
   }
 
   function Resume(uint256 planID, uint256 contractID) public OnlyTimeAlly() returns(bool) {
-  require(Stakes[contractID].ActivePlanListIndex == 0);
-  Stakes[contractID].ActivePlanListIndex = uint32(Plans[planID].ActivePlanList.push(uint32(contractID)).sub(1));
-  Plans[planID].ActivePlanAmount = uint128(uint256(Plans[planID].ActivePlanAmount).add(Stakes[contractID].stakedAmount));
+  require(stakes[contractID].activePlanListIndex == 0);
+  stakes[contractID].activePlanListIndex = uint32(plans[planID].activePlanList.push(uint32(contractID)).sub(1));
+  plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount).add(stakes[contractID].stakedAmount));
   return true;
   }
 
@@ -87,85 +87,85 @@ contract Staking{
   uint256 TotalAmount;
   uint256 i;
   for(i=0; i<=planID; i++){
-    TotalAmount = TotalAmount.add(uint256(Plans[i].ActivePlanAmount));
+    TotalAmount = TotalAmount.add(uint256(plans[i].activePlanAmount));
   }
   emit TotalPlanAmount(TotalAmount);
   require(TotalAmount > 0);
 
   for( i=0; i<=planID; i++){
-      if(Plans[i].ActivePlanAmount == 0){
-        Plans[i].NRTBalance = 0;
+      if(plans[i].activePlanAmount == 0){
+        plans[i].NRTBalance = 0;
       }
       else{
-        Plans[i].NRTBalance = uint128((uint256(Plans[i].ActivePlanAmount).mul(NRT)).div(TotalAmount));
-        Plans[i].LastPlanAmount = Plans[i].ActivePlanAmount;
+        plans[i].NRTBalance = uint128((uint256(plans[i].activePlanAmount).mul(NRT)).div(TotalAmount));
+        plans[i].lastPlanAmount = plans[i].activePlanAmount;
       }
-      emit PlanAmountandNRT(i, uint256(Plans[i].ActivePlanAmount), uint256(Plans[i].NRTBalance));
+      emit PlanAmountandNRT(i, uint256(plans[i].activePlanAmount), uint256(plans[i].NRTBalance));
   }
 
-  uint256 luckPoolBal = (uint256(Plans[0].NRTBalance).mul(2)).div(15);
+  uint256 luckPoolBal = (uint256(plans[0].NRTBalance).mul(2)).div(15);
   if(luckPoolBal != 0){
-    Plans[0].NRTBalance = uint128(uint256(Plans[0].NRTBalance).sub(luckPoolBal));
+    plans[0].NRTBalance = uint128(uint256(plans[0].NRTBalance).sub(luckPoolBal));
   }
-  emit PlanAmountandNRT(0, uint256(Plans[0].ActivePlanAmount), uint256(Plans[0].NRTBalance));
+  emit PlanAmountandNRT(0, uint256(plans[0].activePlanAmount), uint256(plans[0].NRTBalance));
   return luckPoolBal;
   }
 
 
   function MonthlyPlanHandler(uint256 planID, uint256 size) public OnlyTimeAlly() returns(uint[] memory, uint){
-    require(Plans[planID].ActivePlanList.length > Plans[planID].UpdateCount);
-    Plan memory plan = Plans[planID];
+    require(plans[planID].activePlanList.length > plans[planID].updateCount);
+    Plan memory plan = plans[planID];
     Stake memory stake;
     uint256 contractid;
     uint256 Index;
     uint256 Interest;
     uint256 PrincipalToRelease;
     uint256[] memory UserPayment;
-    uint256 i = uint256(plan.UpdateCount);
-    if(i.add(size) >= plan.ActivePlanList.length){
-    size = plan.ActivePlanList.length;
-    plan.UpdateCount =  0;
+    uint256 i = uint256(plan.updateCount);
+    if(i.add(size) >= plan.activePlanList.length){
+    size = plan.activePlanList.length;
+    plan.updateCount =  0;
     }
     else{
     size = i.add(size);
-    plan.UpdateCount =  uint128(size);
+    plan.updateCount =  uint128(size);
     }
     while ( i < size) {
-         contractid = uint256(plan.ActivePlanList[i]);
-         stake = Stakes[contractid];
-         Index = uint256(stake.monthcount % stake.PlanTime);
-         Interest = uint256(stake.stakedAmount * plan.NRTBalance).div(uint256(plan.LastPlanAmount * 2));
-         emit InterestReleased(contractid, stake.monthcount, Interest);
+         contractid = uint256(plan.activePlanList[i]);
+         stake = stakes[contractid];
+         Index = uint256(stake.monthCount % stake.planTime);
+         Interest = uint256(stake.stakedAmount * plan.NRTBalance).div(uint256(plan.lastPlanAmount * 2));
+         emit InterestReleased(contractid, stake.monthCount, Interest);
          PrincipalToRelease = 0;
-         if(stake.monthcount > (uint256(stake.PlanTime).sub(1))){
-           PrincipalToRelease = uint256(stake.MonthlyPrincipal[Index]);
-           emit PrincipalReleased(contractid, stake.monthcount, PrincipalToRelease);
+         if(stake.monthCount > (uint256(stake.planTime).sub(1))){
+           PrincipalToRelease = uint256(stake.monthlyPrincipal[Index]);
+           emit PrincipalReleased(contractid, stake.monthCount, PrincipalToRelease);
          }
-         plan.ActivePlanAmount = uint128((uint256(plan.ActivePlanAmount).add(Interest)).sub(PrincipalToRelease));
+         plan.activePlanAmount = uint128((uint256(plan.activePlanAmount).add(Interest)).sub(PrincipalToRelease));
          stake.stakedAmount = uint128((uint256(stake.stakedAmount).add(Interest)).sub(PrincipalToRelease));
-         stake.MonthlyPrincipal[Index] = uint32(Interest);
-         stake.monthcount++;
+         stake.monthlyPrincipal[Index] = uint32(Interest);
+         stake.monthCount++;
          Index = contractid;
          Index |= (Interest + PrincipalToRelease)<<128;
          UserPayment[UserPayment.length] = Index;
-         Stakes[contractid] = stake;
+         stakes[contractid] = stake;
          i++;
        }
-  emit PlanHandlerStatus(planID, size, plan.ActivePlanList.length);
-  Plans[planID] = plan;
-  return(UserPayment, (plan.ActivePlanList.length).sub(size));
+  emit PlanHandlerStatus(planID, size, plan.activePlanList.length);
+  plans[planID] = plan;
+  return(UserPayment, (plan.activePlanList.length).sub(size));
   }
 
 
 
   function DeleteActivePlanListElement(uint256 id, uint32 index) internal returns(bool){
-    require(Plans[id].ActivePlanAmount != 0);
-    require(index < Plans[id].ActivePlanList.length);
-    uint256 last = Plans[id].ActivePlanList.length.sub(1);
-    uint32 lastelem = Plans[id].ActivePlanList[last];
-    Stakes[lastelem].ActivePlanListIndex = index;
-    Plans[id].ActivePlanList[index] = Plans[id].ActivePlanList[last];
-    Plans[id].ActivePlanList.pop;
+    require(plans[id].activePlanAmount != 0);
+    require(index < plans[id].activePlanList.length);
+    uint256 last = plans[id].activePlanList.length.sub(1);
+    uint32 lastelem = plans[id].activePlanList[last];
+    stakes[lastelem].activePlanListIndex = index;
+    plans[id].activePlanList[index] = plans[id].activePlanList[last];
+    plans[id].activePlanList.pop;
     return true;
   }
 

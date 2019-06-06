@@ -13,7 +13,7 @@ using SafeMath for uint256;
   uint256 PlanPeriod;
   uint256 LoanInterestRate;
   uint256 LoanPeriod;
-  uint256 RefundWeeks;
+  uint256 refundWeeks;
   }
   uint256 public PlanID = 0;
   mapping (uint256 => TimeAllyPlan) public Plans;
