@@ -34,19 +34,31 @@ contract LoanAndRefund {
     event RefundEnded(uint256 contractid);
     event LoanDefaulted(uint256 contractid);
 
-
     modifier onlyTimeAlly() {
         require(msg.sender == timeAlly, "Owner TimeAlly should be calling");
         _;
     }
 
     constructor(address timeally) public {
-    timeAlly = timeally;
+        timeAlly = timeally;
     }
 
-  function ViewLoan(uint256 contractID) external onlyTimeAlly() view returns(uint256, uint256, uint256){
-   return(uint256(loans[contractID].loanPeriod), uint256(loans[contractID].loanStartTime), uint256(loans[contractID].loanAmount));
-  }
+    function viewLoan(uint256 contractID)
+        external
+        onlyTimeAlly()
+        view
+        returns(
+            uint256,
+            uint256,
+            uint256
+            )
+    {
+        return(
+            uint256(loans[contractID].loanPeriod),
+            uint256(loans[contractID].loanStartTime),
+            uint256(loans[contractID].loanAmount)
+            );
+    }
 
     function ViewRefund(uint256 contractID) external onlyTimeAlly() view returns(uint256, uint256, uint256){
    return(uint256(reFunds[contractID].refundWeeks), uint256(reFunds[contractID].refundCount), uint256(reFunds[contractID].refundAmount));
