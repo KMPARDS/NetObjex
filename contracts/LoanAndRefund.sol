@@ -89,6 +89,47 @@ contract LoanAndRefund {
         return true;
     }
 
+    function monthlyRefundHandler(uint256 size)
+        external
+        onlyTimeAlly()
+        returns(
+            uint[] memory,
+            uint)
+    {
+        uint256[] memory userPayment;
+        uint256 character;
+        Refund memory refund;
+        uint256 i = refundListUpdateCount;
+        if (i.add(size) >= reFundList.length) {
+            size = reFundList.length;
+        }else {
+            size = i.add(size);
+        }
+        while (i < size) {
+            uint256 contractID = reFundList[i];
+            refund = reFunds[contractID];
+            character = contractID;
+            character |= refund.refundAmount<<128;
+            userPayment[userPayment.length] = character;
+            emit RefundInitiated(contractID, refund.refundCount, refund.refundAmount);
+            refund.refundCount++;
+            reFunds[contractID] = refund;
+            if(refund.refundCount == refund.refundWeeks){
+                DeleteRefundListElement(refund.refundListIndex);
+                emit RefundEnded(contractID);
+                size = size.sub(1);
+            }else {
+                i++;
+            }
+        }
+        if (size == reFundList.length) {
+            refundListUpdateCount = 0;
+        }else {
+            refundListUpdateCount = size;
+        }
+        return(userPayment, reFundList.length.sub(size));
+    }
+
     function viewLoan(uint256 contractID)
         external
         onlyTimeAlly()
@@ -121,45 +162,6 @@ contract LoanAndRefund {
             uint256(reFunds[contractID].refundAmount)
             );
     }
-
-  function MonthlyRefundHandler(uint256 size) external onlyTimeAlly() returns (uint[] memory, uint){
-      uint256[] memory UserPayment;
-      uint256 character;
-      Refund memory refund;
-      uint256 i = refundListUpdateCount;
-      if(i.add(size) >= reFundList.length){
-          size = reFundList.length;
-      }
-      else{
-          size = i.add(size);
-      }
-      while ( i < size) {
-          uint256 contractID = reFundList[i];
-          refund = reFunds[contractID];
-          character = contractID;
-          character |= refund.refundAmount<<128;
-          UserPayment[UserPayment.length] = character;
-          emit RefundInitiated(contractID, refund.refundCount, refund.refundAmount);
-          refund.refundCount++;
-          reFunds[contractID] = refund;
-          if(refund.refundCount == refund.refundWeeks){
-              DeleteRefundListElement(refund.refundListIndex);
-              emit RefundEnded(contractID);
-              size = size.sub(1);
-          }
-          else {
-              i++;
-          }
-
-      }
-      if(size == reFundList.length) {
-          refundListUpdateCount =  0;
-      }
-      else {
-          refundListUpdateCount =  size;
-      }
-      return(UserPayment, reFundList.length.sub(size));
-  }
 
   function MonthlyLoanHandler(uint256 size) external onlyTimeAlly() returns (uint[] memory, uint){
       uint256[] memory Defaultlist;
