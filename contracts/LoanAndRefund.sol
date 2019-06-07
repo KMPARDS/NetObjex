@@ -24,7 +24,7 @@ contract LoanAndRefund {
 
     mapping (uint256 => Refund) public reFunds;
 
-    uint256[] public reFundList;
+    uint256[] public storage reFundList;
     uint256[] public loanList;
     uint256 private refundListUpdateCount;
     uint256 private loanListUpdateCount;
@@ -114,7 +114,7 @@ contract LoanAndRefund {
             emit RefundInitiated(contractID, refund.refundCount, refund.refundAmount);
             refund.refundCount++;
             reFunds[contractID] = refund;
-            if(refund.refundCount == refund.refundWeeks){
+            if (refund.refundCount == refund.refundWeeks) {
                 DeleteRefundListElement(refund.refundListIndex);
                 emit RefundEnded(contractID);
                 size = size.sub(1);
