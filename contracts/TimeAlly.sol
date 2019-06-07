@@ -53,145 +53,6 @@ contract TimeAlly is TimeAllyCore {
         public
         TimeAllyCore(eraswapTokenAddress) {
         }
-        
-    /**
-    * @dev Function
-    */
-    function viewContract(uint256 contractID)
-        public
-        view
-        onlyContractOwner(contractID)
-        returns(
-            uint256,
-            uint256,
-            uint256,
-            address
-            )
-    {
-        return (
-                Contracts[ContractID].status,
-                Contracts[ContractID].timestamp,
-                Contracts[ContractID].planid,
-                Contracts[ContractID].owner
-            );
-    }
-
-    function viewUserStakes(uint256 contractID)
-        public
-        view
-        onlyContractOwner(contractID)
-        returns(
-            uint256,
-            uint256,
-            uint256) {
-            (uint256 a, uint256 b, uint256 c) = staking.ViewStake(contractID);
-            return (a, b, c);
-        }
-
-    function viewUserLoan(uint256 contractID)
-        public
-        view
-        onlyContractOwner(contractID)
-        returns(
-            uint256,
-            uint256,
-            uint256)
-    {
-        (uint256 a, uint256 b, uint256 c) = loanAndRefund.ViewLoan(contractID);
-        return (a, b, c);
-    }
-
-    function viewUserRefund(uint256 contractID)
-        public
-        view
-        onlyContractOwner(contractID)
-        returns(
-            uint256,
-            uint256,
-            uint256)
-    {
-        (uint256 a, uint256 b, uint256 c) = loanAndRefund.ViewRefund(contractID);
-        return (a, b, c);
-    }
-
-  /**
-  * @dev Function
-  */
-    function allContracts() public view returns(uint256[] memory) {
-        return (ContractIds[msg.sender]);
-    }
-
-  /**
-  * @dev Function
-  */
-    function planDetails(uint256 planID)
-        public
-        view
-        returns(
-            uint256,
-            uint256,
-            uint256,
-            uint256) {
-            return(
-            Plans[planID].LoanInterestRate,
-            Plans[planID].RefundWeeks,
-            Plans[planID].LoanPeriod,
-            Plans[planID].PlanPeriod
-            );
-        }
-
-  /**
-   * @dev Function to create a contract
-   * @return orderId of created
-   */
-    function createContract(
-        address owner,
-        uint256 planid,
-        uint256 stakedamount)
-        public
-        NotPaused()
-        returns(bool) {
-            require(EraswapToken.allowance(msg.sender, address(this)) >= stakedamount);
-            require(EraswapToken.transferFrom(msg.sender, address(this), stakedamount));
-            require(staking.AddStake(planid, ContractID, Plans[planid].PlanPeriod, stakedamount));
-            require(newContract(owner, planid));
-            return true;
-        }
-
-  /**
-   * @dev To create staking contract by batch
-   * @return orderIds of created contracts
-   */
-    function createContractsByBatch(
-        uint256 batchlength,
-        uint256 planid,
-        address[] memory contractOwner,
-        uint256[] memory amount,
-        uint256 total)
-        public
-        NotPaused()
-        OnlyOwner()
-        returns(bool) {
-            require(EraswapToken.allowance(msg.sender, address(this)) >= total);
-            require(EraswapToken.transferFrom(msg.sender, address(this), total));
-            require(staking.BatchAddStake(batchlength, planid, ContractID, Plans[planid].PlanPeriod, amount));
-            for (uint i = 0; i < batchlength; i++) {
-                require(newContract(contractOwner[i], planid));
-            }
-            return true;
-        }
-
-    function newContract(address contractOwner, uint256 planID) internal returns(bool) {
-        Contract memory tempContract;
-        tempContract.status = 1;
-        tempContract.planid = planID;
-        tempContract.owner = contractOwner;
-        tempContract.timestamp = now;
-        Contracts[ContractID] = tempContract;
-        ContractIds[contractOwner].push(ContractID);
-        emit ContractCreated(ContractID, contractOwner, planID);
-        ContractID = ContractID.add(1);
-    }
 
   /**
   * @dev Function
@@ -202,7 +63,7 @@ contract TimeAlly is TimeAllyCore {
         uint256 loanPeriod,
         uint256 refundWeeks
         )
-        public
+        external
         NotPaused()
         OnlyOwner()
         returns(bool) {
@@ -217,11 +78,10 @@ contract TimeAlly is TimeAllyCore {
             return true;
         }
 
-
   /**
   * @dev Function
   */
-  function windUpContract(uint256 contractID)
+    function windUpContract(uint256 contractID)
             external
             onlyContractOwner(contractID)
             canBeWindedUp(contractID)
@@ -244,7 +104,7 @@ contract TimeAlly is TimeAllyCore {
   /**
   * @dev Function
   */
-  function takeLoan(
+    function takeLoan(
             uint256 contractID,
             uint256 loanamount
             )
@@ -286,8 +146,6 @@ contract TimeAlly is TimeAllyCore {
             return true;
         }
 
-
-
   /**
    * @dev To Transfer Staking Ownership
    * @return bool true if ownership successfully transffered
@@ -295,7 +153,7 @@ contract TimeAlly is TimeAllyCore {
     function transferOwnership(
         uint256 contractid,
         address newowner)
-        public
+        external
         onlyContractOwner(contractid)
         loanCanBeTaken(contractid)
         returns(bool) {
@@ -304,6 +162,150 @@ contract TimeAlly is TimeAllyCore {
             return true;
         }
 
+        /**
+        * @dev Function
+        */
+    function viewContract(uint256 contractID)
+        external
+        onlyContractOwner(contractID)
+        returns(
+            uint256,
+            uint256,
+            uint256,
+            address
+            )
+    {
+        return (
+                Contracts[ContractID].status,
+                Contracts[ContractID].timestamp,
+                Contracts[ContractID].planid,
+                Contracts[ContractID].owner
+            );
+    }
+
+    /**
+     * @dev Function to create a contract
+     * @return orderId of created
+     */
+    function createContract(
+        address owner,
+        uint256 planid,
+        uint256 stakedamount)
+        external
+        NotPaused()
+        returns(bool) {
+            require(EraswapToken.allowance(msg.sender, address(this)) >= stakedamount);
+            require(EraswapToken.transferFrom(msg.sender, address(this), stakedamount));
+            require(staking.AddStake(planid, ContractID, Plans[planid].PlanPeriod, stakedamount));
+            require(newContract(owner, planid));
+            return true;
+        }
+
+    function viewUserStakes(uint256 contractID)
+        external
+        view
+        onlyContractOwner(contractID)
+        returns(
+            uint256,
+            uint256,
+            uint256) {
+            (uint256 a, uint256 b, uint256 c) = staking.ViewStake(contractID);
+            return (a, b, c);
+        }
+
+    function viewUserLoan(uint256 contractID)
+        external
+        view
+        onlyContractOwner(contractID)
+        returns(
+            uint256,
+            uint256,
+            uint256)
+    {
+        (uint256 a, uint256 b, uint256 c) = loanAndRefund.ViewLoan(contractID);
+        return (a, b, c);
+    }
+
+    function viewUserRefund(uint256 contractID)
+        external
+        view
+        onlyContractOwner(contractID)
+        returns(
+            uint256,
+            uint256,
+            uint256)
+    {
+        (uint256 a, uint256 b, uint256 c) = loanAndRefund.ViewRefund(contractID);
+        return (a, b, c);
+    }
+
+  /**
+  * @dev Function
+  */
+    function allContracts()
+        external
+        view
+        returns(uint256[] memory) {
+            return (ContractIds[msg.sender]);
+        }
+
+  /**
+  * @dev Function
+  */
+    function planDetails(uint256 planID)
+        external
+        view
+        returns(
+            uint256,
+            uint256,
+            uint256,
+            uint256) {
+            return(
+            Plans[planID].LoanInterestRate,
+            Plans[planID].RefundWeeks,
+            Plans[planID].LoanPeriod,
+            Plans[planID].PlanPeriod
+            );
+        }
+
+  /**
+   * @dev To create staking contract by batch
+   * @return orderIds of created contracts
+   */
+    function createContractsByBatch(
+        uint256 batchlength,
+        uint256 planid,
+        address[] memory contractOwner,
+        uint256[] memory amount,
+        uint256 total)
+        public
+        NotPaused()
+        OnlyOwner()
+        returns(bool) {
+            require(EraswapToken.allowance(msg.sender, address(this)) >= total);
+            require(EraswapToken.transferFrom(msg.sender, address(this), total));
+            require(staking.BatchAddStake(batchlength, planid, ContractID, Plans[planid].PlanPeriod, amount));
+            for (uint i = 0; i < batchlength; i++) {
+                require(newContract(contractOwner[i], planid));
+            }
+            return true;
+        }
+
+    function newContract(
+            address contractOwner,
+            uint256 planID)
+            internal
+            returns(bool) {
+                Contract memory tempContract;
+                tempContract.status = 1;
+                tempContract.planid = planID;
+                tempContract.owner = contractOwner;
+                tempContract.timestamp = now;
+                Contracts[ContractID] = tempContract;
+                ContractIds[contractOwner].push(ContractID);
+                emit ContractCreated(ContractID, contractOwner, planID);
+                ContractID = ContractID.add(1);
+            }
 
 
 }
