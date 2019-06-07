@@ -70,7 +70,7 @@ contract TimeAllyCore {
         lastMonthlyHandler = now;
         owner = msg.sender;
     }
-
+    
     function setaddress(
         address stakingaddress,
         address loanandrefundaddress
