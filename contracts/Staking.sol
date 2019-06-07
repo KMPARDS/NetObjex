@@ -2,12 +2,13 @@ pragma solidity ^0.5.2;
 
 import "./SafeMath.sol";
 
-contract Staking{
+
+contract Staking {
 
     using SafeMath for uint256;
 
-    struct Plan{                         //Structure to store details of different Plans
-        uint128 NRTBalance;
+    struct Plan {                         //Structure to store details of different Plans
+        uint128 nrtBalance;
         uint128 activePlanAmount;
         uint128 lastPlanAmount;
         uint128 updateCount;
@@ -94,20 +95,20 @@ contract Staking{
 
         for( i=0; i<=planID; i++){
             if(plans[i].activePlanAmount == 0){
-                plans[i].NRTBalance = 0;
+                plans[i].nrtBalance = 0;
             }
             else{
-                plans[i].NRTBalance = uint128((uint256(plans[i].activePlanAmount).mul(NRT)).div(TotalAmount));
+                plans[i].nrtBalance = uint128((uint256(plans[i].activePlanAmount).mul(NRT)).div(TotalAmount));
                 plans[i].lastPlanAmount = plans[i].activePlanAmount;
             }
-            emit PlanAmountandNRT(i, uint256(plans[i].activePlanAmount), uint256(plans[i].NRTBalance));
-        }   
-
-        uint256 luckPoolBal = (uint256(plans[0].NRTBalance).mul(2)).div(15);
-        if(luckPoolBal != 0){
-            plans[0].NRTBalance = uint128(uint256(plans[0].NRTBalance).sub(luckPoolBal));
+            emit PlanAmountandNRT(i, uint256(plans[i].activePlanAmount), uint256(plans[i].nrtBalance));
         }
-        emit PlanAmountandNRT(0, uint256(plans[0].activePlanAmount), uint256(plans[0].NRTBalance));
+
+        uint256 luckPoolBal = (uint256(plans[0].nrtBalance).mul(2)).div(15);
+        if(luckPoolBal != 0){
+            plans[0].nrtBalance = uint128(uint256(plans[0].nrtBalance).sub(luckPoolBal));
+        }
+        emit PlanAmountandNRT(0, uint256(plans[0].activePlanAmount), uint256(plans[0].nrtBalance));
         return luckPoolBal;
     }
 
@@ -134,7 +135,7 @@ contract Staking{
             contractid = uint256(plan.activePlanList[i]);
             stake = stakes[contractid];
             Index = uint256(stake.monthCount % stake.planTime);
-            Interest = uint256(stake.stakedAmount * plan.NRTBalance).div(uint256(plan.lastPlanAmount * 2));
+            Interest = uint256(stake.stakedAmount * plan.nrtBalance).div(uint256(plan.lastPlanAmount * 2));
             emit InterestReleased(contractid, stake.monthCount, Interest);
             PrincipalToRelease = 0;
             if(stake.monthCount > (uint256(stake.planTime).sub(1))){
@@ -171,4 +172,3 @@ contract Staking{
 
 
 }
-
