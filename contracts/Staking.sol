@@ -89,9 +89,19 @@ contract Staking {
             return true;
         }
 
-    function BatchAddStake(uint256 size, uint256 planID, uint256 contractID, uint256 plantime, uint256[] memory stakedamount) public onlyTimeAlly() returns(bool) {
-        for(uint256 i = 0; i < size; i++) {
-        require(AddStake(planID, contractID.add(i), plantime, stakedamount[i]));
+    function batchAddStake(
+            uint256 size,
+            uint256 planID,
+            uint256 contractID,
+            uint256 plantime,
+            uint256[] memory stakedamount
+            )
+            public
+            onlyTimeAlly()
+            returns(bool)
+        {
+        for (uint256 i = 0; i < size; i++) {
+            require(addStake(planID, contractID.add(i), plantime, stakedamount[i]));
         }
         return true;
     }
