@@ -69,17 +69,25 @@ contract Staking {
         return(uint256(stakes[contractID].stakedAmount));
     }
 
-    function AddStake(uint256 planID, uint256 contractID, uint256 plantime, uint256 stakedamount) public onlyTimeAlly() returns(bool) {
-        Stake memory stake;
-        stake.planTime = uint32(plantime);
-        stake.stakedAmount = uint128(stakedamount);
-        stake.monthCount = 0;
-        stake.activePlanListIndex = uint32(plans[planID].activePlanList.push(uint32(contractID)).sub(1));
-        stake.monthlyPrincipal[0] = uint32(stakedamount);
-        stakes[contractID] = stake;
-        plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount).add(stakedamount));
-        return true;
-    }
+    function addStake(
+        uint256 planID,
+        uint256 contractID,
+        uint256 plantime,
+        uint256 stakedamount
+        )
+        public
+        onlyTimeAlly()
+        returns(bool) {
+            Stake memory stake;
+            stake.planTime = uint32(plantime);
+            stake.stakedAmount = uint128(stakedamount);
+            stake.monthCount = 0;
+            stake.activePlanListIndex = uint32(plans[planID].activePlanList.push(uint32(contractID)).sub(1));
+            stake.monthlyPrincipal[0] = uint32(stakedamount);
+            stakes[contractID] = stake;
+            plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount).add(stakedamount));
+            return true;
+        }
 
     function BatchAddStake(uint256 size, uint256 planID, uint256 contractID, uint256 plantime, uint256[] memory stakedamount) public onlyTimeAlly() returns(bool) {
         for(uint256 i = 0; i < size; i++) {
