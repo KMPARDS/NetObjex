@@ -12,6 +12,7 @@ contract LoanAndRefund {
         uint32 loanStartTime;
         uint32 loanListIndex;
     }
+
     mapping (uint256 => Loan) public loans;
 
     struct Refund {
@@ -20,20 +21,21 @@ contract LoanAndRefund {
         uint32 refundListIndex;
         uint64 refundAmount;
     }
+
     mapping (uint256 => Refund) public reFunds;
 
     uint256[] public reFundList;
     uint256[] public loanList;
     uint256 private refundListUpdateCount;
     uint256 private loanListUpdateCount;
-    address timeAlly;
+    address public timeAlly;
 
     event RefundInitiated(uint256 contractid, uint256 count, uint256 amount);
     event RefundEnded(uint256 contractid);
     event LoanDefaulted(uint256 contractid);
 
 
-    modifier OnlyTimeAlly() {
+    modifier onlyTimeAlly() {
         require(msg.sender == timeAlly, "Owner TimeAlly should be calling");
         _;
     }
@@ -42,15 +44,15 @@ contract LoanAndRefund {
     timeAlly = timeally;
     }
 
-  function ViewLoan(uint256 contractID) external OnlyTimeAlly() view returns(uint256, uint256, uint256){
+  function ViewLoan(uint256 contractID) external onlyTimeAlly() view returns(uint256, uint256, uint256){
    return(uint256(loans[contractID].loanPeriod), uint256(loans[contractID].loanStartTime), uint256(loans[contractID].loanAmount));
   }
 
-    function ViewRefund(uint256 contractID) external OnlyTimeAlly() view returns(uint256, uint256, uint256){
+    function ViewRefund(uint256 contractID) external onlyTimeAlly() view returns(uint256, uint256, uint256){
    return(uint256(reFunds[contractID].refundWeeks), uint256(reFunds[contractID].refundCount), uint256(reFunds[contractID].refundAmount));
   }
 
-  function AddLoan(uint256 contractID, uint32 loanperiod, uint128 loanamount) external OnlyTimeAlly() returns(bool) {
+  function AddLoan(uint256 contractID, uint32 loanperiod, uint128 loanamount) external onlyTimeAlly() returns(bool) {
       Loan memory loan;
       loan.loanPeriod = loanperiod;
       loan.loanAmount = uint128(loanamount);
@@ -60,12 +62,12 @@ contract LoanAndRefund {
   return true;
   }
 
-  function RemoveLoan(uint256 contractID) external OnlyTimeAlly() returns(bool) {
+  function RemoveLoan(uint256 contractID) external onlyTimeAlly() returns(bool) {
   DeleteLoanListElement(loans[contractID].loanListIndex);
   return true;
   }
 
-  function AddRefund(uint256 contractID, uint32 refundweeks, uint32 refundcount, uint64 refundamount) external OnlyTimeAlly() returns(bool) {
+  function AddRefund(uint256 contractID, uint32 refundweeks, uint32 refundcount, uint64 refundamount) external onlyTimeAlly() returns(bool) {
       Refund memory refund;
       refund.refundWeeks = refundweeks;
       refund.refundCount = refundcount;
@@ -76,7 +78,7 @@ contract LoanAndRefund {
       return true;
   }
 
-  function MonthlyRefundHandler(uint256 size) external OnlyTimeAlly() returns (uint[] memory, uint){
+  function MonthlyRefundHandler(uint256 size) external onlyTimeAlly() returns (uint[] memory, uint){
       uint256[] memory UserPayment;
       uint256 character;
       Refund memory refund;
@@ -115,7 +117,7 @@ contract LoanAndRefund {
       return(UserPayment, reFundList.length.sub(size));
   }
 
-  function MonthlyLoanHandler(uint256 size) external OnlyTimeAlly() returns (uint[] memory, uint){
+  function MonthlyLoanHandler(uint256 size) external onlyTimeAlly() returns (uint[] memory, uint){
       uint256[] memory Defaultlist;
       Loan memory loan;
       uint256 i = loanListUpdateCount;
