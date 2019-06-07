@@ -59,23 +59,30 @@ contract TimeAllyCore {
         _;
     }
 
-    modifier NotPaused() {
+    modifier notPaused() {
         require(paused == false, "Should not be paused");
         _;
     }
 
-
-    constructor(address eraswapTokenAddress) public{
-    eraswapToken = Eraswap(eraswapTokenAddress);
-    lastMonthlyHandler = now;
-    owner = msg.sender;
+    constructor(address eraswapTokenAddress)
+    public {
+        eraswapToken = Eraswap(eraswapTokenAddress);
+        lastMonthlyHandler = now;
+        owner = msg.sender;
     }
 
-  function Setaddress(address stakingaddress, address loanandrefundaddress) public onlyOwner() returns(bool){
-      staking = Staking(stakingaddress);
-      loanAndRefund = LoanAndRefund(loanandrefundaddress);
-      return true;
-  }
+    function setaddress(
+        address stakingaddress,
+        address loanandrefundaddress
+    )
+    public
+    onlyOwner()
+    returns(bool)
+    {
+        staking = Staking(stakingaddress);
+        loanAndRefund = LoanAndRefund(loanandrefundaddress);
+        return true;
+    }
 
   function AddToTransferList(uint256[] memory list) internal returns(bool) {
       for (uint256 i = 0; i < list.length; i++) {
