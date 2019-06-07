@@ -125,7 +125,6 @@ contract LoanAndRefund {
         return(defaultlist, loanList.length.sub(size));
     }
 
-
     function monthlyRefundHandler(uint256 size)
         external
         onlyTimeAlly()
@@ -200,16 +199,22 @@ contract LoanAndRefund {
             );
     }
 
-    function DeleteRefundListElement(uint32 index) internal returns(bool){
+    function deleteRefundListElement(uint32 index)
+        internal
+        returns(bool)
+    {
         require(index < reFundList.length);
         uint256 last = reFundList.length.sub(1);
         reFunds[reFundList[last]].refundListIndex = index;
         reFundList[index] = reFundList[last];
-        reFundList.pop();
+        reFundList.length--;
         return true;
     }
 
-    function DeleteLoanListElement(uint32 index) internal returns(bool){
+    function deleteLoanListElement(uint32 index)
+        internal
+        returns(bool)
+    {
         require(index < loanList.length);
         uint256 last = loanList.length.sub(1);
         loans[loanList[last]].loanListIndex = index;
