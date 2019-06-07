@@ -40,11 +40,24 @@ contract Staking {
     }
 
     constructor(address timeally) public {
-    timeAlly = timeally;
+        timeAlly = timeally;
     }
 
-    function ViewStake(uint256 contractID) public onlyTimeAlly() view returns(uint256, uint256, uint256){
-        return(uint256(stakes[contractID].planTime), uint256(stakes[contractID].stakedAmount), uint256(stakes[contractID].monthCount));
+    function viewStake(uint256 contractID)
+        public
+        onlyTimeAlly()
+        view
+        returns(
+            uint256,
+            uint256,
+            uint256
+            )
+    {
+        return(
+            uint256(stakes[contractID].planTime),
+            uint256(stakes[contractID].stakedAmount),
+            uint256(stakes[contractID].monthCount)
+            );
     }
 
     function ViewStakedAmount(uint256 contractID) public onlyTimeAlly() view returns(uint256){
