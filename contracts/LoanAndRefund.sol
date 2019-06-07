@@ -89,6 +89,43 @@ contract LoanAndRefund {
         return true;
     }
 
+    function monthlyLoanHandler(uint256 size)
+        external
+        onlyTimeAlly()
+        returns(
+            uint[] memory,
+            uint
+            )
+    {
+        uint256[] memory defaultlist;
+        Loan memory loan;
+        uint256 i = loanListUpdateCount;
+        if (i.add(size) >= loanList.length){
+            size = loanList.length;
+        }else {
+            size = i.add(size);
+        }
+        while (i < size) {
+            uint256 contractID = loanList[i];
+            loan = loans[contractID];
+            if ((now.sub(loan.loanStartTime)) > loan.loanPeriod) {
+                defaultlist[defaultlist.length] = contractID;
+                DeleteLoanListElement(loan.loanListIndex);
+                emit LoanDefaulted(contractID);
+                size = size.sub(1);
+            }else {
+                i++;
+            }
+        }
+        if (size == loanList.length) {
+            loanListUpdateCount = 0;
+        }else {
+            loanListUpdateCount = size;
+        }
+        return(defaultlist, loanList.length.sub(size));
+    }
+
+
     function monthlyRefundHandler(uint256 size)
         external
         onlyTimeAlly()
@@ -162,40 +199,6 @@ contract LoanAndRefund {
             uint256(reFunds[contractID].refundAmount)
             );
     }
-
-  function MonthlyLoanHandler(uint256 size) external onlyTimeAlly() returns (uint[] memory, uint){
-      uint256[] memory Defaultlist;
-      Loan memory loan;
-      uint256 i = loanListUpdateCount;
-      if(i.add(size) >= loanList.length){
-          size = loanList.length;
-      }
-      else{
-          size = i.add(size);
-      }
-      while (i < size) {
-          uint256 contractID = loanList[i];
-          loan = loans[contractID];
-          if ((now.sub(loan.loanStartTime)) > loan.loanPeriod ) {
-              Defaultlist[Defaultlist.length] = contractID;
-              DeleteLoanListElement(loan.loanListIndex);
-              emit LoanDefaulted(contractID);
-              size = size.sub(1);
-          }
-          else {
-              i++;
-          }
-
-      }
-      if(size == loanList.length) {
-          loanListUpdateCount =  0;
-      }
-      else {
-          loanListUpdateCount =  size;
-      }
-      return(Defaultlist, loanList.length.sub(size));
-  }
-
 
     function DeleteRefundListElement(uint32 index) internal returns(bool){
         require(index < reFundList.length);
