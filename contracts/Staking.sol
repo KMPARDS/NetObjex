@@ -42,7 +42,7 @@ contract Staking {
     constructor(address timeally) public {
         timeAlly = timeally;
     }
-
+    
     function batchAddStake(
             uint256 size,
             uint256 planID,
@@ -220,7 +220,7 @@ contract Staking {
             plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount).add(stakedamount));
             return true;
         }
-        
+
     function deleteActivePlanListElement(
             uint256 id,
             uint32 index

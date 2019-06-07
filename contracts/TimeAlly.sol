@@ -246,7 +246,7 @@ contract TimeAlly is TimeAllyCore {
         external
         view
         returns(uint256[] memory) {
-            return (ContractIds[msg.sender]);
+            return (contractIds[msg.sender]);
         }
 
   /**
@@ -302,7 +302,7 @@ contract TimeAlly is TimeAllyCore {
                 tempContract.owner = contractOwner;
                 tempContract.timestamp = now;
                 Contracts[ContractID] = tempContract;
-                ContractIds[contractOwner].push(ContractID);
+                contractIds[contractOwner].push(ContractID);
                 emit ContractCreated(ContractID, contractOwner, planID);
                 ContractID = ContractID.add(1);
             }
