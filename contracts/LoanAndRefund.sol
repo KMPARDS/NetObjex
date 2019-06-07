@@ -3,7 +3,7 @@ pragma solidity ^0.5.2;
 import "./SafeMath.sol";
 
 
-contract LoanAndRefund{
+contract LoanAndRefund {
     using SafeMath for uint256;
 
     struct Loan {
@@ -12,7 +12,7 @@ contract LoanAndRefund{
         uint32 loanStartTime;
         uint32 loanListIndex;
     }
-    mapping (uint256 => Loan) public Loans;
+    mapping (uint256 => Loan) public loans;
 
     struct Refund {
         uint32 refundWeeks;
@@ -43,7 +43,7 @@ contract LoanAndRefund{
     }
 
   function ViewLoan(uint256 contractID) external OnlyTimeAlly() view returns(uint256, uint256, uint256){
-   return(uint256(Loans[contractID].loanPeriod), uint256(Loans[contractID].loanStartTime), uint256(Loans[contractID].loanAmount));
+   return(uint256(loans[contractID].loanPeriod), uint256(loans[contractID].loanStartTime), uint256(loans[contractID].loanAmount));
   }
 
     function ViewRefund(uint256 contractID) external OnlyTimeAlly() view returns(uint256, uint256, uint256){
@@ -56,12 +56,12 @@ contract LoanAndRefund{
       loan.loanAmount = uint128(loanamount);
       loan.loanStartTime = uint32(now);
       loan.loanListIndex = uint32(loanList.push(contractID).sub(1));
-      Loans[contractID] = loan;
+      loans[contractID] = loan;
   return true;
   }
 
   function RemoveLoan(uint256 contractID) external OnlyTimeAlly() returns(bool) {
-  DeleteLoanListElement(Loans[contractID].loanListIndex);
+  DeleteLoanListElement(loans[contractID].loanListIndex);
   return true;
   }
 
@@ -102,12 +102,12 @@ contract LoanAndRefund{
               size = size.sub(1);
           }
           else {
-              i++;  
+              i++;
           }
-          
+
       }
       if(size == reFundList.length) {
-          refundListUpdateCount =  0;  
+          refundListUpdateCount =  0;
       }
       else {
           refundListUpdateCount =  size;
@@ -127,7 +127,7 @@ contract LoanAndRefund{
       }
       while (i < size) {
           uint256 contractID = loanList[i];
-          loan = Loans[contractID];
+          loan = loans[contractID];
           if ((now.sub(loan.loanStartTime)) > loan.loanPeriod ) {
               Defaultlist[Defaultlist.length] = contractID;
               DeleteLoanListElement(loan.loanListIndex);
@@ -135,12 +135,12 @@ contract LoanAndRefund{
               size = size.sub(1);
           }
           else {
-              i++;  
+              i++;
           }
-        
+
       }
       if(size == loanList.length) {
-          loanListUpdateCount =  0;  
+          loanListUpdateCount =  0;
       }
       else {
           loanListUpdateCount =  size;
@@ -161,11 +161,10 @@ contract LoanAndRefund{
     function DeleteLoanListElement(uint32 index) internal returns(bool){
         require(index < loanList.length);
         uint256 last = loanList.length.sub(1);
-        Loans[loanList[last]].loanListIndex = index;
+        loans[loanList[last]].loanListIndex = index;
         loanList[index] = loanList[last];
         loanList.pop();
         return true;
     }
 
 }
-
