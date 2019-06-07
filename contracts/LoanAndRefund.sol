@@ -60,9 +60,21 @@ contract LoanAndRefund {
             );
     }
 
-    function ViewRefund(uint256 contractID) external onlyTimeAlly() view returns(uint256, uint256, uint256){
-   return(uint256(reFunds[contractID].refundWeeks), uint256(reFunds[contractID].refundCount), uint256(reFunds[contractID].refundAmount));
-  }
+    function viewRefund(uint256 contractID)
+        external
+        onlyTimeAlly()
+        view
+        returns(
+            uint256,
+            uint256,
+            uint256)
+            {
+        return(
+            uint256(reFunds[contractID].refundWeeks),
+            uint256(reFunds[contractID].refundCount),
+            uint256(reFunds[contractID].refundAmount)
+            );
+    }
 
   function AddLoan(uint256 contractID, uint32 loanperiod, uint128 loanamount) external onlyTimeAlly() returns(bool) {
       Loan memory loan;
