@@ -43,60 +43,14 @@ contract Staking {
         timeAlly = timeally;
     }
 
-    function viewStake(uint256 contractID)
-        public
-        onlyTimeAlly()
-        view
-        returns(
-            uint256,
-            uint256,
-            uint256
-            )
-    {
-        return(
-            uint256(stakes[contractID].planTime),
-            uint256(stakes[contractID].stakedAmount),
-            uint256(stakes[contractID].monthCount)
-            );
-    }
-
-    function viewStakedAmount(uint256 contractID)
-        public
-        onlyTimeAlly()
-        view
-        returns(uint256)
-    {
-        return(uint256(stakes[contractID].stakedAmount));
-    }
-
-    function addStake(
-        uint256 planID,
-        uint256 contractID,
-        uint256 plantime,
-        uint256 stakedamount
-        )
-        public
-        onlyTimeAlly()
-        returns(bool) {
-            Stake memory stake;
-            stake.planTime = uint32(plantime);
-            stake.stakedAmount = uint128(stakedamount);
-            stake.monthCount = 0;
-            stake.activePlanListIndex = uint32(plans[planID].activePlanList.push(uint32(contractID)).sub(1));
-            stake.monthlyPrincipal[0] = uint32(stakedamount);
-            stakes[contractID] = stake;
-            plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount).add(stakedamount));
-            return true;
-        }
-
     function batchAddStake(
             uint256 size,
             uint256 planID,
             uint256 contractID,
             uint256 plantime,
-            uint256[] memory stakedamount
+            uint256[] stakedamount
             )
-            public
+            external
             onlyTimeAlly()
             returns(bool)
         {
@@ -110,7 +64,7 @@ contract Staking {
             uint256 planID,
             uint256 contractID
             )
-            public
+            external
             onlyTimeAlly()
             returns(bool)
     {
@@ -125,7 +79,7 @@ contract Staking {
             uint256 planID,
             uint256 contractID
             )
-            public
+            external
             onlyTimeAlly()
             returns(bool)
     {
@@ -140,7 +94,7 @@ contract Staking {
     function monthlyNRTHandler(
             uint256 nrt,
             uint256 planID)
-            public
+            external
             onlyTimeAlly()
             returns(uint256)
     {
@@ -173,7 +127,7 @@ contract Staking {
     function monthlyPlanHandler(
             uint256 planID,
             uint256 size)
-            public
+            external
             onlyTimeAlly()
             returns(
             uint[] memory,
@@ -221,6 +175,52 @@ contract Staking {
         return(userPayment, (plan.activePlanList.length).sub(size));
     }
 
+    function viewStake(uint256 contractID)
+        external
+        onlyTimeAlly()
+        view
+        returns(
+            uint256,
+            uint256,
+            uint256
+            )
+    {
+        return(
+            uint256(stakes[contractID].planTime),
+            uint256(stakes[contractID].stakedAmount),
+            uint256(stakes[contractID].monthCount)
+            );
+    }
+
+    function viewStakedAmount(uint256 contractID)
+        external
+        onlyTimeAlly()
+        view
+        returns(uint256)
+    {
+        return(uint256(stakes[contractID].stakedAmount));
+    }
+
+    function addStake(
+        uint256 planID,
+        uint256 contractID,
+        uint256 plantime,
+        uint256 stakedamount
+        )
+        public
+        onlyTimeAlly()
+        returns(bool) {
+            Stake memory stake;
+            stake.planTime = uint32(plantime);
+            stake.stakedAmount = uint128(stakedamount);
+            stake.monthCount = 0;
+            stake.activePlanListIndex = uint32(plans[planID].activePlanList.push(uint32(contractID)).sub(1));
+            stake.monthlyPrincipal[0] = uint32(stakedamount);
+            stakes[contractID] = stake;
+            plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount).add(stakedamount));
+            return true;
+        }
+        
     function deleteActivePlanListElement(
             uint256 id,
             uint32 index
