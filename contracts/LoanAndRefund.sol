@@ -70,6 +70,25 @@ contract LoanAndRefund {
         return true;
     }
 
+    function addRefund(
+        uint256 contractID,
+        uint32 refundweeks,
+        uint32 refundcount,
+        uint64 refundamount)
+        external
+        onlyTimeAlly()
+        returns(bool)
+    {
+        Refund memory refund;
+        refund.refundWeeks = refundweeks;
+        refund.refundCount = refundcount;
+        refund.refundAmount = refundamount;
+        refund.refundListIndex = uint32(reFundList.push(contractID).sub(1));
+
+        reFunds[contractID] = refund;
+        return true;
+    }
+
     function viewLoan(uint256 contractID)
         external
         onlyTimeAlly()
@@ -102,17 +121,6 @@ contract LoanAndRefund {
             uint256(reFunds[contractID].refundAmount)
             );
     }
-
-  function AddRefund(uint256 contractID, uint32 refundweeks, uint32 refundcount, uint64 refundamount) external onlyTimeAlly() returns(bool) {
-      Refund memory refund;
-      refund.refundWeeks = refundweeks;
-      refund.refundCount = refundcount;
-      refund.refundAmount = refundamount;
-      refund.refundListIndex = uint32(reFundList.push(contractID).sub(1));
-
-      reFunds[contractID] = refund;
-      return true;
-  }
 
   function MonthlyRefundHandler(uint256 size) external onlyTimeAlly() returns (uint[] memory, uint){
       uint256[] memory UserPayment;
