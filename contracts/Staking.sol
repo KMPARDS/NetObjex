@@ -170,49 +170,55 @@ contract Staking {
         return luckPoolBal;
     }
 
-
-    function MonthlyPlanHandler(uint256 planID, uint256 size) public onlyTimeAlly() returns(uint[] memory, uint){
+    function monthlyPlanHandler(
+            uint256 planID,
+            uint256 size)
+            public
+            onlyTimeAlly()
+            returns(
+            uint[] memory,
+            uint)
+    {
         require(plans[planID].activePlanList.length > plans[planID].updateCount);
         Plan memory plan = plans[planID];
         Stake memory stake;
         uint256 contractid;
-        uint256 Index;
-        uint256 Interest;
-        uint256 PrincipalToRelease;
-        uint256[] memory UserPayment;
+        uint256 index;
+        uint256 interest;
+        uint256 principalToRelease;
+        uint256[] memory userPayment;
         uint256 i = uint256(plan.updateCount);
-        if(i.add(size) >= plan.activePlanList.length){
-          size = plan.activePlanList.length;
-          plan.updateCount =  0;
+        if (i.add(size) >= plan.activePlanList.length) {
+            size = plan.activePlanList.length;
+            plan.updateCount = 0;
+        }else {
+            size = i.add(size);
+            plan.updateCount = uint128(size);
         }
-        else{
-          size = i.add(size);
-          plan.updateCount =  uint128(size);
-        }
-        while ( i < size) {
+        while (i < size) {
             contractid = uint256(plan.activePlanList[i]);
             stake = stakes[contractid];
-            Index = uint256(stake.monthCount % stake.planTime);
-            Interest = uint256(stake.stakedAmount * plan.nrtBalance).div(uint256(plan.lastPlanAmount * 2));
-            emit InterestReleased(contractid, stake.monthCount, Interest);
-            PrincipalToRelease = 0;
-            if(stake.monthCount > (uint256(stake.planTime).sub(1))){
-                PrincipalToRelease = uint256(stake.monthlyPrincipal[Index]);
-                emit PrincipalReleased(contractid, stake.monthCount, PrincipalToRelease);
+            index = uint256(stake.monthCount % stake.planTime);
+            interest = uint256(stake.stakedAmount * plan.nrtBalance).div(uint256(plan.lastPlanAmount * 2));
+            emit InterestReleased(contractid, stake.monthCount, interest);
+            principalToRelease = 0;
+            if (stake.monthCount > (uint256(stake.planTime).sub(1))) {
+                principalToRelease = uint256(stake.monthlyPrincipal[index]);
+                emit PrincipalReleased(contractid, stake.monthCount, principalToRelease);
             }
-            plan.activePlanAmount = uint128((uint256(plan.activePlanAmount).add(Interest)).sub(PrincipalToRelease));
-            stake.stakedAmount = uint128((uint256(stake.stakedAmount).add(Interest)).sub(PrincipalToRelease));
-            stake.monthlyPrincipal[Index] = uint32(Interest);
+            plan.activePlanAmount = uint128((uint256(plan.activePlanAmount).add(interest)).sub(principalToRelease));
+            stake.stakedAmount = uint128((uint256(stake.stakedAmount).add(interest)).sub(principalToRelease));
+            stake.monthlyPrincipal[index] = uint32(interest);
             stake.monthCount++;
-            Index = contractid;
-            Index |= (Interest + PrincipalToRelease)<<128;
-            UserPayment[UserPayment.length] = Index;
+            index = contractid;
+            index |= (interest + principalToRelease)<<128;
+            userPayment[userPayment.length] = index;
             stakes[contractid] = stake;
             i++;
-          }
+        }
         emit PlanHandlerStatus(planID, size, plan.activePlanList.length);
         plans[planID] = plan;
-        return(UserPayment, (plan.activePlanList.length).sub(size));
+        return(userPayment, (plan.activePlanList.length).sub(size));
     }
 
 
