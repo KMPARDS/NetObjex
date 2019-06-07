@@ -24,7 +24,7 @@ contract LoanAndRefund {
 
     mapping (uint256 => Refund) public reFunds;
 
-    uint256[] public storage reFundList;
+    uint256[] public reFundList;
     uint256[] public loanList;
     uint256 private refundListUpdateCount;
     uint256 private loanListUpdateCount;
