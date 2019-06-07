@@ -3,7 +3,7 @@ pragma solidity ^ 0.5.2;
 import "./TimeAllyCore.sol";
 
 
-contract TimeAlly is TimeAllyCore{
+contract TimeAlly is TimeAllyCore {
 
     using SafeMath for uint256;
 
@@ -14,9 +14,7 @@ contract TimeAlly is TimeAllyCore{
     event LoanRepayed(uint256 contractid, address owner, uint256 loanamnt, uint256 interest, uint256 planid);
     event OwnershipTransfered(uint256 contractid, address owner, address newowner);
 
-
-
-    modifier OnlyContractOwner(uint256 contractid) {
+    modifier onlyContractOwner(uint256 contractid) {
         require(msg.sender == Contracts[contractid].owner, "Owner should be calling");
         _;
     }
@@ -25,8 +23,9 @@ contract TimeAlly is TimeAllyCore{
     * @dev Modifier
     */
     //todo: this also should check whther the contract have any active loans or not
-    modifier CanBeWindedUp(uint256 contractID) {
-        require(((now.sub(Contracts[contractID].timestamp)) >= Plans[Contracts[contractID].planid].PlanPeriod), "Contract can only be ended after 2 years");
+    modifier canBeWindedUp(uint256 contractID) {
+        require(((now.sub(Contracts[contractID].timestamp)) >= Plans[Contracts[contractID].planid].PlanPeriod),
+            "Contract can only be ended after 2 years");
         require(Contracts[contractID].status == 1);
         _;
     }
@@ -34,7 +33,7 @@ contract TimeAlly is TimeAllyCore{
     /**
     * @dev Modifier
     */
-    modifier LoanCanBeTaken(uint256 contractID) {
+    modifier loanCanBeTaken(uint256 contractID) {
         require(Contracts[contractID].status == 1, "Loan should not be present");
         _;
     }
@@ -42,7 +41,7 @@ contract TimeAlly is TimeAllyCore{
     /**
     * @dev Modifier
     */
-    modifier LoanCanBeRepayed(uint256 contractID) {
+    modifier loanCanBeRepayed(uint256 contractID) {
         require(Contracts[contractID].status == 2, "Loan should not be present");
         _;
     }
@@ -50,19 +49,51 @@ contract TimeAlly is TimeAllyCore{
     /**
     * @dev Function
     */
+    function viewContract(uint256 contractID)
+        public
+        view
+        onlyContractOwner(contractID)
+        returns(
+            uint256,
+            uint256,
+            uint256,
+            address
+            )
+    {
+        return (
+                Contracts[ContractID].status,
+                Contracts[ContractID].timestamp,
+                Contracts[ContractID].planid,
+                Contracts[ContractID].owner
+            );
+    }
 
-  function ViewContract(uint256 contractID) public view OnlyContractOwner(contractID) returns(uint256, uint256, uint256, address) {
-    return (Contracts[ContractID].status, Contracts[ContractID].timestamp, Contracts[ContractID].planid, Contracts[ContractID].owner);
-  }
-  function ViewUserStakes(uint256 contractID) public view OnlyContractOwner(contractID) returns(uint256, uint256, uint256) {
-    (uint256 a, uint256 b, uint256 c) = staking.ViewStake(contractID);
-    return (a, b, c);
-  }
-  function ViewUserLoan(uint256 contractID) public view OnlyContractOwner(contractID) returns(uint256, uint256, uint256) {
-    (uint256 a, uint256 b, uint256 c) = loanAndRefund.ViewLoan(contractID);
-    return (a, b, c);
-  }
-  function ViewUserRefund(uint256 contractID) public view OnlyContractOwner(contractID) returns(uint256, uint256, uint256) {
+    function viewUserStakes(uint256 contractID)
+        public
+        view
+        onlyContractOwner(contractID)
+        returns(
+            uint256,
+            uint256,
+            uint256) {
+            (uint256 a, uint256 b, uint256 c) = staking.ViewStake(contractID);
+            return (a, b, c);
+        }
+
+    function viewUserLoan(uint256 contractID)
+        public
+        view
+        onlyContractOwner(contractID)
+        returns(
+            uint256,
+            uint256,
+            uint256)
+    {
+        (uint256 a, uint256 b, uint256 c) = loanAndRefund.ViewLoan(contractID);
+        return (a, b, c);
+    }
+
+  function ViewUserRefund(uint256 contractID) public view onlyContractOwner(contractID) returns(uint256, uint256, uint256) {
     (uint256 a, uint256 b, uint256 c) = loanAndRefund.ViewRefund(contractID);
     return (a, b, c);
   }
@@ -145,7 +176,7 @@ contract TimeAlly is TimeAllyCore{
   * @dev Function
   */
 
-  function windUpContract(uint256 contractID) external OnlyContractOwner(contractID) CanBeWindedUp(contractID) returns(bool) {
+  function windUpContract(uint256 contractID) external onlyContractOwner(contractID) canBeWindedUp(contractID) returns(bool) {
     require(staking.Pause(Contracts[contractID].planid, contractID));
     Contracts[contractID].status = 3;
     uint256 refundAmount = (staking.ViewStakedAmount(contractID)).div(Plans[Contracts[contractID].planid].RefundWeeks);
@@ -158,7 +189,7 @@ contract TimeAlly is TimeAllyCore{
   * @dev Function
   */
 
-  function takeLoan(uint256 contractID, uint256 loanamount) external OnlyContractOwner(contractID) LoanCanBeTaken(contractID) returns(bool) {
+  function takeLoan(uint256 contractID, uint256 loanamount) external onlyContractOwner(contractID) loanCanBeTaken(contractID) returns(bool) {
     require(loanamount < ((staking.ViewStakedAmount(contractID)).div(2)));
     uint256 planid = Contracts[contractID].planid;
     uint256 repayamount = loanamount.add((loanamount.mul(Plans[planid].LoanInterestRate)).div(100));
@@ -175,7 +206,7 @@ contract TimeAlly is TimeAllyCore{
   * @dev Function
   */
 
-  function rePayLoan(uint256 contractID) external OnlyContractOwner(contractID) LoanCanBeRepayed(contractID) returns(bool) {
+  function rePayLoan(uint256 contractID) external onlyContractOwner(contractID) loanCanBeRepayed(contractID) returns(bool) {
     require(EraswapToken.allowance(msg.sender, address(this)) >= LoanRepaymentAmount[contractID]);
     require(EraswapToken.transferFrom(msg.sender, address(this), LoanRepaymentAmount[contractID]));
     require(loanAndRefund.RemoveLoan(contractID));
@@ -196,7 +227,7 @@ contract TimeAlly is TimeAllyCore{
    * @dev To Transfer Staking Ownership
    * @return bool true if ownership successfully transffered
    */
-  function transferOwnership(uint256 contractid, address newowner) public OnlyContractOwner(contractid) LoanCanBeTaken(contractid) returns(bool) {
+  function transferOwnership(uint256 contractid, address newowner) public onlyContractOwner(contractid) loanCanBeTaken(contractid) returns(bool) {
     emit OwnershipTransfered(contractid, Contracts[contractid].owner, newowner);
     Contracts[contractid].owner = newowner;
     return true;
@@ -210,4 +241,3 @@ contract TimeAlly is TimeAllyCore{
   }
 
 }
-
