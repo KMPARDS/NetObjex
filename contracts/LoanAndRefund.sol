@@ -66,7 +66,7 @@ contract LoanAndRefund {
         onlyTimeAlly()
         returns(bool)
     {
-        DeleteLoanListElement(loans[contractID].loanListIndex);
+        deleteLoanListElement(loans[contractID].loanListIndex);
         return true;
     }
 
@@ -110,7 +110,7 @@ contract LoanAndRefund {
             loan = loans[contractID];
             if ((now.sub(loan.loanStartTime)) > loan.loanPeriod) {
                 defaultlist[defaultlist.length] = contractID;
-                DeleteLoanListElement(loan.loanListIndex);
+                deleteLoanListElement(loan.loanListIndex);
                 emit LoanDefaulted(contractID);
                 size = size.sub(1);
             }else {
@@ -151,7 +151,7 @@ contract LoanAndRefund {
             refund.refundCount++;
             reFunds[contractID] = refund;
             if (refund.refundCount == refund.refundWeeks) {
-                DeleteRefundListElement(refund.refundListIndex);
+                deleteRefundListElement(refund.refundListIndex);
                 emit RefundEnded(contractID);
                 size = size.sub(1);
             }else {
@@ -219,7 +219,7 @@ contract LoanAndRefund {
         uint256 last = loanList.length.sub(1);
         loans[loanList[last]].loanListIndex = index;
         loanList[index] = loanList[last];
-        loanList.pop();
+        loanList.length--;
         return true;
     }
 
