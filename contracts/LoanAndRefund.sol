@@ -61,6 +61,15 @@ contract LoanAndRefund {
         return true;
     }
 
+    function removeLoan(uint256 contractID)
+        external
+        onlyTimeAlly()
+        returns(bool)
+    {
+        DeleteLoanListElement(loans[contractID].loanListIndex);
+        return true;
+    }
+
     function viewLoan(uint256 contractID)
         external
         onlyTimeAlly()
@@ -93,12 +102,6 @@ contract LoanAndRefund {
             uint256(reFunds[contractID].refundAmount)
             );
     }
-
-
-  function RemoveLoan(uint256 contractID) external onlyTimeAlly() returns(bool) {
-  DeleteLoanListElement(loans[contractID].loanListIndex);
-  return true;
-  }
 
   function AddRefund(uint256 contractID, uint32 refundweeks, uint32 refundcount, uint64 refundamount) external onlyTimeAlly() returns(bool) {
       Refund memory refund;
