@@ -60,7 +60,12 @@ contract Staking {
             );
     }
 
-    function ViewStakedAmount(uint256 contractID) public onlyTimeAlly() view returns(uint256){
+    function viewStakedAmount(uint256 contractID)
+        public
+        onlyTimeAlly()
+        view
+        returns(uint256)
+    {
         return(uint256(stakes[contractID].stakedAmount));
     }
 
