@@ -106,9 +106,18 @@ contract Staking {
         return true;
     }
 
-    function Pause(uint256 planID, uint256 contractID) public onlyTimeAlly() returns(bool) {
-        DeleteActivePlanListElement(planID, stakes[contractID].activePlanListIndex);
-        plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount).sub(uint256(stakes[contractID].stakedAmount)));
+    function pause(
+            uint256 planID,
+            uint256 contractID
+            )
+            public
+            onlyTimeAlly()
+            returns(bool)
+        {
+        DeleteActivePlanListElement(planID,
+                                    stakes[contractID].activePlanListIndex);
+        plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount)
+                                                        .sub(uint256(stakes[contractID].stakedAmount)));
         return true;
     }
 
