@@ -93,7 +93,6 @@ contract TimeAllyCore {
         require(now.sub(nrtManager.LastNRTRelease()) < 30 days);
         paused = true;
         if (step == 0) {
-
             uint256 nrt = nrtManager.TimeAllyNRT();
             uint256 luckPoolBal = staking.MonthlyNRTHandler(nrt, planID);
             if (luckPoolBal != 0) {
@@ -102,15 +101,12 @@ contract TimeAllyCore {
             }
             emit NRTRecieved(nrt);
             emit Progress("Step (0/5): TimeAlly nrt Distribution", remaining);
-
         }else if (step == 1) {
             uint256[] memory refundList;
             (refundList, remaining) = loanAndRefund.MonthlyRefundHandler(size);
             addToTransferList(refundList);
             emit Progress("Step (1/5): TimeAlly Refund Management. Remaining =", remaining);
-
         }else if (step == 2) {
-
             uint256[] memory loanList;
             (loanList, remaining) = loanAndRefund.MonthlyLoanHandler(size);
             for (uint256 i = 0; i < loanList.length; i++) {
@@ -136,14 +132,10 @@ contract TimeAllyCore {
             }else {
                 emit Progress("Step (3/4): PlanHandler processing. Remaining =", remaining);
             }
-
         }else if (step == 4) {
-
-            remaining = MonthlyPaymentHandler(size);
+            remaining = monthlyPaymentHandler(size);
             emit Progress("Step (4/4): TimeAlly Refund Management. Remaining =", remaining);
-
         }
-
         if (remaining == 0) {
             emit StepCompleted(step);
             step++;
@@ -156,36 +148,36 @@ contract TimeAllyCore {
         return true;
     }
 
-
-
-  function MonthlyPaymentHandler(uint256 size) internal returns (uint){
-      uint256 contractID;
-      uint256 value;
-      address to;
-      uint256 i;
-      if(tokenUpdateCount == 0) {
-          i = tokenTransferList.length;
-      }
-      else {
-          i = tokenUpdateCount;
-      }
-      if(i.sub(size) > 0){
-          size = i.sub(size);
-          tokenUpdateCount = size;
-      }
-      else{
-          size = 0;
-          tokenUpdateCount = 0;
-      }
-      while (i > size) {
-          i = i.sub(1);
-          contractID = uint256(tokenTransferList[i]);
-          value = uint256(uint128(tokenTransferList[i]>>128));
-          to = contracts[contractID].owner;
-          require(eraswapToken.transfer(to, value));
-          tokenTransferList.pop();
-      }
-      return(size);
+    function monthlyPaymentHandler(uint256 size)
+    internal
+    returns
+    (uint)
+    {
+        uint256 contractID;
+        uint256 value;
+        address to;
+        uint256 i;
+        if (tokenUpdateCount == 0) {
+            i = tokenTransferList.length;
+        }else {
+            i = tokenUpdateCount;
+        }
+        if (i.sub(size) > 0) {
+            size = i.sub(size);
+            tokenUpdateCount = size;
+        }  else {
+            size = 0;
+            tokenUpdateCount = 0;
+        }
+        while (i > size) {
+            i = i.sub(1);
+            contractID = uint256(tokenTransferList[i]);
+            value = uint256(uint128(tokenTransferList[i]>>128));
+            to = contracts[contractID].owner;
+            require(eraswapToken.transfer(to, value));
+            tokenTransferList.pop();
+        }
+        return(size);
     }
 
     function addToTransferList(
