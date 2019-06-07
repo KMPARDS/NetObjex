@@ -43,6 +43,24 @@ contract LoanAndRefund {
         timeAlly = timeally;
     }
 
+    function addLoan(
+        uint256 contractID,
+        uint32 loanperiod,
+        uint128 loanamount
+        )
+        external
+        onlyTimeAlly()
+        returns(bool)
+    {
+        Loan memory loan;
+        loan.loanPeriod = loanperiod;
+        loan.loanAmount = uint128(loanamount);
+        loan.loanStartTime = uint32(now);
+        loan.loanListIndex = uint32(loanList.push(contractID).sub(1));
+        loans[contractID] = loan;
+        return true;
+    }
+
     function viewLoan(uint256 contractID)
         external
         onlyTimeAlly()
@@ -76,15 +94,6 @@ contract LoanAndRefund {
             );
     }
 
-  function AddLoan(uint256 contractID, uint32 loanperiod, uint128 loanamount) external onlyTimeAlly() returns(bool) {
-      Loan memory loan;
-      loan.loanPeriod = loanperiod;
-      loan.loanAmount = uint128(loanamount);
-      loan.loanStartTime = uint32(now);
-      loan.loanListIndex = uint32(loanList.push(contractID).sub(1));
-      loans[contractID] = loan;
-  return true;
-  }
 
   function RemoveLoan(uint256 contractID) external onlyTimeAlly() returns(bool) {
   DeleteLoanListElement(loans[contractID].loanListIndex);
