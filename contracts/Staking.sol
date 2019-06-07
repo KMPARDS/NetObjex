@@ -14,7 +14,6 @@ contract Staking {
         uint128 updateCount;
         uint32[] activePlanList;
     }
-    mapping (uint256 => Plan) public plans;     //orderid ==> order details
 
     struct Stake {
         uint128 stakedAmount;
@@ -23,17 +22,19 @@ contract Staking {
         uint32 activePlanListIndex;
         uint32[24] monthlyPrincipal;
     }
+
+    mapping(uint256 => Plan) public plans;     //orderid ==> order details
     mapping (uint256 => Stake) public stakes;     //orderid ==> order details
-    address timeAlly;
+    address public timeAlly;
 
 
     event TotalPlanAmount(uint256 amount);
-    event PlanAmountandNRT(uint256 planid, uint256 activeplanamount, uint256 nrtbalance);
-    event PrincipalReleased(uint256 contractid, uint32 term ,uint256 amount);
-    event InterestReleased(uint256 contractid, uint32 month ,uint256 interest);
-    event PlanHandlerStatus(uint256 planid, uint256 current, uint256 total);
+    event PlanAmountandNRT(uint256 indexed planid, uint256 activeplanamount, uint256 nrtbalance);
+    event PrincipalReleased(uint256 indexed contractid, uint32 term, uint256 amount);
+    event InterestReleased(uint256 indexed contractid, uint32 month, uint256 interest);
+    event PlanHandlerStatus(uint256 indexed planid, uint256 current, uint256 total);
 
-    modifier OnlyTimeAlly() {
+    modifier onlyTimeAlly() {
         require(msg.sender == timeAlly, "Owner TimeAlly should be calling");
         _;
     }
@@ -42,15 +43,15 @@ contract Staking {
     timeAlly = timeally;
     }
 
-    function ViewStake(uint256 contractID) public OnlyTimeAlly() view returns(uint256, uint256, uint256){
+    function ViewStake(uint256 contractID) public onlyTimeAlly() view returns(uint256, uint256, uint256){
         return(uint256(stakes[contractID].planTime), uint256(stakes[contractID].stakedAmount), uint256(stakes[contractID].monthCount));
     }
 
-    function ViewStakedAmount(uint256 contractID) public OnlyTimeAlly() view returns(uint256){
+    function ViewStakedAmount(uint256 contractID) public onlyTimeAlly() view returns(uint256){
         return(uint256(stakes[contractID].stakedAmount));
     }
 
-    function AddStake(uint256 planID, uint256 contractID, uint256 plantime, uint256 stakedamount) public OnlyTimeAlly() returns(bool) {
+    function AddStake(uint256 planID, uint256 contractID, uint256 plantime, uint256 stakedamount) public onlyTimeAlly() returns(bool) {
         Stake memory stake;
         stake.planTime = uint32(plantime);
         stake.stakedAmount = uint128(stakedamount);
@@ -62,20 +63,20 @@ contract Staking {
         return true;
     }
 
-    function BatchAddStake(uint256 size, uint256 planID, uint256 contractID, uint256 plantime, uint256[] memory stakedamount) public OnlyTimeAlly() returns(bool) {
+    function BatchAddStake(uint256 size, uint256 planID, uint256 contractID, uint256 plantime, uint256[] memory stakedamount) public onlyTimeAlly() returns(bool) {
         for(uint256 i = 0; i < size; i++) {
         require(AddStake(planID, contractID.add(i), plantime, stakedamount[i]));
         }
         return true;
     }
 
-    function Pause(uint256 planID, uint256 contractID) public OnlyTimeAlly() returns(bool) {
+    function Pause(uint256 planID, uint256 contractID) public onlyTimeAlly() returns(bool) {
         DeleteActivePlanListElement(planID, stakes[contractID].activePlanListIndex);
         plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount).sub(uint256(stakes[contractID].stakedAmount)));
         return true;
     }
 
-    function Resume(uint256 planID, uint256 contractID) public OnlyTimeAlly() returns(bool) {
+    function Resume(uint256 planID, uint256 contractID) public onlyTimeAlly() returns(bool) {
         require(stakes[contractID].activePlanListIndex == 0);
         stakes[contractID].activePlanListIndex = uint32(plans[planID].activePlanList.push(uint32(contractID)).sub(1));
         plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount).add(stakes[contractID].stakedAmount));
@@ -84,7 +85,7 @@ contract Staking {
 
 
 
-    function MonthlyNRTHandler(uint256 NRT, uint256 planID) public OnlyTimeAlly() returns(uint256){
+    function MonthlyNRTHandler(uint256 NRT, uint256 planID) public onlyTimeAlly() returns(uint256){
         uint256 TotalAmount;
         uint256 i;
         for(i=0; i<=planID; i++){
@@ -113,7 +114,7 @@ contract Staking {
     }
 
 
-    function MonthlyPlanHandler(uint256 planID, uint256 size) public OnlyTimeAlly() returns(uint[] memory, uint){
+    function MonthlyPlanHandler(uint256 planID, uint256 size) public onlyTimeAlly() returns(uint[] memory, uint){
         require(plans[planID].activePlanList.length > plans[planID].updateCount);
         Plan memory plan = plans[planID];
         Stake memory stake;
