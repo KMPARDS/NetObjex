@@ -137,30 +137,33 @@ contract Staking {
         return true;
     }
 
-
-
-    function MonthlyNRTHandler(uint256 NRT, uint256 planID) public onlyTimeAlly() returns(uint256){
-        uint256 TotalAmount;
+    function monthlyNRTHandler(
+            uint256 nrt,
+            uint256 planID)
+            public
+            onlyTimeAlly()
+            returns(uint256)
+    {
+        uint256 totalAmount;
         uint256 i;
-        for(i=0; i<=planID; i++){
-            TotalAmount = TotalAmount.add(uint256(plans[i].activePlanAmount));
+        for (i = 0; i <= planID; i++) {
+            totalAmount = totalAmount.add(uint256(plans[i].activePlanAmount));
         }
-        emit TotalPlanAmount(TotalAmount);
-        require(TotalAmount > 0);
+        emit TotalPlanAmount(totalAmount);
+        require(totalAmount > 0);
 
-        for( i=0; i<=planID; i++){
-            if(plans[i].activePlanAmount == 0){
+        for (i = 0; i <= planID; i++) {
+            if (plans[i].activePlanAmount == 0) {
                 plans[i].nrtBalance = 0;
-            }
-            else{
-                plans[i].nrtBalance = uint128((uint256(plans[i].activePlanAmount).mul(NRT)).div(TotalAmount));
+            }else {
+                plans[i].nrtBalance = uint128((uint256(plans[i].activePlanAmount).mul(nrt)).div(totalAmount));
                 plans[i].lastPlanAmount = plans[i].activePlanAmount;
             }
             emit PlanAmountandNRT(i, uint256(plans[i].activePlanAmount), uint256(plans[i].nrtBalance));
         }
 
         uint256 luckPoolBal = (uint256(plans[0].nrtBalance).mul(2)).div(15);
-        if(luckPoolBal != 0){
+        if (luckPoolBal != 0) {
             plans[0].nrtBalance = uint128(uint256(plans[0].nrtBalance).sub(luckPoolBal));
         }
         emit PlanAmountandNRT(0, uint256(plans[0].activePlanAmount), uint256(plans[0].nrtBalance));
