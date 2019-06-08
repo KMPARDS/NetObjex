@@ -42,13 +42,13 @@ contract Staking {
     constructor(address timeally) public {
         timeAlly = timeally;
     }
-    
+
     function batchAddStake(
             uint256 size,
             uint256 planID,
             uint256 contractID,
             uint256 plantime,
-            uint256[] stakedamount
+            uint256[] calldata stakedamount
             )
             external
             onlyTimeAlly()
