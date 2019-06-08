@@ -70,10 +70,11 @@ contract TimeAllyCore {
         lastMonthlyHandler = now;
         owner = msg.sender;
     }
-    
+
     function setaddress(
         address stakingaddress,
         address loanandrefundaddress
+        // address nrtManagerAddress
     )
     external
     onlyOwner()
@@ -81,6 +82,7 @@ contract TimeAllyCore {
     {
         staking = Staking(stakingaddress);
         loanAndRefund = LoanAndRefund(loanandrefundaddress);
+        // nrtManager = NRTManager(nrtManagerAddress);
         return true;
     }
 
@@ -90,11 +92,11 @@ contract TimeAllyCore {
     returns(bool)
     {
         require(now.sub(lastMonthlyHandler) > 30 days);
-        require(now.sub(nrtManager.LastNRTRelease()) < 30 days);
+        require(now.sub(nrtManager.lastNRTRelease()) < 30 days);
         paused = true;
         if (step == 0) {
             uint256 nrt = nrtManager.TimeAllyNRT();
-            uint256 luckPoolBal = staking.MonthlyNRTHandler(nrt, planID);
+            uint256 luckPoolBal = staking.monthlyNRTHandler(nrt, planID);
             if (luckPoolBal != 0) {
                 require(eraswapToken.approve(nrtManagerAddress, luckPoolBal));
                 require(nrtManager.UpdateLuckpool(luckPoolBal));
@@ -103,25 +105,25 @@ contract TimeAllyCore {
             emit Progress("Step (0/5): TimeAlly nrt Distribution", remaining);
         }else if (step == 1) {
             uint256[] memory refundList;
-            (refundList, remaining) = loanAndRefund.MonthlyRefundHandler(size);
+            (refundList, remaining) = loanAndRefund.monthlyRefundHandler(size);
             addToTransferList(refundList);
             emit Progress("Step (1/5): TimeAlly Refund Management. Remaining =", remaining);
         }else if (step == 2) {
             uint256[] memory loanList;
-            (loanList, remaining) = loanAndRefund.MonthlyLoanHandler(size);
+            (loanList, remaining) = loanAndRefund.monthlyLoanHandler(size);
             for (uint256 i = 0; i < loanList.length; i++) {
-                uint256 contractID = loanList[i];
-                uint256 amount = staking.ViewStakedAmount(contractID);
+                uint256 contractId = loanList[i];
+                uint256 amount = staking.viewStakedAmount(contractId);
                 require(eraswapToken.approve(nrtManagerAddress, amount));
                 require(nrtManager.UpdateBurnBal(amount));
-                contracts[contractID].status = 4;
-                emit ContractBurned(contractID, amount);
+                contracts[contractId].status = 4;
+                emit ContractBurned(contractId, amount);
             }
             emit Progress("Step (2/5): TimeAlly Loan Management. Remaining =", remaining);
         } else if (step == 3) {
             require(planHandlerCount <= planID);
             uint256[] memory interestList;
-            (interestList, remaining) = staking.MonthlyPlanHandler(planHandlerCount, size);
+            (interestList, remaining) = staking.monthlyPlanHandler(planHandlerCount, size);
             addToTransferList(interestList);
             if (remaining == 0 && planHandlerCount == planID) {
                 planHandlerCount = 0;
@@ -153,7 +155,7 @@ contract TimeAllyCore {
     returns
     (uint)
     {
-        uint256 contractID;
+        uint256 contractId;
         uint256 value;
         address to;
         uint256 i;
@@ -171,9 +173,9 @@ contract TimeAllyCore {
         }
         while (i > size) {
             i = i.sub(1);
-            contractID = uint256(tokenTransferList[i]);
+            contractId = uint256(tokenTransferList[i]);
             value = uint256(uint128(tokenTransferList[i]>>128));
-            to = contracts[contractID].owner;
+            to = contracts[contractId].owner;
             require(eraswapToken.transfer(to, value));
             tokenTransferList.pop();
         }
