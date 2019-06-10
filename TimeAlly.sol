@@ -166,7 +166,7 @@ contract TimeAlly is TimeAllyCore {
         * @dev Function
         */
     function viewContract(uint256 contractID)
-        external
+        public view
         onlyContractOwner(contractID)
         returns(
             uint256,
@@ -309,3 +309,4 @@ contract TimeAlly is TimeAllyCore {
 
 
 }
+

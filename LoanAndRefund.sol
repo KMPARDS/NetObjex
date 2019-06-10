@@ -100,29 +100,30 @@ contract LoanAndRefund {
         uint256[] memory defaultlist;
         Loan memory loan;
         uint256 i = loanListUpdateCount;
+        uint256 limit;
         if (i.add(size) >= loanList.length){
-            size = loanList.length;
+            limit = loanList.length;
         }else {
-            size = i.add(size);
+            limit = i.add(size);
         }
-        while (i < size) {
+        while (i < limit) {
             uint256 contractID = loanList[i];
             loan = loans[contractID];
             if ((now.sub(loan.loanStartTime)) > loan.loanPeriod) {
                 defaultlist[defaultlist.length] = contractID;
                 deleteLoanListElement(loan.loanListIndex);
                 emit LoanDefaulted(contractID);
-                size = size.sub(1);
+                limit = limit.sub(1);
             }else {
                 i++;
             }
         }
-        if (size == loanList.length) {
+        if (limit == loanList.length) {
             loanListUpdateCount = 0;
         }else {
-            loanListUpdateCount = size;
+            loanListUpdateCount = limit;
         }
-        return(defaultlist, loanList.length.sub(size));
+        return(defaultlist, loanList.length.sub(limit));
     }
 
     function monthlyRefundHandler(uint256 size)
@@ -136,12 +137,13 @@ contract LoanAndRefund {
         uint256 character;
         Refund memory refund;
         uint256 i = refundListUpdateCount;
+        uint256 limit;
         if (i.add(size) >= reFundList.length) {
-            size = reFundList.length;
+            limit = reFundList.length;
         }else {
-            size = i.add(size);
+            limit = i.add(size);
         }
-        while (i < size) {
+        while (i < limit) {
             uint256 contractID = reFundList[i];
             refund = reFunds[contractID];
             character = contractID;
@@ -153,17 +155,17 @@ contract LoanAndRefund {
             if (refund.refundCount == refund.refundWeeks) {
                 deleteRefundListElement(refund.refundListIndex);
                 emit RefundEnded(contractID);
-                size = size.sub(1);
+                limit = limit.sub(1);
             }else {
                 i++;
             }
         }
-        if (size == reFundList.length) {
+        if (limit == reFundList.length) {
             refundListUpdateCount = 0;
         }else {
-            refundListUpdateCount = size;
+            refundListUpdateCount = limit;
         }
-        return(userPayment, reFundList.length.sub(size));
+        return(userPayment, reFundList.length.sub(limit));
     }
 
     function viewLoan(uint256 contractID)
@@ -224,3 +226,4 @@ contract LoanAndRefund {
     }
 
 }
+

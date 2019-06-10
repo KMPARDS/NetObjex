@@ -142,14 +142,15 @@ contract Staking {
         uint256 principalToRelease;
         uint256[] memory userPayment;
         uint256 i = uint256(plan.updateCount);
+        uint256 limit;
         if (i.add(size) >= plan.activePlanList.length) {
-            size = plan.activePlanList.length;
+            limit = plan.activePlanList.length;
             plan.updateCount = 0;
         }else {
-            size = i.add(size);
-            plan.updateCount = uint128(size);
+            limit = i.add(size);
+            plan.updateCount = uint128(limit);
         }
-        while (i < size) {
+        while (i < limit) {
             contractid = uint256(plan.activePlanList[i]);
             stake = stakes[contractid];
             index = uint256(stake.monthCount % stake.planTime);
@@ -170,9 +171,9 @@ contract Staking {
             stakes[contractid] = stake;
             i++;
         }
-        emit PlanHandlerStatus(planID, size, plan.activePlanList.length);
+        emit PlanHandlerStatus(planID, limit, plan.activePlanList.length);
         plans[planID] = plan;
-        return(userPayment, (plan.activePlanList.length).sub(size));
+        return(userPayment, (plan.activePlanList.length).sub(limit));
     }
 
     function viewStake(uint256 contractID)
@@ -238,3 +239,4 @@ contract Staking {
         return true;
     }
 }
+
