@@ -64,9 +64,11 @@ contract TimeAllyCore {
         _;
     }
 
-    constructor(address eraswapTokenAddress)
+    constructor(address eraswapTokenAddress, address _nrtManagerAddress)
     public {
         eraswapToken = Eraswap(eraswapTokenAddress);
+        nrtManagerAddress = _nrtManagerAddress;
+        nrtManager = NRTManager(_nrtManagerAddress);
         lastMonthlyHandler = now;
         owner = msg.sender;
     }
@@ -74,7 +76,6 @@ contract TimeAllyCore {
     function setaddress(
         address stakingaddress,
         address loanandrefundaddress
-        // address nrtManagerAddress
     )
     external
     onlyOwner()
@@ -82,7 +83,6 @@ contract TimeAllyCore {
     {
         staking = Staking(stakingaddress);
         loanAndRefund = LoanAndRefund(loanandrefundaddress);
-        // nrtManager = NRTManager(nrtManagerAddress);
         return true;
     }
 

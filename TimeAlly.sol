@@ -49,9 +49,9 @@ contract TimeAlly is TimeAllyCore {
     /**
      * @dev Constructor
      */
-    constructor (address eraswapTokenAddress)
+    constructor (address eraswapTokenAddress, address _nrtManagerAddress)
         public
-        TimeAllyCore(eraswapTokenAddress) {
+        TimeAllyCore(eraswapTokenAddress, address _nrtManagerAddress) {
         }
 
   /**
