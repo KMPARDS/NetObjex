@@ -45,8 +45,8 @@ contract Staking {
 
     function batchAddStake(
             uint256 size,
-            uint256 planID,
-            uint256 contractID,
+            uint256 planid,
+            uint256 contractid,
             uint256 plantime,
             uint256[] calldata stakedamount
             )
@@ -55,58 +55,58 @@ contract Staking {
             returns(bool)
         {
         for (uint256 i = 0; i < size; i++) {
-            require(addStake(planID, contractID.add(i), plantime, stakedamount[i]));
+            require(addStake(planid, contractid.add(i), plantime, stakedamount[i]));
         }
         return true;
     }
 
     function pause(
-            uint256 planID,
-            uint256 contractID
+            uint256 planid,
+            uint256 contractid
             )
             external
             onlyTimeAlly()
             returns(bool)
     {
-        deleteActivePlanListElement(planID,
-                                    stakes[contractID].activePlanListIndex);
-        plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount)
-                                                        .sub(uint256(stakes[contractID].stakedAmount)));
+        require(deleteActivePlanListElement(planid,
+                                    stakes[contractid].activePlanListIndex));
+        plans[planid].activePlanAmount = uint128(uint256(plans[planid].activePlanAmount)
+                                                        .sub(uint256(stakes[contractid].stakedAmount)));
         return true;
     }
 
     function resume(
-            uint256 planID,
-            uint256 contractID
+            uint256 planid,
+            uint256 contractid
             )
             external
             onlyTimeAlly()
             returns(bool)
     {
-        require(stakes[contractID].activePlanListIndex == 0);
-        stakes[contractID].activePlanListIndex = uint32(plans[planID].activePlanList
-                                                        .push(uint32(contractID)).sub(1));
-        plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount)
-                                                        .add(stakes[contractID].stakedAmount));
+        require(stakes[contractid].activePlanListIndex == 0);
+        stakes[contractid].activePlanListIndex = uint32(plans[planid].activePlanList
+                                                        .push(uint32(contractid)).sub(1));
+        plans[planid].activePlanAmount = uint128(uint256(plans[planid].activePlanAmount)
+                                                        .add(stakes[contractid].stakedAmount));
         return true;
     }
 
     function monthlyNRTHandler(
             uint256 nrt,
-            uint256 planID)
+            uint256 planid)
             external
             onlyTimeAlly()
             returns(uint256)
     {
         uint256 totalAmount;
         uint256 i;
-        for (i = 0; i <= planID; i++) {
+        for (i = 0; i <= planid; i++) {
             totalAmount = totalAmount.add(uint256(plans[i].activePlanAmount));
         }
         emit TotalPlanAmount(totalAmount);
         require(totalAmount > 0);
 
-        for (i = 0; i <= planID; i++) {
+        for (i = 0; i <= planid; i++) {
             if (plans[i].activePlanAmount == 0) {
                 plans[i].nrtBalance = 0;
             }else {
@@ -125,7 +125,7 @@ contract Staking {
     }
 
     function monthlyPlanHandler(
-            uint256 planID,
+            uint256 planid,
             uint256 size)
             external
             onlyTimeAlly()
@@ -133,8 +133,8 @@ contract Staking {
             uint[] memory,
             uint)
     {
-        require(plans[planID].activePlanList.length > plans[planID].updateCount);
-        Plan memory plan = plans[planID];
+        require(plans[planid].activePlanList.length > plans[planid].updateCount);
+        Plan memory plan = plans[planid];
         Stake memory stake;
         uint256 contractid;
         uint256 index;
@@ -171,12 +171,12 @@ contract Staking {
             stakes[contractid] = stake;
             i++;
         }
-        emit PlanHandlerStatus(planID, limit, plan.activePlanList.length);
-        plans[planID] = plan;
+        emit PlanHandlerStatus(planid, limit, plan.activePlanList.length);
+        plans[planid] = plan;
         return(userPayment, (plan.activePlanList.length).sub(limit));
     }
 
-    function viewStake(uint256 contractID)
+    function viewStake(uint256 contractid)
         external
         onlyTimeAlly()
         view
@@ -187,24 +187,24 @@ contract Staking {
             )
     {
         return(
-            uint256(stakes[contractID].planTime),
-            uint256(stakes[contractID].stakedAmount),
-            uint256(stakes[contractID].monthCount)
+            uint256(stakes[contractid].planTime),
+            uint256(stakes[contractid].stakedAmount),
+            uint256(stakes[contractid].monthCount)
             );
     }
 
-    function viewStakedAmount(uint256 contractID)
+    function viewStakedAmount(uint256 contractid)
         external
         onlyTimeAlly()
         view
         returns(uint256)
     {
-        return(uint256(stakes[contractID].stakedAmount));
+        return(uint256(stakes[contractid].stakedAmount));
     }
 
     function addStake(
-        uint256 planID,
-        uint256 contractID,
+        uint256 planid,
+        uint256 contractid,
         uint256 plantime,
         uint256 stakedamount
         )
@@ -215,10 +215,10 @@ contract Staking {
             stake.planTime = uint32(plantime);
             stake.stakedAmount = uint128(stakedamount);
             stake.monthCount = 0;
-            stake.activePlanListIndex = uint32(plans[planID].activePlanList.push(uint32(contractID)).sub(1));
+            stake.activePlanListIndex = uint32(plans[planid].activePlanList.push(uint32(contractid)).sub(1));
             stake.monthlyPrincipal[0] = uint32(stakedamount);
-            stakes[contractID] = stake;
-            plans[planID].activePlanAmount = uint128(uint256(plans[planID].activePlanAmount).add(stakedamount));
+            stakes[contractid] = stake;
+            plans[planid].activePlanAmount = uint128(uint256(plans[planid].activePlanAmount).add(stakedamount));
             return true;
         }
 
@@ -235,7 +235,7 @@ contract Staking {
         uint32 lastelem = plans[id].activePlanList[last];
         stakes[lastelem].activePlanListIndex = index;
         plans[id].activePlanList[index] = plans[id].activePlanList[last];
-        plans[id].activePlanList.length--;
+        plans[id].activePlanList.pop();
         return true;
     }
 }

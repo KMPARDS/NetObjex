@@ -22,9 +22,9 @@ contract LoanAndRefund {
         uint64 refundAmount;
     }
 
-    mapping (uint256 => Refund) public reFunds;
+    mapping (uint256 => Refund) public refunds;
 
-    uint256[] public reFundList;
+    uint256[] public refundList;
     uint256[] public loanList;
     uint256 private refundListUpdateCount;
     uint256 private loanListUpdateCount;
@@ -44,7 +44,7 @@ contract LoanAndRefund {
     }
 
     function addLoan(
-        uint256 contractID,
+        uint256 contractid,
         uint32 loanperiod,
         uint128 loanamount
         )
@@ -56,22 +56,22 @@ contract LoanAndRefund {
         loan.loanPeriod = loanperiod;
         loan.loanAmount = uint128(loanamount);
         loan.loanStartTime = uint32(now);
-        loan.loanListIndex = uint32(loanList.push(contractID).sub(1));
-        loans[contractID] = loan;
+        loan.loanListIndex = uint32((loanList.push(contractid)).sub(1));
+        loans[contractid] = loan;
         return true;
     }
 
-    function removeLoan(uint256 contractID)
+    function removeLoan(uint256 contractid)
         external
         onlyTimeAlly()
         returns(bool)
     {
-        deleteLoanListElement(loans[contractID].loanListIndex);
+        require(deleteLoanListElement(loans[contractid].loanListIndex));
         return true;
     }
 
     function addRefund(
-        uint256 contractID,
+        uint256 contractid,
         uint32 refundweeks,
         uint32 refundcount,
         uint64 refundamount)
@@ -83,9 +83,9 @@ contract LoanAndRefund {
         refund.refundWeeks = refundweeks;
         refund.refundCount = refundcount;
         refund.refundAmount = refundamount;
-        refund.refundListIndex = uint32(reFundList.push(contractID).sub(1));
+        refund.refundListIndex = uint32(refundList.push(contractid).sub(1));
 
-        reFunds[contractID] = refund;
+        refunds[contractid] = refund;
         return true;
     }
 
@@ -107,12 +107,12 @@ contract LoanAndRefund {
             limit = i.add(size);
         }
         while (i < limit) {
-            uint256 contractID = loanList[i];
-            loan = loans[contractID];
+            uint256 contractid = loanList[i];
+            loan = loans[contractid];
             if ((now.sub(loan.loanStartTime)) > loan.loanPeriod) {
-                defaultlist[defaultlist.length] = contractID;
+                defaultlist[defaultlist.length] = contractid;
                 deleteLoanListElement(loan.loanListIndex);
-                emit LoanDefaulted(contractID);
+                emit LoanDefaulted(contractid);
                 limit = limit.sub(1);
             }else {
                 i++;
@@ -138,37 +138,37 @@ contract LoanAndRefund {
         Refund memory refund;
         uint256 i = refundListUpdateCount;
         uint256 limit;
-        if (i.add(size) >= reFundList.length) {
-            limit = reFundList.length;
+        if (i.add(size) >= refundList.length) {
+            limit = refundList.length;
         }else {
             limit = i.add(size);
         }
         while (i < limit) {
-            uint256 contractID = reFundList[i];
-            refund = reFunds[contractID];
-            character = contractID;
+            uint256 contractid = refundList[i];
+            refund = refunds[contractid];
+            character = contractid;
             character |= refund.refundAmount<<128;
             userPayment[userPayment.length] = character;
-            emit RefundInitiated(contractID, refund.refundCount, refund.refundAmount);
+            emit RefundInitiated(contractid, refund.refundCount, refund.refundAmount);
             refund.refundCount++;
-            reFunds[contractID] = refund;
+            refunds[contractid] = refund;
             if (refund.refundCount == refund.refundWeeks) {
-                deleteRefundListElement(refund.refundListIndex);
-                emit RefundEnded(contractID);
+                require(deleteRefundListElement(refund.refundListIndex));
+                emit RefundEnded(contractid);
                 limit = limit.sub(1);
             }else {
                 i++;
             }
         }
-        if (limit == reFundList.length) {
+        if (limit == refundList.length) {
             refundListUpdateCount = 0;
         }else {
             refundListUpdateCount = limit;
         }
-        return(userPayment, reFundList.length.sub(limit));
+        return(userPayment, refundList.length.sub(limit));
     }
 
-    function viewLoan(uint256 contractID)
+    function viewLoan(uint256 contractid)
         external
         onlyTimeAlly()
         view
@@ -179,13 +179,13 @@ contract LoanAndRefund {
             )
     {
         return(
-            uint256(loans[contractID].loanPeriod),
-            uint256(loans[contractID].loanStartTime),
-            uint256(loans[contractID].loanAmount)
+            uint256(loans[contractid].loanPeriod),
+            uint256(loans[contractid].loanStartTime),
+            uint256(loans[contractid].loanAmount)
             );
     }
 
-    function viewRefund(uint256 contractID)
+    function viewRefund(uint256 contractid)
         external
         onlyTimeAlly()
         view
@@ -195,9 +195,9 @@ contract LoanAndRefund {
             uint256)
             {
         return(
-            uint256(reFunds[contractID].refundWeeks),
-            uint256(reFunds[contractID].refundCount),
-            uint256(reFunds[contractID].refundAmount)
+            uint256(refunds[contractid].refundWeeks),
+            uint256(refunds[contractid].refundCount),
+            uint256(refunds[contractid].refundAmount)
             );
     }
 
@@ -205,11 +205,11 @@ contract LoanAndRefund {
         internal
         returns(bool)
     {
-        require(index < reFundList.length);
-        uint256 last = reFundList.length.sub(1);
-        reFunds[reFundList[last]].refundListIndex = index;
-        reFundList[index] = reFundList[last];
-        reFundList.length--;
+        require(index < refundList.length);
+        uint256 last = refundList.length.sub(1);
+        refunds[refundList[last]].refundListIndex = index;
+        refundList[index] = refundList[last];
+        refundList.pop();
         return true;
     }
 
@@ -221,7 +221,7 @@ contract LoanAndRefund {
         uint256 last = loanList.length.sub(1);
         loans[loanList[last]].loanListIndex = index;
         loanList[index] = loanList[last];
-        loanList.length--;
+        loanList.pop();
         return true;
     }
 

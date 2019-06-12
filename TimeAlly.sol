@@ -23,26 +23,26 @@ contract TimeAlly is TimeAllyCore {
     * @dev Modifier
     */
     //todo: this also should check whther the contract have any active loans or not
-    modifier canBeWindedUp(uint256 contractID) {
-        require(((now.sub(contracts[contractID].timestamp)) >= plans[contracts[contractID].planid].planPeriod),
+    modifier canBeWindedUp(uint256 contractid) {
+        require(((now.sub(contracts[contractid].timestamp)) >= plans[contracts[contractid].planid].planPeriod),
             "Contract can only be ended after 2 years");
-        require(contracts[contractID].status == 1);
+        require(contracts[contractid].status == 1);
         _;
     }
 
     /**
     * @dev Modifier
     */
-    modifier loanCanBeTaken(uint256 contractID) {
-        require(contracts[contractID].status == 1, "Loan should not be present");
+    modifier loanCanBeTaken(uint256 contractid) {
+        require(contracts[contractid].status == 1, "Loan should not be present");
         _;
     }
 
     /**
     * @dev Modifier
     */
-    modifier loanCanBeRepayed(uint256 contractID) {
-        require(contracts[contractID].status == 2, "Loan should not be present");
+    modifier loanCanBeRepayed(uint256 contractid) {
+        require(contracts[contractid].status == 2, "Loan should not be present");
         _;
     }
 
@@ -81,23 +81,23 @@ contract TimeAlly is TimeAllyCore {
   /**
   * @dev Function
   */
-    function windUpContract(uint256 contractID)
+    function windUpContract(uint256 contractid)
             external
-            onlyContractOwner(contractID)
-            canBeWindedUp(contractID)
+            onlyContractOwner(contractid)
+            canBeWindedUp(contractid)
             returns(bool) {
-                require(staking.pause(contracts[contractID].planid, contractID));
-                contracts[contractID].status = 3;
-                uint256 refundAmount = (staking.viewStakedAmount(contractID))
-                                            .div(plans[contracts[contractID].planid].refundWeeks);
-                require(loanAndRefund.addRefund(contractID,
-                                                uint32(plans[contracts[contractID].planid].refundWeeks),
+                require(staking.pause(contracts[contractid].planid, contractid));
+                contracts[contractid].status = 3;
+                uint256 refundAmount = (staking.viewStakedAmount(contractid))
+                                            .div(plans[contracts[contractid].planid].refundWeeks);
+                require(loanAndRefund.addRefund(contractid,
+                                                uint32(plans[contracts[contractid].planid].refundWeeks),
                                                 0,
                                                 uint64(refundAmount)));
-                emit WindupInitiated(contractID,
-                                        contracts[contractID].owner,
-                                        staking.viewStakedAmount(contractID),
-                                        contracts[contractID].planid);
+                emit WindupInitiated(contractid,
+                                        contracts[contractid].owner,
+                                        staking.viewStakedAmount(contractid),
+                                        contracts[contractid].planid);
                 return true;
             }
 
@@ -105,44 +105,44 @@ contract TimeAlly is TimeAllyCore {
   * @dev Function
   */
     function takeLoan(
-            uint256 contractID,
+            uint256 contractid,
             uint256 loanamount
             )
             external
-            onlyContractOwner(contractID)
-            loanCanBeTaken(contractID)
+            onlyContractOwner(contractid)
+            loanCanBeTaken(contractid)
             returns(bool) {
-                require(loanamount < ((staking.viewStakedAmount(contractID)).div(2)));
-                uint256 planid = contracts[contractID].planid;
+                require(loanamount < ((staking.viewStakedAmount(contractid)).div(2)));
+                uint256 planid = contracts[contractid].planid;
                 uint256 repayamount = loanamount.add((loanamount.mul(plans[planid].loanInterestRate)).div(100));
-                require(staking.pause(planid, contractID));
-                require(loanAndRefund.addLoan(contractID, uint32(plans[planid].loanPeriod), uint128(loanamount)));
-                loanRepaymentAmount[contractID] = repayamount;
-                contracts[contractID].status = 2;
-                require(eraswapToken.transfer(contracts[contractID].owner, loanamount));
-                emit LoanTaken(contractID, contracts[contractID].owner, loanamount, planid);
+                require(staking.pause(planid, contractid));
+                require(loanAndRefund.addLoan(contractid, uint32(plans[planid].loanPeriod), uint128(loanamount)));
+                loanRepaymentAmount[contractid] = repayamount;
+                contracts[contractid].status = 2;
+                require(eraswapToken.transfer(contracts[contractid].owner, loanamount));
+                emit LoanTaken(contractid, contracts[contractid].owner, loanamount, planid);
                 return true;
             }
 
   /**
   * @dev Function
   */
-    function rePayLoan(uint256 contractID)
+    function rePayLoan(uint256 contractid)
         external
-        onlyContractOwner(contractID)
-        loanCanBeRepayed(contractID)
+        onlyContractOwner(contractid)
+        loanCanBeRepayed(contractid)
         returns(bool) {
-            require(eraswapToken.allowance(msg.sender, address(this)) >= loanRepaymentAmount[contractID]);
-            require(eraswapToken.transferFrom(msg.sender, address(this), loanRepaymentAmount[contractID]));
-            require(loanAndRefund.removeLoan(contractID));
-            uint256 planid = contracts[contractID].planid;
-            (, , uint256 amount) = loanAndRefund.viewLoan(contractID);
-            uint256 luckPoolBal = loanRepaymentAmount[contractID].sub(amount);
+            require(eraswapToken.allowance(msg.sender, address(this)) >= loanRepaymentAmount[contractid]);
+            require(eraswapToken.transferFrom(msg.sender, address(this), loanRepaymentAmount[contractid]));
+            require(loanAndRefund.removeLoan(contractid));
+            uint256 planid = contracts[contractid].planid;
+            ( , , uint256 amount) = loanAndRefund.viewLoan(contractid);
+            uint256 luckPoolBal = loanRepaymentAmount[contractid].sub(amount);
             require(eraswapToken.approve(nrtManagerAddress, luckPoolBal));
             require(nrtManager.UpdateLuckpool(luckPoolBal));
-            require(staking.resume(planid, contractID));
-            contracts[contractID].status = 1;
-            emit LoanRepayed(contractID, contracts[contractID].owner, amount, luckPoolBal, planid);
+            require(staking.resume(planid, contractid));
+            contracts[contractid].status = 1;
+            emit LoanRepayed(contractid, contracts[contractid].owner, amount, luckPoolBal, planid);
             return true;
         }
 
@@ -165,9 +165,9 @@ contract TimeAlly is TimeAllyCore {
         /**
         * @dev Function
         */
-    function viewContract(uint256 contractID)
+    function viewContract(uint256 contractid)
         public view
-        onlyContractOwner(contractID)
+        onlyContractOwner(contractid)
         returns(
             uint256,
             uint256,
@@ -176,10 +176,10 @@ contract TimeAlly is TimeAllyCore {
             )
     {
         return (
-                contracts[contractID].status,
-                contracts[contractID].timestamp,
-                contracts[contractID].planid,
-                contracts[contractID].owner
+                contracts[contractid].status,
+                contracts[contractid].timestamp,
+                contracts[contractid].planid,
+                contracts[contractid].owner
             );
     }
 
@@ -201,41 +201,41 @@ contract TimeAlly is TimeAllyCore {
             return true;
         }
 
-    function viewUserStakes(uint256 contractID)
+    function viewUserStakes(uint256 contractid)
         external
         view
-        onlyContractOwner(contractID)
+        onlyContractOwner(contractid)
         returns(
             uint256,
             uint256,
             uint256) {
-            (uint256 a, uint256 b, uint256 c) = staking.viewStake(contractID);
+            (uint256 a, uint256 b, uint256 c) = staking.viewStake(contractid);
             return (a, b, c);
         }
 
-    function viewUserLoan(uint256 contractID)
+    function viewUserLoan(uint256 contractid)
         external
         view
-        onlyContractOwner(contractID)
+        onlyContractOwner(contractid)
         returns(
             uint256,
             uint256,
             uint256)
     {
-        (uint256 a, uint256 b, uint256 c) = loanAndRefund.viewLoan(contractID);
+        (uint256 a, uint256 b, uint256 c) = loanAndRefund.viewLoan(contractid);
         return (a, b, c);
     }
 
-    function viewUserRefund(uint256 contractID)
+    function viewUserRefund(uint256 contractid)
         external
         view
-        onlyContractOwner(contractID)
+        onlyContractOwner(contractid)
         returns(
             uint256,
             uint256,
             uint256)
     {
-        (uint256 a, uint256 b, uint256 c) = loanAndRefund.viewRefund(contractID);
+        (uint256 a, uint256 b, uint256 c) = loanAndRefund.viewRefund(contractid);
         return (a, b, c);
     }
 
@@ -252,7 +252,7 @@ contract TimeAlly is TimeAllyCore {
   /**
   * @dev Function
   */
-    function planDetails(uint256 planID)
+    function planDetails(uint256 planid)
         external
         view
         returns(
@@ -261,10 +261,10 @@ contract TimeAlly is TimeAllyCore {
             uint256,
             uint256) {
             return(
-            plans[planID].loanInterestRate,
-            plans[planID].refundWeeks,
-            plans[planID].loanPeriod,
-            plans[planID].planPeriod
+            plans[planid].loanInterestRate,
+            plans[planid].refundWeeks,
+            plans[planid].loanPeriod,
+            plans[planid].planPeriod
             );
         }
 
@@ -293,18 +293,19 @@ contract TimeAlly is TimeAllyCore {
 
     function newContract(
             address contractOwner,
-            uint256 planID)
+            uint256 planid)
             internal
             returns(bool) {
                 Contract memory tempContract;
                 tempContract.status = 1;
-                tempContract.planid = planID;
+                tempContract.planid = planid;
                 tempContract.owner = contractOwner;
                 tempContract.timestamp = now;
                 contracts[contractID] = tempContract;
                 contractIds[contractOwner].push(contractID);
-                emit ContractCreated(contractID, contractOwner, planID);
+                emit ContractCreated(contractID, contractOwner, planid);
                 contractID = contractID.add(1);
+                return true;
             }
 
 
