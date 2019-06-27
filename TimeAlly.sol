@@ -138,7 +138,7 @@ contract TimeAlly is TimeAllyCore {
             uint256 planid = contracts[contractid].planid;
             ( , , uint256 amount) = loanAndRefund.viewLoan(contractid);
             uint256 luckPoolBal = loanRepaymentAmount[contractid].sub(amount);
-            require(eraswapToken.approve(nrtManagerAddress, luckPoolBal));
+            require(eraswapToken.transfer(nrtManagerAddress, luckPoolBal));
             require(nrtManager.UpdateLuckpool(luckPoolBal));
             require(staking.resume(planid, contractid));
             contracts[contractid].status = 1;
@@ -310,4 +310,3 @@ contract TimeAlly is TimeAllyCore {
 
 
 }
-
