@@ -172,8 +172,7 @@ contract NRTManager {
       * @param amount Amount to be updated
       */
       function UpdateLuckpool(uint256 amount) external OnlyAllowed returns(bool){
-        require(token.transferFrom(msg.sender,address(this), amount),"Amount should be successfully transfered");
-        luckPoolBal = luckPoolBal.add(amount);
+              luckPoolBal = luckPoolBal.add(amount);
         emit LuckPoolUpdated(luckPoolBal);
         return true;
       }
@@ -183,8 +182,7 @@ contract NRTManager {
       * @param amount Amount to be updated
       */
       function UpdateBurnBal(uint256 amount) external OnlyAllowed returns(bool){
-        require(token.transferFrom(msg.sender,address(this), amount),"Amount should be successfully transfered");
-        burnTokenBal = burnTokenBal.add(amount);
+             burnTokenBal = burnTokenBal.add(amount);
         emit BurnTokenBalUpdated(burnTokenBal);
         return true;
       }
