@@ -114,7 +114,7 @@ contract TimeAllyCore {
             for (uint256 i = 0; i < loanList.length; i++) {
                 uint256 contractId = loanList[i];
                 uint256 amount = staking.viewStakedAmount(contractId);
-                require(eraswapToken.approve(nrtManagerAddress, amount));
+                require(eraswapToken.transfer(nrtManagerAddress, amount));
                 require(nrtManager.UpdateBurnBal(amount));
                 contracts[contractId].status = 4;
                 emit ContractBurned(contractId, amount);
