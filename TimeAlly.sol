@@ -194,6 +194,7 @@ contract TimeAlly is TimeAllyCore {
         external
         notPaused()
         returns(bool) {
+            require(planid <= planID);
             require(eraswapToken.allowance(msg.sender, address(this)) >= stakedamount);
             require(eraswapToken.transferFrom(msg.sender, address(this), stakedamount));
             require(staking.addStake(planid, contractID, plans[planid].planPeriod, stakedamount));
@@ -282,6 +283,7 @@ contract TimeAlly is TimeAllyCore {
         notPaused()
         onlyOwner()
         returns(bool) {
+            require(planid <= planID);
             require(eraswapToken.allowance(msg.sender, address(this)) >= total);
             require(eraswapToken.transferFrom(msg.sender, address(this), total));
             require(staking.batchAddStake(batchlength, planid, contractID, plans[planid].planPeriod, amount));
